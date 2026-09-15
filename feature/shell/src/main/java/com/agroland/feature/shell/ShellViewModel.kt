@@ -27,11 +27,22 @@ class ShellViewModel @Inject constructor(
     val localeTag = settings.localeTag
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    /** Қондырғы деңгейіндегі өңір (AppRegionModel: countryId, cityId) — Фаза 7. */
+    val appRegionCountryId = settings.appRegionCountryId
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** Splash қақпасы үшін бір рет оқу. */
+    suspend fun appRegionCountryIdOnce(): Int? = settings.appRegionCountryIdOnce()
+
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch { settings.setThemeMode(mode) }
     }
 
     fun selectLocale(tag: String) {
         viewModelScope.launch { settings.setLocale(tag) }
+    }
+
+    fun setAppRegion(countryId: Int, cityId: Int) {
+        viewModelScope.launch { settings.setAppRegion(countryId, cityId) }
     }
 }

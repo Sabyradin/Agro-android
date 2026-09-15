@@ -1,5 +1,6 @@
 package com.agroland.feature.profile.data
 
+import com.agroland.feature.location.data.SelectedLocation
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import org.junit.Assert.assertEquals
@@ -37,7 +38,10 @@ class ProfileParserTest {
                   "representative_position": "Директор"
                 }
               },
-              "locations": [{"id": 3, "title": "Үй", "address": "Достык 5", "is_primary": true}],
+              "locations": [{"address_id": 9, "user_location_id": 3, "house": "12/1",
+                "street": "Достык", "country": "Қазақстан", "area": "Астана",
+                "province": "Астана", "locality": "Есіл", "country_id": 1,
+                "region_id": 10, "district_id": 100, "latitude": "51.1282", "longitude": "71.4307"}],
               "announcements": {"counts": {"active": "4", "pending": 1, "rejected": 0}}
             }
             """.trimIndent(),
@@ -54,8 +58,17 @@ class ProfileParserTest {
         assertEquals("Agro Ltd", profile.company?.name)
         assertEquals("Асан Әсенов", profile.company?.representativeName)
         assertEquals(1, profile.locations.size)
-        assertEquals("Үй", profile.locations[0].title)
-        assertTrue(profile.locations[0].isPrimary)
+        val loc = profile.locations[0]
+        assertEquals(3L, loc.id) // user_location_id — API әрекеттері осы id арқылы
+        assertEquals(9L, loc.addressId)
+        assertEquals("Есіл, Достык, 12/1", loc.title)
+        assertEquals("Астана, Қазақстан", loc.subtitle)
+        assertEquals("Қазақстан, Астана, Есіл, Достык, 12/1", loc.fullAddress)
+        assertEquals(1, loc.countryId)
+        assertEquals(10, loc.regionId)
+        assertEquals(100, loc.districtId)
+        assertEquals(51.1282, loc.latitude!!, 0.0001) // string координат та оқылады
+        assertEquals(71.4307, loc.longitude!!, 0.0001)
         // int string түрінде келсе де дұрыс оқылады.
         assertEquals(4, profile.announcements?.active)
         assertEquals(1, profile.announcements?.pending)
@@ -121,5 +134,43 @@ class ProfileParserTest {
         assertFalse("website" in body)
         assertTrue("telegram" in body)
         assertTrue("whatsapp" in body) // бос string де жіберіледі (тазарту үшін)
+    }
+
+    @Test
+    fun `location body Flutter toMap пішімінде — Фаза 7`() {
+        val body = ProfileRequests.location(
+            street = "Достык",
+            house = "12/1",
+            catalog = SelectedLocation(
+                countryId = 1, countryName = "Қазақстан",
+                regionId = 10, regionName = "Астана",
+                districtId = 100, districtName = "Есіл",
+                latitude = 51.1282, longitude = 71.4307,
+            ),
+            latitude = 51.1282,
+            longitude = 71.4307,
+        )
+        assertEquals("Достык", body["street"]?.toString()?.trim('"'))
+        assertEquals("12/1", body["house"]?.toString()?.trim('"'))
+        assertEquals("Қазақстан", body["country"]?.toString()?.trim('"'))
+        // area мен province екеуі де өңір атауы (Flutter солай жібереді).
+        assertEquals("Астана", body["area"]?.toString()?.trim('"'))
+        assertEquals("Астана", body["province"]?.toString()?.trim('"'))
+        assertEquals("Есіл", body["locality"]?.toString()?.trim('"'))
+        assertEquals("1", body["country_id"]?.toString())
+        assertEquals("10", body["region_id"]?.toString())
+        assertEquals("100", body["district_id"]?.toString())
+        assertEquals("51.1282", body["latitude"]?.toString())
+        assertEquals("71.4307", body["longitude"]?.toString())
+
+        // Бос көше/үй жіберілмейді; координат жоқ болса 0.0 (backend district_id-ды
+        // өздігінен турындатады). title/address/city мүлде жоқ.
+        val empty = ProfileRequests.location("", "", null, null, null)
+        assertFalse("street" in empty)
+        assertFalse("house" in empty)
+        assertFalse("country" in empty)
+        assertFalse("country_id" in empty)
+        assertEquals("0.0", empty["latitude"]?.toString())
+        assertEquals("0.0", empty["longitude"]?.toString())
     }
 }

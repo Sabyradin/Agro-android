@@ -1,6 +1,7 @@
 package com.agroland.feature.marketplace.data
 
 import com.agroland.core.network.json.JsonParser
+import com.agroland.feature.location.data.SelectedLocation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
@@ -124,9 +125,9 @@ enum class FilterSort(val queryKey: String?, val queryValue: String?) {
 }
 
 /**
- * Қолданыстағы сүзгі — FilterModel: query, price range, category, negotiable, sort.
+ * Қолданыстағы сүзгі — FilterModel: query, price range, category, negotiable, sort,
+ * локация (Фаза 7: country_id/region_id/district_id каталог ID-лері).
  * @Serializable — навигация маршрут параметрі ретінде жіберіледі.
- * Локация бөлігі — Фаза 7 (Country/Region/District селекторлары).
  */
 @Serializable
 data class AnnouncementFilter(
@@ -140,6 +141,7 @@ data class AnnouncementFilter(
     val orderRandom: Boolean = false,
     val typeAd: String? = null,
     val isVip: Boolean? = null,
+    val location: SelectedLocation? = null,
 ) {
     /** Backend query map — тек толтырылған өрістер. Әдепкі баға диапазоны жіберілмейді. */
     fun toQueryMap(page: Int, limit: Int): Map<String, String> = buildMap {
@@ -152,6 +154,11 @@ data class AnnouncementFilter(
         if (orderRandom) put("order_random", "true")
         typeAd?.let { put("type_ad", it) }
         isVip?.let { put("is_vip", it.toString()) }
+        location?.let { loc ->
+            loc.countryId?.let { put("country_id", it.toString()) }
+            loc.regionId?.let { put("region_id", it.toString()) }
+            loc.districtId?.let { put("district_id", it.toString()) }
+        }
         sort.queryKey?.let { key -> put(key, sort.queryValue ?: "desc") }
         put("page", page.toString())
         put("limit", limit.toString())
@@ -160,7 +167,7 @@ data class AnnouncementFilter(
     fun isDefault(): Boolean =
         query.isNullOrBlank() && categoryId == null && subcategoryId == null &&
             minPrice == null && maxPrice == null && negotiable == null &&
-            sort == FilterSort.DEFAULT && typeAd == null
+            sort == FilterSort.DEFAULT && typeAd == null && location == null
 }
 
 /** Парсер — бір ғана орыннан. */

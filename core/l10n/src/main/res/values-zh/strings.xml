@@ -119,6 +119,8 @@
     <string name="address_city_hint">城市</string>
     <string name="address_title_error">请输入名称</string>
     <string name="address_address_error">请输入地址</string>
+    <string name="address_street_hint">街道</string>
+    <string name="address_house_hint">门牌号/房间</string>
     <string name="address_empty_title">暂无地址</string>
     <string name="address_empty_message">添加您的第一个地址</string>
     <string name="address_deleted_toast">地址已删除</string>
@@ -305,4 +307,26 @@
     <string name="offer_field_quantity">数量（选填）</string>
     <string name="offer_submit">发布求购</string>
     <string name="offer_created_toast">求购已发布！</string>
+    <!-- 位置 / 地图 (第 7 阶段) -->
+    <string name="app_region_title">选择您的地区</string>
+    <string name="app_region_subtitle">广告将按所选地区显示</string>
+    <string name="location_title">位置</string>
+    <string name="location_choose_country">选择国家</string>
+    <string name="location_choose_region">选择州/市</string>
+    <string name="location_choose_district">选择区</string>
+    <string name="location_search_hint">搜索…</string>
+    <string name="location_nothing_found">未找到结果</string>
+    <string name="location_pin_hint">点击地图或使用 GPS/目录</string>
+    <string name="location_locating">正在定位…</string>
+    <string name="location_gps_failed">无法确定您的位置</string>
+    <string name="location_reverse_failed">地址未识别 — 请从目录中选择</string>
+    <string name="location_map_unavailable">地图不可用（缺少 API 密钥）— GPS 和目录仍可使用</string>
+    <string name="location_use_gps">我的位置</string>
+    <string name="location_open_in_maps">在地图应用中打开</string>
+    <string name="location_select">选择</string>
+    <string name="location_selected_coords">坐标：%1$s, %2$s</string>
+    <string name="location_catalog_section">从目录中选择</string>
+    <string name="filter_location">位置</string>
+    <string name="filter_any_location">所有地区</string>
+    <string name="create_pick_location_map">在地图上选择</string>
 </resources>

@@ -42,15 +42,11 @@ interface UserApi {
     suspend fun deleteAccount(): Response<ResponseBody>
 
     // Мекенжайлар (user locations).
+    // PATCH /user/location/{id} Flutter-де жоқ (тек POST + DELETE); өңдеу =
+    // POST жаңа + DELETE ескі (profile_address_notifier refreshStale үлгісі).
 
     @retrofit2.http.POST("user/location")
     suspend fun createLocation(@retrofit2.http.Body body: JsonObject): JsonObject
-
-    @retrofit2.http.PATCH("user/location/{id}")
-    suspend fun updateLocation(
-        @retrofit2.http.Path("id") id: Long,
-        @retrofit2.http.Body body: JsonObject,
-    ): JsonObject
 
     @retrofit2.http.DELETE("user/location/{id}")
     suspend fun deleteLocation(@retrofit2.http.Path("id") id: Long): Response<ResponseBody>

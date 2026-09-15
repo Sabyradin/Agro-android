@@ -66,4 +66,5 @@ class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
     /** Бір реттік оқу — старттық шешімдер үшін. */
     suspend fun localeTagOnce(): String? = localeTag.first()
     suspend fun languageSelectedOnce(): Boolean = languageSelected.first()
+    suspend fun appRegionCountryIdOnce(): Int? = appRegionCountryId.first()
 }

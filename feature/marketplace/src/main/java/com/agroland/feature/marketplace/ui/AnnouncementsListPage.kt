@@ -157,6 +157,7 @@ private fun FilterSummaryBar(
         filter.negotiable?.let { "neg" },
         filter.sort.takeIf { it != com.agroland.feature.marketplace.data.FilterSort.DEFAULT }
             ?.let { "sort" },
+        filter.location?.let { "loc" },
     ).size
     Row(
         modifier = Modifier

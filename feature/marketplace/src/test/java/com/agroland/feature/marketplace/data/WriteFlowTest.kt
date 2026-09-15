@@ -1,5 +1,6 @@
 package com.agroland.feature.marketplace.data
 
+import com.agroland.feature.location.data.SelectedLocation
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
@@ -79,6 +80,58 @@ class WriteFlowTest {
             categoryId = 1, subcategoryId = 2, contactNumbers = listOf("8"), userLocationId = 1,
         )
         assertEquals(AdDraft.FIELD_PRICE, draft.validate())
+    }
+
+    @Test
+    fun `карта локациясы user_location_id орнына жарамсы — Фаза 7`() {
+        // user_location_id жоқ, бірақ каталог локациясы бар — валид.
+        val draft = AdDraft(
+            title = "а", description = "б", price = "1",
+            categoryId = 1, subcategoryId = 2, contactNumbers = listOf("8"),
+            location = SelectedLocation(countryId = 1, regionId = 10),
+        )
+        assertNull(draft.validate())
+
+        // Екеуі де жоқ — FIELD_LOCATION.
+        assertEquals(
+            AdDraft.FIELD_LOCATION,
+            AdDraft(
+                title = "а", description = "б", price = "1",
+                categoryId = 1, subcategoryId = 2, contactNumbers = listOf("8"),
+            ).validate(),
+        )
+    }
+
+    @Test
+    fun `multipart user_location_id жоқ болса каталог локация өрістерін жібереді`() {
+        val draft = AdDraft(
+            title = "а", description = "б", price = "1",
+            categoryId = 1, subcategoryId = 2, contactNumbers = listOf("8"),
+            location = SelectedLocation(
+                countryId = 1, countryName = "Қазақстан",
+                regionId = 10, districtId = 100,
+                latitude = 51.1282, longitude = 71.4307,
+            ),
+        )
+        val (fields, parts) = AdRequests.buildMultipart(draft, emptyList(), null)
+        assertNull(fields["user_location_id"])
+        assertEquals("1", RequestBodyText(fields["country_id"]!!))
+        assertEquals("10", RequestBodyText(fields["region_id"]!!))
+        assertEquals("100", RequestBodyText(fields["district_id"]!!))
+        assertEquals("51.1282", RequestBodyText(fields["latitude"]!!))
+        assertEquals("71.4307", RequestBodyText(fields["longitude"]!!))
+        // catalog өрістері Part түрінде емес — бір ғана contact_numbers part.
+        assertEquals(1, parts.size)
+
+        // user_location_id келгенде каталог өрістері жіберілмейді (басым).
+        val withSaved = draft.copy(userLocationId = 5L, location = null)
+        val (fields2, _) = AdRequests.buildMultipart(withSaved, emptyList(), null)
+        assertEquals("5", RequestBodyText(fields2["user_location_id"]!!))
+        assertNull(fields2["country_id"])
+        assertNull(fields2["region_id"])
+        assertNull(fields2["district_id"])
+        assertNull(fields2["latitude"])
+        assertNull(fields2["longitude"])
     }
 
     // ---- AdRequests.buildMultipart ----

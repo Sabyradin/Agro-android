@@ -89,8 +89,8 @@ class CreateAdViewModel @Inject constructor(
                     _draft.update { current ->
                         current.copy(
                             contactNumbers = listOfNotNull(profile.phone?.takeIf { it.isNotBlank() }),
-                            userLocationId = profile.locations.firstOrNull { it.isPrimary }?.id
-                                ?: profile.locations.firstOrNull()?.id,
+                            // Backend locations жауабында is_primary жоқ — біріншісын аламыз.
+                            userLocationId = profile.locations.firstOrNull()?.id,
                         )
                     }
                 }
@@ -250,8 +250,7 @@ class MakeOfferViewModel @Inject constructor(
             (profileRepository.getProfile() as? ApiResult.Success)?.let { result ->
                 _locations.value = result.value.locations
                 _draft.value = _draft.value.copy(
-                    userLocationId = result.value.locations.firstOrNull { it.isPrimary }?.id
-                        ?: result.value.locations.firstOrNull()?.id,
+                    userLocationId = result.value.locations.firstOrNull()?.id,
                 )
             }
         }

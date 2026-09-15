@@ -119,6 +119,8 @@
     <string name="address_city_hint">City</string>
     <string name="address_title_error">Enter a title</string>
     <string name="address_address_error">Enter an address</string>
+    <string name="address_street_hint">Street</string>
+    <string name="address_house_hint">House/Apt</string>
     <string name="address_empty_title">No addresses yet</string>
     <string name="address_empty_message">Add your first address</string>
     <string name="address_deleted_toast">Address deleted</string>
@@ -305,4 +307,26 @@
     <string name="offer_field_quantity">Quantity (optional)</string>
     <string name="offer_submit">Publish request</string>
     <string name="offer_created_toast">Request published!</string>
+    <!-- Location / maps (Phase 7) -->
+    <string name="app_region_title">Choose your region</string>
+    <string name="app_region_subtitle">Announcements are shown for your selected region</string>
+    <string name="location_title">Location</string>
+    <string name="location_choose_country">Select country</string>
+    <string name="location_choose_region">Select region/city</string>
+    <string name="location_choose_district">Select district</string>
+    <string name="location_search_hint">Search…</string>
+    <string name="location_nothing_found">Nothing found</string>
+    <string name="location_pin_hint">Tap the map or use GPS/catalogue</string>
+    <string name="location_locating">Determining your location…</string>
+    <string name="location_gps_failed">Could not determine your location</string>
+    <string name="location_reverse_failed">Address not resolved — pick from the catalogue</string>
+    <string name="location_map_unavailable">Map unavailable (no API key) — GPS and catalogue still work</string>
+    <string name="location_use_gps">My location</string>
+    <string name="location_open_in_maps">Open in maps</string>
+    <string name="location_select">Select</string>
+    <string name="location_selected_coords">Coordinates: %1$s, %2$s</string>
+    <string name="location_catalog_section">Pick from catalogue</string>
+    <string name="filter_location">Location</string>
+    <string name="filter_any_location">All regions</string>
+    <string name="create_pick_location_map">Choose on map</string>
 </resources>

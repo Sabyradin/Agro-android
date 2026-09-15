@@ -21,6 +21,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.agroland.app.navigation.AddressEditRoute
+import com.agroland.app.navigation.AnnouncementFilterTypeMap
 import com.agroland.app.navigation.AnnouncementDetailRoute
 import com.agroland.app.navigation.AnnouncementsListRoute
 import com.agroland.app.navigation.AuthRoute
@@ -30,18 +32,21 @@ import com.agroland.app.navigation.CompanySectionRoute
 import com.agroland.app.navigation.CompanySettingsRoute
 import com.agroland.app.navigation.CreateAdRoute
 import com.agroland.app.navigation.CreateOrOfferRoute
+import com.agroland.app.navigation.CountryListRoute
 import com.agroland.app.navigation.DealerTermsRoute
 import com.agroland.app.navigation.EditAdRoute
 import com.agroland.app.navigation.EditProfileRoute
 import com.agroland.app.navigation.FavoritesRoute
 import com.agroland.app.navigation.FilterRoute
 import com.agroland.app.navigation.LanguageRoute
+import com.agroland.app.navigation.LocationSelectionRoute
 import com.agroland.app.navigation.MainShellRoute
 import com.agroland.app.navigation.MakeOfferRoute
 import com.agroland.app.navigation.MyAnnouncementsRoute
 import com.agroland.app.navigation.PinSetupRoute
 import com.agroland.app.navigation.ProfileAddressesRoute
 import com.agroland.app.navigation.ProfileAnnouncementRoute
+import com.agroland.app.navigation.RegionListRoute
 import com.agroland.app.navigation.SplashRoute
 import com.agroland.app.navigation.SubcategoriesRoute
 import com.agroland.app.navigation.VerificationRoute
@@ -51,6 +56,11 @@ import com.agroland.feature.auth.session.SessionState
 import com.agroland.feature.auth.ui.AppLockGate
 import com.agroland.feature.auth.ui.AuthFlowPage
 import com.agroland.feature.auth.ui.PinSetupPage
+import com.agroland.feature.location.data.LOCATION_RESULT_KEY
+import com.agroland.feature.location.data.SelectedLocation
+import com.agroland.feature.location.ui.CountryListPage
+import com.agroland.feature.location.ui.LocationSelectionPage
+import com.agroland.feature.location.ui.RegionListPage
 import com.agroland.feature.marketplace.data.AnnouncementFilter
 import com.agroland.feature.marketplace.ui.AnnouncementDetailPage
 import com.agroland.feature.marketplace.ui.AnnouncementsListPage
@@ -65,6 +75,7 @@ import com.agroland.feature.marketplace.ui.MakeOfferPage
 import com.agroland.feature.marketplace.ui.MyAnnouncementsPage
 import com.agroland.feature.marketplace.ui.OwnerAnnouncementPage
 import com.agroland.feature.marketplace.ui.SubcategoriesPage
+import com.agroland.feature.profile.ui.AddressEditPage
 import com.agroland.feature.profile.ui.CompanySection
 import com.agroland.feature.profile.ui.CompanySectionPage
 import com.agroland.feature.profile.ui.CompanySettingsPage
@@ -122,7 +133,11 @@ class MainActivity : AppCompatActivity() {
                     AppNavHost(
                         isAuthorized = session == SessionState.Authorized,
                         themeMode = themeMode,
+                        localeTag = localeTag,
                         onThemeChange = { shellViewModel.setThemeMode(it) },
+                        onAppRegionSelected = { countryId, regionId ->
+                            shellViewModel.setAppRegion(countryId, regionId)
+                        },
                     )
                 }
             }
@@ -134,7 +149,9 @@ class MainActivity : AppCompatActivity() {
 private fun AppNavHost(
     isAuthorized: Boolean,
     themeMode: ThemeMode,
+    localeTag: String?,
     onThemeChange: (ThemeMode) -> Unit,
+    onAppRegionSelected: (Int, Int) -> Unit,
 ) {
     val navController = rememberNavController()
     NavHost(
@@ -146,6 +163,7 @@ private fun AppNavHost(
                 onDecided = { target ->
                     val route = when (target) {
                         SplashTarget.Language -> LanguageRoute
+                        SplashTarget.RegionSetup -> CountryListRoute
                         SplashTarget.Main -> MainShellRoute
                     }
                     navController.navigate(route) {
@@ -157,7 +175,9 @@ private fun AppNavHost(
         composable<LanguageRoute> {
             LanguagePage(
                 onSelected = {
-                    navController.navigate(MainShellRoute) {
+                    // regionRedirectProvider баламасы: тілден кейін өңір таңдауға
+                    // бағыттаймыз (appRegion әлі жоқ — splash Main-ға жібермейді).
+                    navController.navigate(CountryListRoute) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
@@ -244,7 +264,12 @@ private fun AppNavHost(
             EditProfilePage(onBack = { navController.popBackStack() })
         }
         composable<ProfileAddressesRoute> {
-            ProfileAddressesPage(onBack = { navController.popBackStack() })
+            ProfileAddressesPage(
+                onBack = { navController.popBackStack() },
+                onEditLocation = { location ->
+                    navController.navigate(AddressEditRoute(location?.id ?: 0L))
+                },
+            )
         }
         composable<CompanySettingsRoute> {
             CompanySettingsPage(
@@ -271,7 +296,7 @@ private fun AppNavHost(
         }
 
         // ---- Маркетплейс (Phase 5) ----
-        composable<AnnouncementsListRoute> { entry ->
+        composable<AnnouncementsListRoute>(typeMap = AnnouncementFilterTypeMap) { entry ->
             val route = entry.toRoute<AnnouncementsListRoute>()
             // FilterPage нәтижесі осы entry-дің savedStateHandle-ына жазылады.
             val filter by entry.savedStateHandle
@@ -284,7 +309,7 @@ private fun AppNavHost(
                 onOpenFilter = { navController.navigate(FilterRoute(filter)) },
             )
         }
-        composable<FilterRoute> { entry ->
+        composable<FilterRoute>(typeMap = AnnouncementFilterTypeMap) { entry ->
             val route = entry.toRoute<FilterRoute>()
             FilterPage(
                 initialFilter = route.filter,
@@ -346,18 +371,34 @@ private fun AppNavHost(
                 onOpenBulkUpload = { navController.navigate(BulkUploadRoute) },
             )
         }
-        composable<CreateAdRoute> {
+        composable<CreateAdRoute> { entry ->
+            val mapSelection by entry.savedStateHandle
+                .getStateFlow<SelectedLocation?>(LOCATION_RESULT_KEY, null)
+                .collectAsState()
             CreateAdPage(
                 onBack = { navController.popBackStack() },
                 onSubmitted = { navController.popBackStack() },
                 onOpenBulkUpload = { navController.navigate(BulkUploadRoute) },
+                mapSelection = mapSelection,
+                onMapSelectionConsumed = { entry.savedStateHandle[LOCATION_RESULT_KEY] = null },
+                onOpenMapPicker = { prefill ->
+                    navController.navigate(LocationSelectionRoute(prefill))
+                },
             )
         }
         composable<EditAdRoute> { entry ->
+            val mapSelection by entry.savedStateHandle
+                .getStateFlow<SelectedLocation?>(LOCATION_RESULT_KEY, null)
+                .collectAsState()
             CreateAdPage(
                 onBack = { navController.popBackStack() },
                 onSubmitted = { navController.popBackStack() },
                 onOpenBulkUpload = { navController.navigate(BulkUploadRoute) },
+                mapSelection = mapSelection,
+                onMapSelectionConsumed = { entry.savedStateHandle[LOCATION_RESULT_KEY] = null },
+                onOpenMapPicker = { prefill ->
+                    navController.navigate(LocationSelectionRoute(prefill))
+                },
                 viewModel = hiltViewModel(viewModelStoreOwner = entry),
             )
         }
@@ -390,6 +431,58 @@ private fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
                 onEdit = { navController.navigate(EditAdRoute(it)) },
+            )
+        }
+
+        // ---- Локация (Phase 7) ----
+        // Бірінші іске қосу: өңір орнату (country → region → MainShell).
+        composable<CountryListRoute> {
+            CountryListPage(
+                onPickCountry = { country ->
+                    navController.navigate(
+                        RegionListRoute(country.id, country.localizedName(localeTag)),
+                    )
+                },
+            )
+        }
+        composable<RegionListRoute> { entry ->
+            val route = entry.toRoute<RegionListRoute>()
+            RegionListPage(
+                countryName = route.countryName.takeIf { it.isNotBlank() },
+                onPickRegion = { region ->
+                    // AppRegion persist: countryId + regionId (/cities DEV-те 404 →
+                    // cityId := region id).
+                    onAppRegionSelected(route.countryId, region.id)
+                    navController.navigate(MainShellRoute) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable<AddressEditRoute> { entry ->
+            val mapSelection by entry.savedStateHandle
+                .getStateFlow<SelectedLocation?>(LOCATION_RESULT_KEY, null)
+                .collectAsState()
+            AddressEditPage(
+                locationId = entry.toRoute<AddressEditRoute>().locationId,
+                mapSelection = mapSelection,
+                onConsumeMapSelection = { entry.savedStateHandle[LOCATION_RESULT_KEY] = null },
+                onOpenMapPicker = { prefill ->
+                    navController.navigate(LocationSelectionRoute(prefill))
+                },
+                onBack = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() },
+            )
+        }
+        composable<LocationSelectionRoute> { entry ->
+            LocationSelectionPage(
+                prefill = entry.toRoute<LocationSelectionRoute>().prefill,
+                onBack = { navController.popBackStack() },
+                onConfirm = { selected ->
+                    // Нәтиже шақырған экранның savedStateHandle-ына қайтады.
+                    navController.previousBackStackEntry?.savedStateHandle?.set(LOCATION_RESULT_KEY, selected)
+                    navController.popBackStack()
+                },
             )
         }
     }

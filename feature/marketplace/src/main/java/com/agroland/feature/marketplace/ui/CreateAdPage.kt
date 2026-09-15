@@ -30,6 +30,7 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material.icons.outlined.UploadFile
 import androidx.compose.material.icons.outlined.Videocam
@@ -57,6 +58,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.agroland.core.l10n.AppLocale
 import com.agroland.core.l10n.R as L10nR
+import com.agroland.feature.location.data.SelectedLocation
 import com.agroland.core.ui.components.AgroAppBar
 import com.agroland.core.ui.components.AgroButton
 import com.agroland.core.ui.components.AgroCheckbox
@@ -84,6 +86,9 @@ fun CreateAdPage(
     onBack: () -> Unit,
     onSubmitted: () -> Unit,
     onOpenBulkUpload: () -> Unit,
+    mapSelection: SelectedLocation? = null,
+    onMapSelectionConsumed: () -> Unit = {},
+    onOpenMapPicker: (SelectedLocation?) -> Unit = {},
     viewModel: CreateAdViewModel = hiltViewModel(),
     categoriesViewModel: CategoriesViewModel = rememberCategoriesViewModel(),
 ) {
@@ -151,6 +156,14 @@ fun CreateAdPage(
 
     LaunchedEffect(draft.categoryId) {
         if (draft.categoryId != null) categoriesViewModel.loadSubcategories(draft.categoryId!!)
+    }
+
+    // Карта нәтижесі (Фаза 7): user_location_id болмағанда каталог локациясы.
+    LaunchedEffect(mapSelection) {
+        if (mapSelection != null) {
+            viewModel.updateDraft { it.copy(userLocationId = null, location = mapSelection) }
+            onMapSelectionConsumed()
+        }
     }
 
     val invalidField = draft.validate()
@@ -329,12 +342,29 @@ fun CreateAdPage(
                             // Мекенжай (user_location_id).
                             SelectRow(
                                 icon = Icons.Outlined.LocationOn,
-                                label = locations.firstOrNull { it.id == draft.userLocationId }?.title
-                                    ?: locations.firstOrNull { it.id == draft.userLocationId }?.address
+                                label = locations.firstOrNull { it.id == draft.userLocationId }?.fullAddress
                                     ?: stringResource(L10nR.string.create_pick_location),
                                 isError = invalidField == AdDraft.FIELD_LOCATION,
                                 onClick = { locationPickerVisible = true },
                             )
+                            // Карта/каталог арқылы — сақталған мекенжай болмағанда
+                            // country/region/district каталог ID-лері жіберіледі (Фаза 7).
+                            if (draft.userLocationId == null) {
+                                val pickedLabel = draft.location?.displayLabel()
+                                if (!pickedLabel.isNullOrBlank()) {
+                                    SelectRow(
+                                        icon = Icons.Outlined.Map,
+                                        label = pickedLabel,
+                                        onClick = { onOpenMapPicker(draft.location) },
+                                    )
+                                } else {
+                                    SelectRow(
+                                        icon = Icons.Outlined.Map,
+                                        label = stringResource(L10nR.string.create_pick_location_map),
+                                        onClick = { onOpenMapPicker(draft.location) },
+                                    )
+                                }
+                            }
 
                             // Байланыс нөмірлері.
                             PhonesSection(
@@ -487,10 +517,10 @@ fun CreateAdPage(
         ListPickerDialog(
             title = stringResource(L10nR.string.create_pick_location),
             items = locations,
-            label = { it.title ?: it.address ?: "" },
+            label = { it.fullAddress },
             selected = locations.firstOrNull { it.id == draft.userLocationId },
             onSelect = { location ->
-                viewModel.updateDraft { it.copy(userLocationId = location.id) }
+                viewModel.updateDraft { it.copy(userLocationId = location.id, location = null) }
                 locationPickerVisible = false
             },
             onDismiss = { locationPickerVisible = false },

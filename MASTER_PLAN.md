@@ -18,7 +18,7 @@
 | 4 | Профиль, компания, KYC | Профиль хаб, өңдеу (additive PATCH, avatar multipart), мекенжай CRUD, компания саб-ресурстары, VerificationPage | ✅ |
 | 5 | Маркетплейс (оқу) | Категориялар (6 bucket), лента (VIP 4+2 аралас), recommended (order_random+country_id=4), іздеу debounce 500ms, сүзгі, таңдаулылар, деталь | ✅ |
 | 6 | Маркетплейс (жазу) | Create/Preview/Edit (multipart images+video), activate/deactivate/delete, bulk-upload, AI ad-content, MakeOffer, status беттері | ✅ |
-| 7 | Локация / карта | Картамен таңдау, reverse geocode → каталог ID, Country/Region/District селекторлары, app-region persist | ⬜ |
+| 7 | Локация / карта | Картамен таңдау, reverse geocode → каталог ID, Country/Region/District селекторлары, app-region persist | ✅ |
 | 8 | Себет / чекаут / тапсырыстар | CartPage (оптимистік qty), Smart Calculator preview (warnings сүзу+локализация), SupplierPicker, Checkout, OrderDetail+timeline, тарих қойындылары | ⬜ |
 | 9 | Төлемдер | Halyk ePay (invoice_url+poll 2с/60с), баланспен төлеу, BCC 3DS (HMAC-SHA1 P_SIGN), mock режим, pending resume, X-Platform: android | ⬜ |
 | 10 | Әмиян | Balance, hold, транзакциялар, шығару (мин 5000₸, IBAN/BIK), /business/* жолдар | ⬜ |

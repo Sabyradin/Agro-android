@@ -1,6 +1,7 @@
 package com.agroland.feature.marketplace.data
 
 import com.agroland.core.network.json.JsonParser
+import com.agroland.feature.location.data.SelectedLocation
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -35,6 +36,12 @@ data class AdDraft(
     val stockQuantity: String = "",
     val allowCart: Boolean = false,
     val isMarketplace: Boolean = false,
+    /**
+     * Каталог локациясы (Фаза 7) — сақталған мекенжай болмағанда карта/каталог
+     * арқылы таңдалады: country_id/region_id/district_id (+ lat/lng).
+     * Backend: user_location_id OR country/region/district (spec POST /announcements).
+     */
+    val location: SelectedLocation? = null,
     /** Тек өңдеу режимінде: қолданылған суреттерді сақтау (жою үшін). */
     val images: List<String> = emptyList(),
 ) {
@@ -51,7 +58,7 @@ data class AdDraft(
         categoryId == null -> FIELD_CATEGORY
         subcategoryId == null -> FIELD_SUBCATEGORY
         contactNumbers.none { it.isNotBlank() } -> FIELD_PHONES
-        userLocationId == null -> FIELD_LOCATION
+        userLocationId == null && location?.countryId == null -> FIELD_LOCATION
         pickupAvailable && pickupAddress.isBlank() -> FIELD_PICKUP_ADDRESS
         else -> null
     }
@@ -195,6 +202,16 @@ object AdRequests {
             draft.subcategoryId?.let { put("subcategory_id", text(it.toString())) }
             draft.measurementUnit?.let { put("measurement_unit", text(it.queryKey)) }
             draft.userLocationId?.let { put("user_location_id", text(it.toString())) }
+            // Каталог локациясы — сақталған мекенжай болмағанда (Фаза 7).
+            if (draft.userLocationId == null) {
+                draft.location?.let { loc ->
+                    loc.countryId?.let { put("country_id", text(it.toString())) }
+                    loc.regionId?.let { put("region_id", text(it.toString())) }
+                    loc.districtId?.let { put("district_id", text(it.toString())) }
+                    loc.latitude?.let { put("latitude", text(it.toString())) }
+                    loc.longitude?.let { put("longitude", text(it.toString())) }
+                }
+            }
             put("delivery_available", text(draft.deliveryAvailable.toString()))
             put("pickup_available", text(draft.pickupAvailable.toString()))
             if (draft.pickupAvailable) put("pickup_address", text(draft.pickupAddress.trim()))

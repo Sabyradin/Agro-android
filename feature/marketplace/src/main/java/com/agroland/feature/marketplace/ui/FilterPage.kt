@@ -46,14 +46,18 @@ import com.agroland.core.ui.components.AgroTextField
 import com.agroland.core.ui.components.AgroTextButton
 import com.agroland.core.ui.components.BottomActionContainer
 import com.agroland.core.ui.theme.extendedColors
+import com.agroland.feature.location.data.CatalogLocation
+import com.agroland.feature.location.data.SelectedLocation
+import com.agroland.feature.location.ui.CatalogPickerDialog
+import com.agroland.feature.location.ui.LocationPickerViewModel
 import com.agroland.feature.marketplace.data.AnnouncementFilter
 import com.agroland.feature.marketplace.data.Category
 import com.agroland.feature.marketplace.data.FilterSort
 
 /**
  * FilterPage — draft сүзгі редакторы (Flutter FilterPage): сұрып, баға диапазоны,
- * келісуге болады, категория/сабкатегория + тікелей нәтиже саны.
- * «Қолдану» — нәтижені caller-ге қайтарады (savedStateHandle арқылы).
+ * келісуге болады, категория/сабкатегория, локация (RegionFilterView, Фаза 7)
+ * + тікелей нәтиже саны. «Қолдану» — нәтижені caller-ге қайтарады (savedStateHandle).
  */
 @Composable
 fun FilterPage(
@@ -62,6 +66,7 @@ fun FilterPage(
     onApply: (AnnouncementFilter) -> Unit,
     filterViewModel: FilterViewModel = hiltViewModel(),
     categoriesViewModel: CategoriesViewModel = rememberCategoriesViewModel(),
+    locationViewModel: LocationPickerViewModel = hiltViewModel(),
 ) {
     val localeTag = LocalConfiguration.current.locales[0]?.toLanguageTag()
     val grouped by categoriesViewModel.grouped.collectAsState()
@@ -78,6 +83,7 @@ fun FilterPage(
     var negotiableEnabled by remember { mutableStateOf(initialFilter.negotiable != null) }
     var categoryId by remember { mutableStateOf(initialFilter.categoryId) }
     var subcategoryId by remember { mutableStateOf(initialFilter.subcategoryId) }
+    var location by remember { mutableStateOf(initialFilter.location) }
 
     fun currentDraft(): AnnouncementFilter = AnnouncementFilter(
         query = initialFilter.query,
@@ -87,14 +93,19 @@ fun FilterPage(
         maxPrice = maxPrice.toLongOrNull()?.toDouble(),
         negotiable = if (negotiableEnabled) negotiable else null,
         sort = sort,
+        location = location,
     )
+
+    // Локация пикерлері (ел → облыс → аудан).
+    var locationDialog by remember { mutableStateOf<String?>(null) }
 
     // Draft өзгерісі — тікелей эфирдегі санды жаңартады.
     var pickerVisible by remember { mutableStateOf(false) }
     val draft = currentDraft()
     LaunchedEffect(
         draft.categoryId, draft.subcategoryId, draft.minPrice, draft.maxPrice,
-        draft.negotiable, draft.sort,
+        draft.negotiable, draft.sort, draft.location?.countryId,
+        draft.location?.regionId, draft.location?.districtId,
     ) {
         filterViewModel.updateCount(draft)
     }
@@ -240,6 +251,47 @@ fun FilterPage(
                         onClick = { pickerVisible = true },
                     )
                 }
+
+                // Локация (RegionFilterView, Фаза 7).
+                SectionTitle(stringResource(L10nR.string.filter_location))
+                PickerRow(
+                    label = location?.countryName
+                        ?: stringResource(L10nR.string.location_choose_country),
+                    clearable = location?.countryId != null,
+                    onClear = { location = null },
+                    onClick = {
+                        locationDialog = "country"
+                        locationViewModel.ensureCountries()
+                    },
+                )
+                location?.countryId?.let { countryId ->
+                    PickerRow(
+                        label = location?.regionName
+                            ?: stringResource(L10nR.string.location_choose_region),
+                        clearable = location?.regionId != null,
+                        onClear = {
+                            location = location?.copy(regionId = null, regionName = null, districtId = null, districtName = null)
+                        },
+                        onClick = {
+                            locationDialog = "region"
+                            locationViewModel.ensureRegions(countryId)
+                        },
+                    )
+                }
+                location?.regionId?.let { regionId ->
+                    PickerRow(
+                        label = location?.districtName
+                            ?: stringResource(L10nR.string.location_choose_district),
+                        clearable = location?.districtId != null,
+                        onClear = {
+                            location = location?.copy(districtId = null, districtName = null)
+                        },
+                        onClick = {
+                            locationDialog = "district"
+                            locationViewModel.ensureDistricts(regionId)
+                        },
+                    )
+                }
             }
 
             // Тікелей эфирдегі нәтиже саны + Қолдану.
@@ -271,6 +323,7 @@ fun FilterPage(
                             categoryId = null
                             subcategoryId = null
                             pickedCategory = null
+                            location = null
                         },
                     )
                 }
@@ -306,6 +359,62 @@ fun FilterPage(
                 pickerVisible = false
             },
             onDismiss = { pickerVisible = false },
+        )
+    }
+
+    // Локация каталог диалогтары (Фаза 7).
+    val activeLocationDialog = locationDialog
+    if (activeLocationDialog != null) {
+        val countries by locationViewModel.countries.collectAsState()
+        val regions by remember(location?.countryId) {
+            locationViewModel.regions(location?.countryId ?: 0)
+        }.collectAsState(initial = LocationPickerViewModel.CatalogState())
+        val districts by remember(location?.regionId) {
+            locationViewModel.districts(location?.regionId ?: 0)
+        }.collectAsState(initial = LocationPickerViewModel.CatalogState())
+
+        val title = when (activeLocationDialog) {
+            "country" -> stringResource(L10nR.string.location_choose_country)
+            "region" -> stringResource(L10nR.string.location_choose_region)
+            else -> stringResource(L10nR.string.location_choose_district)
+        }
+        val dialogState = when (activeLocationDialog) {
+            "country" -> countries
+            "region" -> regions
+            else -> districts
+        }
+        CatalogPickerDialog(
+            title = title,
+            state = dialogState,
+            localeTag = localeTag,
+            selectedId = when (activeLocationDialog) {
+                "country" -> location?.countryId
+                "region" -> location?.regionId
+                else -> location?.districtId
+            },
+            onSelect = { item: CatalogLocation ->
+                val name = item.localizedName(localeTag)
+                location = when (activeLocationDialog) {
+                    "country" -> SelectedLocation(countryId = item.id, countryName = name)
+                    "region" -> location?.copy(regionId = item.id, regionName = name, districtId = null, districtName = null)
+                    else -> location?.copy(districtId = item.id, districtName = name)
+                }
+                locationDialog = when (activeLocationDialog) {
+                    "country" -> "region"
+                    else -> null
+                }
+                when (locationDialog) {
+                    "region" -> location?.countryId?.let { locationViewModel.ensureRegions(it) }
+                }
+            },
+            onRetry = {
+                when (activeLocationDialog) {
+                    "country" -> locationViewModel.retryCountries()
+                    "region" -> location?.countryId?.let { locationViewModel.retryRegions(it) }
+                    else -> location?.regionId?.let { locationViewModel.retryDistricts(it) }
+                }
+            },
+            onDismiss = { locationDialog = null },
         )
     }
 }

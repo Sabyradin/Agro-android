@@ -22,9 +22,13 @@ import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/** Splash шешімі: тіл таңдалды ма — соған қарай келесі экран. */
+/**
+ * Splash шешімі: тіл таңдалды ма, өңір бекітілді ме — соған қарай келесі экран.
+ * regionRedirectProvider баламасы: AppRegion null болса өңір орнатуға мәжбүрлейді.
+ */
 sealed interface SplashTarget {
     data object Language : SplashTarget
+    data object RegionSetup : SplashTarget
     data object Main : SplashTarget
 }
 
@@ -35,16 +39,24 @@ class SplashViewModel @Inject constructor(
 
     /**
      * Splash қақпасы: жалпы ұзақтығы ~3 сек (core-splashscreen жүйелік бөлігінен кейін).
-     * Бірінші іске қосу — тіл таңдауына, әйтпесе басты экранға.
+     * Бірінші іске қосу — тіл таңдауына; тіл бар, өңір жоқ — өңір орнатуға;
+     * қалғанда — басты экранға.
      */
     fun decide(onDecided: (SplashTarget) -> Unit) {
         viewModelScope.launch {
             val start = System.currentTimeMillis()
             val selected = settings.languageSelectedOnce()
+            val regionSet = selected && settings.appRegionCountryIdOnce() != null
             val elapsed = System.currentTimeMillis() - start
             val remain = SPLASH_MIN_MS - elapsed
             if (remain > 0) delay(remain)
-            onDecided(if (selected) SplashTarget.Main else SplashTarget.Language)
+            onDecided(
+                when {
+                    !selected -> SplashTarget.Language
+                    !regionSet -> SplashTarget.RegionSetup
+                    else -> SplashTarget.Main
+                },
+            )
         }
     }
 

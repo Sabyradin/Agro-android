@@ -31,6 +31,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:network"))
     implementation(project(":feature:auth"))
+    implementation(project(":feature:location"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)

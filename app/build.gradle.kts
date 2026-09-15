@@ -18,6 +18,11 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         vectorDrawables { useSupportLibrary = true }
+
+        // Google Maps API кілті — gradle.properties MAPS_API_KEY=... (команда бергенше бос).
+        // Бос кілтте LocationSelectionPage каталог режиміне өтеді (карта плиткалары жүктелмейді).
+        manifestPlaceholders["MAPS_API_KEY"] =
+            (project.findProperty("MAPS_API_KEY") as String?).orEmpty()
     }
 
     flavorDimensions += "environment"
@@ -73,6 +78,7 @@ dependencies {
     implementation(project(":feature:auth"))
     implementation(project(":feature:profile"))
     implementation(project(":feature:marketplace"))
+    implementation(project(":feature:location"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))
@@ -87,6 +93,7 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

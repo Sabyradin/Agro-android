@@ -126,6 +126,8 @@
     <string name="address_city_hint">Қала</string>
     <string name="address_title_error">Атауын енгізіңіз</string>
     <string name="address_address_error">Мекенжайды енгізіңіз</string>
+    <string name="address_street_hint">Көше</string>
+    <string name="address_house_hint">Үй/пәтер</string>
     <string name="address_empty_title">Мекенжайлар жоқ</string>
     <string name="address_empty_message">Бірінші мекенжайды қосыңыз</string>
     <string name="address_deleted_toast">Мекенжай өшірілді</string>
@@ -312,4 +314,27 @@
     <string name="offer_field_quantity">Мөлшері (қажет болса)</string>
     <string name="offer_submit">Сұранысты жариялау</string>
     <string name="offer_created_toast">Сұраныс жарияланды!</string>
+
+    <!-- Локация / карта (Фаза 7) -->
+    <string name="app_region_title">Өңіріңізді таңдаңыз</string>
+    <string name="app_region_subtitle">Жарнамалар соңғы өңіріңізге сай көрсетіледі</string>
+    <string name="location_title">Локация</string>
+    <string name="location_choose_country">Елді таңдаңыз</string>
+    <string name="location_choose_region">Облысты/қаланы таңдаңыз</string>
+    <string name="location_choose_district">Ауданды таңдаңыз</string>
+    <string name="location_search_hint">Іздеу…</string>
+    <string name="location_nothing_found">Ештеңе табылмады</string>
+    <string name="location_pin_hint">Картаны түртіңіз немесе GPS/каталогты қолданыңыз</string>
+    <string name="location_locating">Орналасқан жер анықталуда…</string>
+    <string name="location_gps_failed">Орналасқан жерді анықтау мүмкін болмады</string>
+    <string name="location_reverse_failed">Мекенжай анықталмады — каталогтан таңдаңыз</string>
+    <string name="location_map_unavailable">Карта қолжетімсіз (API кілті жоқ) — GPS пен каталог жұмыс істейді</string>
+    <string name="location_use_gps">Менің орналасқан жерім</string>
+    <string name="location_open_in_maps">Карта қосымшасында ашу</string>
+    <string name="location_select">Таңдау</string>
+    <string name="location_selected_coords">Координаттар: %1$s, %2$s</string>
+    <string name="location_catalog_section">Каталогтан таңдау</string>
+    <string name="filter_location">Локация</string>
+    <string name="filter_any_location">Барлық өңірлер</string>
+    <string name="create_pick_location_map">Карта арқылы таңдау</string>
 </resources>

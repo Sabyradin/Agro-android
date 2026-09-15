@@ -119,6 +119,8 @@
     <string name="address_city_hint">Город</string>
     <string name="address_title_error">Введите название</string>
     <string name="address_address_error">Введите адрес</string>
+    <string name="address_street_hint">Улица</string>
+    <string name="address_house_hint">Дом/кв</string>
     <string name="address_empty_title">Адресов пока нет</string>
     <string name="address_empty_message">Добавьте первый адрес</string>
     <string name="address_deleted_toast">Адрес удалён</string>
@@ -305,4 +307,26 @@
     <string name="offer_field_quantity">Количество (при необходимости)</string>
     <string name="offer_submit">Опубликовать запрос</string>
     <string name="offer_created_toast">Запрос опубликован!</string>
+    <!-- Локация / карта (Фаза 7) -->
+    <string name="app_region_title">Выберите свой регион</string>
+    <string name="app_region_subtitle">Объявления показываются по выбранному региону</string>
+    <string name="location_title">Локация</string>
+    <string name="location_choose_country">Выберите страну</string>
+    <string name="location_choose_region">Выберите область/город</string>
+    <string name="location_choose_district">Выберите район</string>
+    <string name="location_search_hint">Поиск…</string>
+    <string name="location_nothing_found">Ничего не найдено</string>
+    <string name="location_pin_hint">Нажмите на карту или используйте GPS/каталог</string>
+    <string name="location_locating">Определяем местоположение…</string>
+    <string name="location_gps_failed">Не удалось определить местоположение</string>
+    <string name="location_reverse_failed">Адрес не определён — выберите из каталога</string>
+    <string name="location_map_unavailable">Карта недоступна (нет API-ключа) — GPS и каталог работают</string>
+    <string name="location_use_gps">Моё местоположение</string>
+    <string name="location_open_in_maps">Открыть в картах</string>
+    <string name="location_select">Выбрать</string>
+    <string name="location_selected_coords">Координаты: %1$s, %2$s</string>
+    <string name="location_catalog_section">Выбрать из каталога</string>
+    <string name="filter_location">Локация</string>
+    <string name="filter_any_location">Все регионы</string>
+    <string name="create_pick_location_map">Выбрать на карте</string>
 </resources>

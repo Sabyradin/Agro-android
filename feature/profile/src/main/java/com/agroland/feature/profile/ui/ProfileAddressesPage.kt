@@ -53,15 +53,12 @@ import com.agroland.feature.profile.data.UserLocation
  * Тізім + «қосу» түймесі, өңдеу/өшіру әрекеттері.
  */
 @Composable
-fun ProfileAddressesPage(onBack: () -> Unit) {
+fun ProfileAddressesPage(onBack: () -> Unit, onEditLocation: (UserLocation?) -> Unit) {
     val viewModel = rememberProfileViewModel()
     val profile by viewModel.profile.collectAsState()
     val loading by viewModel.loading.collectAsState()
     val saving by viewModel.saving.collectAsState()
     val snackbar = remember { SnackbarHostState() }
-
-    var editing by remember { mutableStateOf<UserLocation?>(null) }
-    var dialogOpen by remember { mutableStateOf(false) }
 
     val genericError = stringResource(L10nR.string.error_generic_message)
     val networkError = stringResource(L10nR.string.error_no_internet)
@@ -76,7 +73,7 @@ fun ProfileAddressesPage(onBack: () -> Unit) {
                         ?: if (event.error.isNetwork) networkError else genericError
                     snackbar.showSnackbar(text)
                 }
-                ProfileEvent.Saved -> dialogOpen = false
+                ProfileEvent.Saved -> Unit // AddressEditPage өзі артқа шығады
                 ProfileEvent.LocationDeleted -> snackbar.showSnackbar(deletedToast)
                 else -> Unit
             }
@@ -109,10 +106,7 @@ fun ProfileAddressesPage(onBack: () -> Unit) {
                     items(locations, key = { it.id }) { location ->
                         LocationTile(
                             location = location,
-                            onEdit = {
-                                editing = location
-                                dialogOpen = true
-                            },
+                            onEdit = { onEditLocation(location) },
                             onDelete = { viewModel.deleteLocation(location.id) },
                         )
                     }
@@ -127,10 +121,7 @@ fun ProfileAddressesPage(onBack: () -> Unit) {
             ) {
                 com.agroland.core.ui.components.AgroButton(
                     text = stringResource(L10nR.string.address_add),
-                    onClick = {
-                        editing = null
-                        dialogOpen = true
-                    },
+                    onClick = { onEditLocation(null) },
                     enabled = !saving,
                     loading = saving,
                     modifier = Modifier.fillMaxWidth(),
@@ -140,16 +131,6 @@ fun ProfileAddressesPage(onBack: () -> Unit) {
         }
     }
 
-    if (dialogOpen) {
-        LocationDialog(
-            existing = editing,
-            saving = saving,
-            onSave = { title, address, city ->
-                viewModel.saveLocation(editing, title, address, city)
-            },
-            onDismiss = { dialogOpen = false },
-        )
-    }
 }
 
 @Composable
@@ -175,19 +156,17 @@ private fun LocationTile(
             modifier = Modifier.height(24.dp),
         )
         Column(modifier = Modifier.weight(1f)) {
+            // Flutter title/subtitle: locality, street, house / province, country.
             Text(
-                text = location.title ?: location.address ?: "",
+                text = location.title,
                 style = MaterialTheme.typography.bodySmall,
                 color = ext.primaryText,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            val subtitle = listOfNotNull(location.city, location.address)
-                .filter { it.isNotBlank() }
-                .joinToString(", ")
-            if (subtitle.isNotEmpty()) {
+            if (location.subtitle.isNotEmpty()) {
                 Text(
-                    text = subtitle,
+                    text = location.subtitle,
                     style = MaterialTheme.typography.labelMedium,
                     color = ext.secondaryText,
                     maxLines = 2,
@@ -207,95 +186,5 @@ private fun LocationTile(
             tint = MaterialTheme.colorScheme.error,
             onClick = onDelete,
         )
-    }
-}
-
-/** Қосу/өңдеу диалогі — атау, мекенжай, қала. */
-@Composable
-private fun LocationDialog(
-    existing: UserLocation?,
-    saving: Boolean,
-    onSave: (title: String, address: String, city: String?) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var title by remember { mutableStateOf(existing?.title ?: "") }
-    var address by remember { mutableStateOf(existing?.address ?: "") }
-    var city by remember { mutableStateOf(existing?.city ?: "") }
-    var titleError by remember { mutableStateOf(false) }
-    var addressError by remember { mutableStateOf(false) }
-
-    val titleEmpty = stringResource(L10nR.string.address_title_error)
-    val addressEmpty = stringResource(L10nR.string.address_address_error)
-
-    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(extendedColors().card)
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = stringResource(
-                    if (existing == null) L10nR.string.address_add else L10nR.string.address_edit,
-                ),
-                style = MaterialTheme.typography.titleSmall,
-                color = extendedColors().primaryText,
-            )
-            com.agroland.core.ui.components.AgroTextField(
-                value = title,
-                onValueChange = {
-                    title = it
-                    titleError = false
-                },
-                label = stringResource(L10nR.string.address_title_hint),
-                isError = titleError,
-                errorText = titleEmpty,
-            )
-            com.agroland.core.ui.components.AgroTextField(
-                value = address,
-                onValueChange = {
-                    address = it
-                    addressError = false
-                },
-                label = stringResource(L10nR.string.address_address_hint),
-                isError = addressError,
-                errorText = addressEmpty,
-            )
-            com.agroland.core.ui.components.AgroTextField(
-                value = city,
-                onValueChange = { city = it },
-                label = stringResource(L10nR.string.address_city_hint),
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                Box(modifier = Modifier.weight(1f)) {
-                    com.agroland.core.ui.components.AgroButton(
-                        text = stringResource(L10nR.string.common_cancel),
-                        onClick = onDismiss,
-                        containerColor = extendedColors().grey,
-                        contentColor = extendedColors().primaryText,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                    com.agroland.core.ui.components.AgroButton(
-                        text = stringResource(L10nR.string.common_save),
-                        enabled = !saving,
-                        loading = saving,
-                        onClick = {
-                            if (title.isBlank()) {
-                                titleError = true
-                            } else if (address.isBlank()) {
-                                addressError = true
-                            } else {
-                                onSave(title.trim(), address.trim(), city.trim().takeIf { it.isNotEmpty() })
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
-        }
     }
 }

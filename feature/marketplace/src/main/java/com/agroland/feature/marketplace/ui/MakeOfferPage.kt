@@ -181,7 +181,7 @@ fun MakeOfferPage(
                     OfferSelectRow(
                         icon = Icons.Outlined.LocationOn,
                         label = locations.firstOrNull { it.id == draft.userLocationId }
-                            ?.let { it.title ?: it.address ?: "" }
+                            ?.fullAddress
                             ?.takeIf { it.isNotBlank() }
                             ?: stringResource(L10nR.string.create_pick_location),
                         isError = invalidField == AdDraft.FIELD_LOCATION,
@@ -256,7 +256,7 @@ fun MakeOfferPage(
         ListPickerDialog(
             title = stringResource(L10nR.string.create_pick_location),
             items = locations,
-            label = { it.title ?: it.address ?: "" },
+            label = { it.fullAddress },
             selected = locations.firstOrNull { it.id == draft.userLocationId },
             onSelect = { location ->
                 viewModel.updateDraft { it.copy(userLocationId = location.id) }

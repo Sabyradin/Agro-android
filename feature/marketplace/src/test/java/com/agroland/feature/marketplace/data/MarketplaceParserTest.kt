@@ -1,5 +1,6 @@
 package com.agroland.feature.marketplace.data
 
+import com.agroland.feature.location.data.SelectedLocation
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import org.junit.Assert.assertEquals
@@ -229,5 +230,37 @@ class MarketplaceParserTest {
         assertEquals("asc", dateAsc.toQueryMap(1, 20)["sort_by_date"])
         val plain = AnnouncementFilter(sort = FilterSort.DEFAULT)
         assertFalse(plain.toQueryMap(1, 20).containsKey("sort_by_date"))
+    }
+
+    @Test
+    fun `сүзгі локация каталог ID-лерін жібереді — Фаза 7`() {
+        val filter = AnnouncementFilter(
+            location = SelectedLocation(
+                countryId = 1,
+                regionId = 10,
+                districtId = 100,
+                latitude = 51.1282,
+                longitude = 71.4307,
+            ),
+        )
+        val map = filter.toQueryMap(page = 1, limit = 20)
+        assertEquals("1", map["country_id"])
+        assertEquals("10", map["region_id"])
+        assertEquals("100", map["district_id"])
+
+        // Локация бар фильтр әдепкі емес.
+        assertFalse(filter.isDefault())
+
+        // Толық емес локация: тек country.
+        val partial = AnnouncementFilter(location = SelectedLocation(countryId = 1))
+        val partialMap = partial.toQueryMap(1, 20)
+        assertEquals("1", partialMap["country_id"])
+        assertFalse(partialMap.containsKey("region_id"))
+        assertFalse(partialMap.containsKey("district_id"))
+
+        // Локация жоқ фильтр ешқандай локация параметрін жібермейді.
+        val noLocation = AnnouncementFilter().toQueryMap(1, 20)
+        assertFalse(noLocation.containsKey("country_id"))
+        assertTrue(AnnouncementFilter().isDefault())
     }
 }

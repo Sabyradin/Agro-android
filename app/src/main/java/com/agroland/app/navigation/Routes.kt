@@ -1,5 +1,6 @@
 package com.agroland.app.navigation
 
+import com.agroland.feature.location.data.SelectedLocation
 import com.agroland.feature.marketplace.data.AnnouncementFilter
 import com.agroland.feature.profile.ui.CompanySection
 import kotlinx.serialization.Serializable
@@ -109,3 +110,21 @@ data class MyAnnouncementsRoute(val status: String = "active")
 /** Өз жарнамасының деталы + ие әрекеттері. */
 @Serializable
 data class ProfileAnnouncementRoute(val id: Long)
+
+// ---- Локация (Phase 7) ----
+
+/** Бірінші іске қосу: ел таңдау (app-region орнату ағыны). */
+@Serializable
+data object CountryListRoute
+
+/** Бірінші іске қосу: елдің өңірлерін таңдау. */
+@Serializable
+data class RegionListRoute(val countryId: Int, val countryName: String = "")
+
+/** Мекенжай қосу (locationId = 0) / өңдеу. */
+@Serializable
+data class AddressEditRoute(val locationId: Long = 0L)
+
+/** Карта арқылы локация таңдау — нәтиже caller-дің savedStateHandle-ына қайтады. */
+@Serializable
+data class LocationSelectionRoute(val prefill: SelectedLocation? = null)

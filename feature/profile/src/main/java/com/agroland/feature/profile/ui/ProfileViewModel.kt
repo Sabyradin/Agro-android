@@ -7,6 +7,7 @@ import com.agroland.feature.auth.security.PinManager
 import com.agroland.feature.auth.session.SessionController
 import com.agroland.feature.profile.data.ProfileRepository
 import com.agroland.feature.profile.data.UserLocation
+import com.agroland.feature.location.data.SelectedLocation
 import com.agroland.feature.profile.data.UserProfile
 import com.agroland.feature.profile.data.VerificationStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -119,23 +120,48 @@ class ProfileViewModel @Inject constructor(
 
     // Мекенжайлар.
 
-    fun saveLocation(existing: UserLocation?, title: String, address: String, city: String?) {
+    /**
+     * Мекенжайды сақтау. Catalog міндетті (country+region+district — Flutter
+     * _buildLocationModel сияқты); координаттар жаңа карта таңдауынан, болмаса
+     * бұрынғы мекенжайдан, болмаса 0.0 (backend district_id-ды өздігінен
+     * турындатады). Өңдеу = POST жаңа + DELETE ескі (PATCH жоқ).
+     * Сақтағаннан кейін 3-тен асқаны өшіріледі (Flutter maxAddresses = 3).
+     */
+    fun saveLocation(
+        existing: UserLocation?,
+        street: String,
+        house: String,
+        catalog: SelectedLocation?,
+    ) {
         viewModelScope.launch {
             _saving.value = true
+            val latitude = catalog?.latitude ?: existing?.latitude
+            val longitude = catalog?.longitude ?: existing?.longitude
             val result = if (existing == null) {
-                repository.createLocation(title, address, city)
+                repository.createLocation(street, house, catalog, latitude, longitude)
             } else {
-                repository.updateLocation(existing.id, title, address, city)
+                repository.replaceLocation(existing.id, street, house, catalog, latitude, longitude)
             }
             when (result) {
                 is ApiResult.Success -> {
                     refresh()
+                    trimExcessAddresses()
                     _events.emit(ProfileEvent.Saved)
                 }
                 is ApiResult.Error -> _events.emit(ProfileEvent.ShowError(result.failure.toProfileError()))
             }
             _saving.value = false
         }
+    }
+
+    /** 3-тен асқан мекенжайдан ең ескісін (кіші user_location_id) өшіреді. */
+    private suspend fun trimExcessAddresses() {
+        val locations = _profile.value?.locations ?: return
+        if (locations.size <= MAX_ADDRESSES) return
+        locations.sortedBy { it.id }
+            .dropLast(MAX_ADDRESSES)
+            .forEach { repository.deleteLocation(it.id) }
+        refresh()
     }
 
     fun deleteLocation(id: Long) {
@@ -276,5 +302,10 @@ class ProfileViewModel @Inject constructor(
             sessionController.onLoggedOut()
             _events.emit(ProfileEvent.LoggedOut)
         }
+    }
+
+    private companion object {
+        /** Flutter ProfileAddressNotifier.maxAddresses. */
+        const val MAX_ADDRESSES = 3
     }
 }

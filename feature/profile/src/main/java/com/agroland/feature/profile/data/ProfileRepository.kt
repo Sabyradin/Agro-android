@@ -1,6 +1,7 @@
 package com.agroland.feature.profile.data
 
 import com.agroland.core.network.ApiResult
+import com.agroland.feature.location.data.SelectedLocation
 import com.agroland.core.network.NetworkModule
 import com.agroland.core.network.error.Failure
 import javax.inject.Inject
@@ -30,11 +31,38 @@ class ProfileRepository @Inject constructor(
     suspend fun uploadAvatar(part: MultipartBody.Part): ApiResult<String?> =
         safeCall { ProfileParser.parseAvatarUrl(userApi.uploadAvatar(part)) }
 
-    suspend fun createLocation(title: String, address: String, city: String?): ApiResult<UserLocation> =
-        parseLocationBody { userApi.createLocation(ProfileRequests.location(title, address, city)) }
+    suspend fun createLocation(
+        street: String,
+        house: String,
+        catalog: SelectedLocation?,
+        latitude: Double?,
+        longitude: Double?,
+    ): ApiResult<UserLocation> =
+        parseLocationBody {
+            userApi.createLocation(
+                ProfileRequests.location(street, house, catalog, latitude, longitude),
+            )
+        }
 
-    suspend fun updateLocation(id: Long, title: String, address: String, city: String?): ApiResult<UserLocation> =
-        parseLocationBody { userApi.updateLocation(id, ProfileRequests.location(title, address, city)) }
+    /**
+     * Мекенжайды «өңдеу» — Flutter refreshStale үлгісі: жаңасын POST етіп,
+     * ескісін DELETE жасаймыз (PATCH /user/location/{id} жоқ).
+     * Қайта жүктеу кезінде backend district_id-ды координат бойынша өздігінен
+     * турындатады.
+     */
+    suspend fun replaceLocation(
+        oldId: Long,
+        street: String,
+        house: String,
+        catalog: SelectedLocation?,
+        latitude: Double?,
+        longitude: Double?,
+    ): ApiResult<UserLocation> {
+        val created = createLocation(street, house, catalog, latitude, longitude)
+        if (created is ApiResult.Error) return created
+        deleteLocation(oldId)
+        return created
+    }
 
     suspend fun deleteLocation(id: Long): ApiResult<Unit> =
         safeCall { userApi.deleteLocation(id); Unit }

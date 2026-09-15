@@ -207,7 +207,7 @@ private fun AuthorizedProfileContent(
                 )
                 AgroListTile(
                     title = stringResource(L10nR.string.profile_addresses),
-                    subtitle = profile.locations.firstOrNull()?.address,
+                    subtitle = profile.locations.firstOrNull()?.fullAddress?.takeIf { it.isNotBlank() },
                     leading = { SectionIcon(Icons.Outlined.LocationOn) },
                     onClick = onAddresses,
                 )
