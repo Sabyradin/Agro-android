@@ -2,16 +2,23 @@ package com.agroland.feature.marketplace.data
 
 import com.agroland.core.network.ApiResult
 import com.agroland.core.network.NetworkModule
+import com.agroland.core.network.error.Failure
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import okhttp3.MultipartBody
 
 /**
  * Маркетплейс репозиторісі — сүзгіленген лента, деталь (FIFO кеш 50), таңдаулылар,
- * ұсыныстар, категориялар. Барлық шақыру NetworkModule.safeCall арқылы.
+ * ұсыныстар, категориялар + жазу ағыны (create/edit/activate/delete, сұраныс, AI).
+ * Барлық шақыру NetworkModule.safeCall арқылы.
  */
 @Singleton
 class MarketplaceRepository @Inject constructor(
     private val catalogApi: CatalogApi,
+    private val writeApi: WriteApi,
 ) {
 
     /** FullAnnouncementNotifier-дің FIFO кеші (50) — сәтсіз fetch кезде fallback. */
@@ -69,6 +76,83 @@ class MarketplaceRepository @Inject constructor(
 
     suspend fun getFavoriteStatus(id: Long): ApiResult<Boolean> =
         safeCall { MarketplaceParser.parseFavoriteStatus(catalogApi.getFavoriteStatus(id)) }
+
+    // ---- Жазу ағыны (Фаза 6) ----
+
+    /** Жарнама жасау — multipart (images + video + қайталанатын массивтер). */
+    suspend fun createAnnouncement(
+        draft: AdDraft,
+        images: List<MultipartBody.Part>,
+        video: MultipartBody.Part?,
+        skipTariffDialog: Boolean = false,
+    ): ApiResult<Long?> {
+        val (fields, parts) = AdRequests.buildMultipart(draft, images, video, skipTariffDialog)
+        return safeCall { WriteParser.parseAnnouncementId(writeApi.createAnnouncement(fields, parts)) }
+    }
+
+    /** Өңдеу — PATCH /announcement/{id}; backend статусты PENDING жасайды. */
+    suspend fun updateAnnouncement(
+        id: Long,
+        draft: AdDraft,
+        images: List<MultipartBody.Part>,
+        video: MultipartBody.Part?,
+    ): ApiResult<Long?> {
+        val (fields, parts) = AdRequests.buildMultipart(draft, images, video)
+        return safeCall { WriteParser.parseAnnouncementId(writeApi.updateAnnouncement(id, fields, parts)) }
+    }
+
+    suspend fun activateAnnouncement(id: Long): ApiResult<Unit> =
+        safeCall { writeApi.activateAnnouncement(id); Unit }
+
+    suspend fun deactivateAnnouncement(id: Long): ApiResult<Unit> =
+        safeCall { writeApi.deactivateAnnouncement(id); Unit }
+
+    suspend fun deleteAnnouncement(id: Long): ApiResult<Unit> =
+        safeCall { writeApi.deleteAnnouncement(id); Unit }
+
+    suspend fun getRejectMessage(id: Long): ApiResult<String?> =
+        safeCall { WriteParser.parseRejectMessage(writeApi.getRejectMessage(id)) }
+
+    /** Менің жарнамаларым — status: active|inactive|pending|rejected. */
+    suspend fun getMyAnnouncements(status: String, page: Int, limit: Int = PAGE_SIZE): ApiResult<AnnouncementsPage> =
+        safeCall { MarketplaceParser.parseAnnouncementPage(writeApi.getMyAnnouncements(status, page, limit)) }
+
+    /** AI мазмұн — {ad_title, lang_code}; DEV-те AI сервисі қазір 500 береді (ISSUES #12). */
+    suspend fun generateAdContent(title: String, langCode: String): ApiResult<AdContent?> {
+        val body = buildJsonObject {
+            put("ad_title", title)
+            put("lang_code", langCode)
+        }
+        return safeCall { WriteParser.parseAdContent(writeApi.generateAdContent(body)) }
+    }
+
+    /**
+     * Сұраныс жасау (MakeOffer) — әдетте JSON; backend form күтсе (4xx) form
+     * қайта әрекет. 4xx = сұраныс жасалмады, сондықтан қайталау дубликат болмайды.
+     */
+    suspend fun createDemand(draft: DemandDraft): ApiResult<Long?> {
+        val primary = safeCall { WriteParser.parseDemandId(writeApi.createDemand(draft.toJsonObject())) }
+        val http = (primary as? ApiResult.Error)?.failure as? Failure.Http ?: return primary
+        if (http.error.httpStatus !in 400..422) return primary
+        return safeCall { WriteParser.parseDemandId(writeApi.createDemandForm(draft.toPartMap())) }
+    }
+
+    /** Бизнес жеткізу аймақтары — {id, name/region_name, delivery_cost}. */
+    suspend fun getDeliveryZones(): ApiResult<List<DeliveryZone>> =
+        safeCall { WriteParser.parseDeliveryZones(writeApi.getDeliveryZones()) }
+
+    /** Bulk-upload нәтижесі. */
+    suspend fun bulkUpload(file: MultipartBody.Part): ApiResult<BulkUploadResult> =
+        safeCall { WriteParser.parseBulkResult(writeApi.bulkUpload(file)) }
+
+    /** Excel үлгісі — бинарлы файл (ResponseBody); VM файлға жазады. */
+    suspend fun downloadBulkTemplate(lang: String): ApiResult<okhttp3.ResponseBody> =
+        safeCall {
+            val response = writeApi.getBulkTemplate(lang)
+            val body = response.body() ?: throw IllegalStateException("Пустой ответ")
+            if (!response.isSuccessful) throw IllegalStateException("HTTP ${response.code()}")
+            body
+        }
 
     private suspend fun <T> safeCall(block: suspend () -> T): ApiResult<T> =
         NetworkModule.safeCall(block)

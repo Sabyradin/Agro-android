@@ -32,6 +32,7 @@ fun AgroTextField(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     singleLine: Boolean = true,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     isError: Boolean = false,
     errorText: String? = null,
     supportingText: String? = null,
@@ -47,6 +48,7 @@ fun AgroTextField(
         modifier = modifier.fillMaxWidth(),
         enabled = enabled,
         singleLine = singleLine,
+        maxLines = maxLines,
         isError = isError,
         shape = RoundedCornerShape(14.dp),
         leadingIcon = leadingIcon?.let { icon ->

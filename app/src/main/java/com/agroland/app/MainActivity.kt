@@ -24,17 +24,24 @@ import androidx.navigation.toRoute
 import com.agroland.app.navigation.AnnouncementDetailRoute
 import com.agroland.app.navigation.AnnouncementsListRoute
 import com.agroland.app.navigation.AuthRoute
+import com.agroland.app.navigation.BulkUploadRoute
 import com.agroland.app.navigation.CategoriesRoute
 import com.agroland.app.navigation.CompanySectionRoute
 import com.agroland.app.navigation.CompanySettingsRoute
+import com.agroland.app.navigation.CreateAdRoute
+import com.agroland.app.navigation.CreateOrOfferRoute
 import com.agroland.app.navigation.DealerTermsRoute
+import com.agroland.app.navigation.EditAdRoute
 import com.agroland.app.navigation.EditProfileRoute
 import com.agroland.app.navigation.FavoritesRoute
 import com.agroland.app.navigation.FilterRoute
 import com.agroland.app.navigation.LanguageRoute
 import com.agroland.app.navigation.MainShellRoute
+import com.agroland.app.navigation.MakeOfferRoute
+import com.agroland.app.navigation.MyAnnouncementsRoute
 import com.agroland.app.navigation.PinSetupRoute
 import com.agroland.app.navigation.ProfileAddressesRoute
+import com.agroland.app.navigation.ProfileAnnouncementRoute
 import com.agroland.app.navigation.SplashRoute
 import com.agroland.app.navigation.SubcategoriesRoute
 import com.agroland.app.navigation.VerificationRoute
@@ -47,10 +54,16 @@ import com.agroland.feature.auth.ui.PinSetupPage
 import com.agroland.feature.marketplace.data.AnnouncementFilter
 import com.agroland.feature.marketplace.ui.AnnouncementDetailPage
 import com.agroland.feature.marketplace.ui.AnnouncementsListPage
+import com.agroland.feature.marketplace.ui.BulkUploadPage
 import com.agroland.feature.marketplace.ui.CategoriesPage
+import com.agroland.feature.marketplace.ui.CreateAdPage
+import com.agroland.feature.marketplace.ui.CreateOrOfferPage
 import com.agroland.feature.marketplace.ui.FavoritesPage
 import com.agroland.feature.marketplace.ui.FilterPage
 import com.agroland.feature.marketplace.ui.HomeFeedPage
+import com.agroland.feature.marketplace.ui.MakeOfferPage
+import com.agroland.feature.marketplace.ui.MyAnnouncementsPage
+import com.agroland.feature.marketplace.ui.OwnerAnnouncementPage
 import com.agroland.feature.marketplace.ui.SubcategoriesPage
 import com.agroland.feature.profile.ui.CompanySection
 import com.agroland.feature.profile.ui.CompanySectionPage
@@ -154,7 +167,7 @@ private fun AppNavHost(
             MainShellPage(
                 onCreateClick = {
                     if (isAuthorized) {
-                        // Жарнама жасау — фаза 6 (auth қақпасымен).
+                        navController.navigate(CreateOrOfferRoute)
                     } else {
                         navController.navigate(AuthRoute)
                     }
@@ -184,6 +197,9 @@ private fun AppNavHost(
                         onAddresses = { navController.navigate(ProfileAddressesRoute) },
                         onCompanySettings = { navController.navigate(CompanySettingsRoute) },
                         onVerification = { navController.navigate(VerificationRoute) },
+                        onMyAnnouncements = { status ->
+                            navController.navigate(MyAnnouncementsRoute(status))
+                        },
                     )
                 },
             )
@@ -318,6 +334,62 @@ private fun AppNavHost(
             FavoritesPage(
                 onBack = { navController.popBackStack() },
                 onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
+            )
+        }
+
+        // ---- Маркетплейс: жазу режимі (Phase 6) ----
+        composable<CreateOrOfferRoute> {
+            CreateOrOfferPage(
+                onBack = { navController.popBackStack() },
+                onCreateAd = { navController.navigate(CreateAdRoute) },
+                onMakeOffer = { navController.navigate(MakeOfferRoute) },
+                onOpenBulkUpload = { navController.navigate(BulkUploadRoute) },
+            )
+        }
+        composable<CreateAdRoute> {
+            CreateAdPage(
+                onBack = { navController.popBackStack() },
+                onSubmitted = { navController.popBackStack() },
+                onOpenBulkUpload = { navController.navigate(BulkUploadRoute) },
+            )
+        }
+        composable<EditAdRoute> { entry ->
+            CreateAdPage(
+                onBack = { navController.popBackStack() },
+                onSubmitted = { navController.popBackStack() },
+                onOpenBulkUpload = { navController.navigate(BulkUploadRoute) },
+                viewModel = hiltViewModel(viewModelStoreOwner = entry),
+            )
+        }
+        composable<MakeOfferRoute> {
+            MakeOfferPage(
+                onBack = { navController.popBackStack() },
+                onSubmitted = { navController.popBackStack() },
+            )
+        }
+        composable<BulkUploadRoute> {
+            BulkUploadPage(onBack = { navController.popBackStack() })
+        }
+        composable<MyAnnouncementsRoute> { entry ->
+            MyAnnouncementsPage(
+                onBack = { navController.popBackStack() },
+                onOpenStatus = { status ->
+                    navController.navigate(MyAnnouncementsRoute(status)) {
+                        // Статус беттері шынжыр болмайды — әрқайсысы жаңа стек құрады.
+                    }
+                },
+                onOpenAnnouncement = { navController.navigate(ProfileAnnouncementRoute(it)) },
+                onEditAnnouncement = { navController.navigate(EditAdRoute(it)) },
+                viewModel = hiltViewModel(viewModelStoreOwner = entry),
+            )
+        }
+        composable<ProfileAnnouncementRoute> { entry ->
+            val id = entry.toRoute<ProfileAnnouncementRoute>().id
+            OwnerAnnouncementPage(
+                announcementId = id,
+                onBack = { navController.popBackStack() },
+                onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
+                onEdit = { navController.navigate(EditAdRoute(it)) },
             )
         }
     }

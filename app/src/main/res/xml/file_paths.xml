@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FileProvider жолдары: bulk-upload Excel үлгісі cache/templates ішінде. -->
+<paths>
+    <cache-path
+        name="templates"
+        path="templates/" />
+</paths>

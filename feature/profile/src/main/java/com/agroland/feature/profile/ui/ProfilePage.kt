@@ -69,6 +69,7 @@ fun ProfilePage(
     onAddresses: () -> Unit,
     onCompanySettings: () -> Unit,
     onVerification: () -> Unit,
+    onMyAnnouncements: (String) -> Unit = {},
 ) {
     val viewModel = rememberProfileViewModel()
     val profile by viewModel.profile.collectAsState()
@@ -130,6 +131,7 @@ fun ProfilePage(
                     onAddresses = onAddresses,
                     onCompanySettings = onCompanySettings,
                     onVerification = onVerification,
+                    onMyAnnouncements = onMyAnnouncements,
                 )
             }
             SnackbarHost(hostState = snackbar, modifier = Modifier.align(Alignment.BottomCenter))
@@ -168,6 +170,7 @@ private fun AuthorizedProfileContent(
     onAddresses: () -> Unit,
     onCompanySettings: () -> Unit,
     onVerification: () -> Unit,
+    onMyAnnouncements: (String) -> Unit,
 ) {
     val isDealer = profile.userType.equals("dealer", ignoreCase = true) ||
         profile.userType.equals("business", ignoreCase = true)
@@ -194,7 +197,7 @@ private fun AuthorizedProfileContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item { ProfileInfoCard(profile) }
-        item { ProfileAdsCard(profile) }
+        item { ProfileAdsCard(profile, onMyAnnouncements) }
         item {
             ProfileSectionCard(title = null) {
                 AgroListTile(
@@ -327,30 +330,31 @@ private fun ProfileInfoCard(profile: UserProfile) {
     }
 }
 
-/** Жарнама сандары — profile.announcements. */
+/** Жарнама сандары — profile.announcements; плиткалар тиісті статус бетіне ашады. */
 @Composable
-private fun ProfileAdsCard(profile: UserProfile) {
+private fun ProfileAdsCard(profile: UserProfile, onOpenStatus: (String) -> Unit) {
     val counts = profile.announcements ?: return
-    val ext = extendedColors()
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(ext.card)
-            .padding(16.dp),
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        AgroListTile(
+            title = stringResource(L10nR.string.my_ads_title),
+            leading = { SectionIcon(Icons.Outlined.Campaign) },
+            onClick = { onOpenStatus("active") },
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             AdCountTile(
                 icon = Icons.Outlined.Campaign,
                 label = stringResource(L10nR.string.profile_ads_active),
                 value = counts.active,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).clickable { onOpenStatus("active") },
             )
             AdCountTile(
                 icon = Icons.Outlined.Refresh,
                 label = stringResource(L10nR.string.profile_ads_pending),
                 value = counts.pending,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).clickable { onOpenStatus("pending") },
             )
         }
     }

@@ -70,6 +70,7 @@ fun AnnouncementDetailPage(
     announcementId: Long,
     onBack: () -> Unit,
     onOpenDetail: (Long) -> Unit,
+    bottomBar: (@Composable () -> Unit)? = null,
     viewModel: AnnouncementDetailViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -145,6 +146,7 @@ fun AnnouncementDetailPage(
                 },
             )
         },
+        bottomBar = { bottomBar?.invoke() },
     ) { inner ->
         Box(modifier = inner.fillMaxSize()) {
             when {

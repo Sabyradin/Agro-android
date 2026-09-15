@@ -79,3 +79,33 @@ data object FavoritesRoute
 /** Сүзгі редакторы — нәтиже caller-дің savedStateHandle-ына қайтады. */
 @Serializable
 data class FilterRoute(val filter: AnnouncementFilter)
+
+// ---- Маркетплейс: жазу режимі (Phase 6) ----
+
+/** «+» табының таңдау экраны: жарнама / сұраныс / топтап жүктеу. */
+@Serializable
+data object CreateOrOfferRoute
+
+/** Жарнама құру (multipart images+video, AI мазмұн, preview). */
+@Serializable
+data object CreateAdRoute
+
+/** Жарнаманы өңдеу (FullAnnouncement prefill). */
+@Serializable
+data class EditAdRoute(val id: Long)
+
+/** Сұраныс құру — POST /demands (MakeOffer). */
+@Serializable
+data object MakeOfferRoute
+
+/** Топтап жүктеу (.xlsx/.csv шаблон + upload). */
+@Serializable
+data object BulkUploadRoute
+
+/** Менің жарнамаларым — статус беттері (active|pending|inactive|rejected). */
+@Serializable
+data class MyAnnouncementsRoute(val status: String = "active")
+
+/** Өз жарнамасының деталы + ие әрекеттері. */
+@Serializable
+data class ProfileAnnouncementRoute(val id: Long)

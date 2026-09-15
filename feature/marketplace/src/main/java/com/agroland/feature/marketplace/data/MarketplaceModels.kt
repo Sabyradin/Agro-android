@@ -50,6 +50,10 @@ data class FullAnnouncement(
     val contactNumbers: List<String>,
     val categoryId: Int?,
     val subcategoryId: Int?,
+    val userLocationId: Long?,
+    val keywords: List<String>,
+    val sku: String?,
+    val stockQuantity: Int?,
     val additional: List<Announcement>,
     val similar: List<Announcement>,
 )
@@ -232,6 +236,13 @@ object MarketplaceParser {
             },
             categoryId = JsonParser.int(root, "category_id"),
             subcategoryId = JsonParser.int(root, "subcategory_id"),
+            userLocationId = JsonParser.long(root, "user_location_id"),
+            keywords = JsonParser.arrayOrSingle(root, "keywords")
+                .plus(JsonParser.arrayOrSingle(root, "tags"))
+                .mapNotNull { (it as? kotlinx.serialization.json.JsonPrimitive)?.content }
+                .filter { it.isNotBlank() },
+            sku = JsonParser.string(root, "sku"),
+            stockQuantity = JsonParser.int(root, "stock_quantity"),
             additional = JsonParser.arrayOrSingle(root, "additional_announcements")
                 .mapNotNull { parseAnnouncement(it as? JsonObject) },
             similar = JsonParser.arrayOrSingle(root, "similar_announcements")

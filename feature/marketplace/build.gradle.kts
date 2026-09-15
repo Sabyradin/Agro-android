@@ -33,6 +33,8 @@ dependencies {
     implementation(project(":core:l10n"))
     implementation(project(":core:network"))
     implementation(project(":feature:auth"))
+    // Жазу ағыны: профиль мекенжайлары (user_location_id) және MultipartHelper.
+    implementation(project(":feature:profile"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)
@@ -41,6 +43,8 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.activity.compose)
+    // Жаңа (жергілікті Uri) сурет таңдауларының thumbnails-ы үшін.
+    implementation(libs.coil.compose)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
