@@ -445,4 +445,20 @@
         <item quantity="many">%1$d тауар</item>
         <item quantity="other">%1$d тауар</item>
     </plurals>
+
+    <!-- Төлемдер (Phase 9): Halyk ePay + баланспен төлеу -->
+    <string name="payment_choose_method">Төлем тәсілін таңдаңыз</string>
+    <string name="payment_order_total">Барлығы: %1$s</string>
+    <string name="payment_your_balance">Сіздің балансыңыз: %1$s</string>
+    <string name="payment_pay_with_balance">Баланстан төлеу</string>
+    <string name="payment_pay_with_card">Картамен төлеу</string>
+    <string name="payment_insufficient_balance">Баланс жеткіліксіз: -%1$s</string>
+    <string name="payment_remaining_balance">Қалдық: %1$s</string>
+    <string name="payment_successful">Төлем сәтті өтті!</string>
+    <string name="payment_result">Төлем нәтижесі</string>
+    <string name="payment_verifying">Төлем тексеріледі...</string>
+    <string name="payment_in_processing">Төлем өңделуде. Тапсырыс тарихыңызды кейін тексеріңіз.</string>
+    <string name="payment_failed">Төлем сәтсіз болды</string>
+    <string name="payment_view_orders">Тапсырыстарды қарау</string>
+    <string name="payment_pay_now">Төлеу</string>
 </resources>

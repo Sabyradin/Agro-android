@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.agroland.feature.cart"
+    namespace = "com.agroland.feature.payment"
     compileSdk = 36
 
     defaultConfig {
@@ -32,12 +32,6 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))
     implementation(project(":core:network"))
-    // Сақталған мекенжайлар (жеткізу таңдауышы) — UserLocation.
-    implementation(project(":feature:profile"))
-    // Себет айтемдерін жарнама деталымен байыту + delivery-check.
-    implementation(project(":feature:marketplace"))
-    // Төлем парағы (Halyk ePay + баланспен төлеу) — чекауттан кейін ашылады.
-    implementation(project(":feature:payment"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)
@@ -46,7 +40,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.coil.compose)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 

@@ -23,6 +23,8 @@ data class UserProfile(
     val isVipSeller: Boolean,
     val dealerStatus: String?,
     val dealerTermsAccepted: Boolean,
+    /** Әмиян балансы (₸) — PaymentMethodSheet жеткіліктігін тексереді (Фаза 9). */
+    val balance: Double = 0.0,
     val company: CompanyInfo?,
     val locations: List<UserLocation>,
     val announcements: AnnouncementCounts?,
@@ -132,6 +134,7 @@ object ProfileParser {
             dealerStatus = JsonParser.string(user, "dealer_status") ?: JsonParser.string(user, "business_status"),
             dealerTermsAccepted = JsonParser.bool(user, "dealer_terms_accepted")
                 ?: JsonParser.bool(user, "business_terms_accepted") ?: false,
+            balance = JsonParser.double(user, "balance") ?: 0.0,
             company = parseCompany(JsonParser.obj(user, "company_info")),
             locations = JsonParser.arrayOrSingle(root, "locations").mapNotNull { parseLocation(it as? JsonObject) },
             announcements = parseAnnouncementCounts(

@@ -434,4 +434,20 @@
     <plurals name="cart_dealer_items">
         <item quantity="other">%1$d 件商品</item>
     </plurals>
+
+    <!-- 支付（Phase 9）：Halyk ePay + 余额支付 -->
+    <string name="payment_choose_method">选择支付方式</string>
+    <string name="payment_order_total">订单总额：%1$s</string>
+    <string name="payment_your_balance">您的余额：%1$s</string>
+    <string name="payment_pay_with_balance">余额支付</string>
+    <string name="payment_pay_with_card">银行卡支付</string>
+    <string name="payment_insufficient_balance">余额不足：-%1$s</string>
+    <string name="payment_remaining_balance">剩余：%1$s</string>
+    <string name="payment_successful">支付成功！</string>
+    <string name="payment_result">支付结果</string>
+    <string name="payment_verifying">正在验证支付...</string>
+    <string name="payment_in_processing">支付处理中，请稍后查看订单记录。</string>
+    <string name="payment_failed">支付失败</string>
+    <string name="payment_view_orders">查看订单</string>
+    <string name="payment_pay_now">立即支付</string>
 </resources>

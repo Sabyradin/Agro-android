@@ -435,4 +435,20 @@
         <item quantity="one">%1$d item</item>
         <item quantity="other">%1$d items</item>
     </plurals>
+
+    <!-- Payments (Phase 9): Halyk ePay + pay with balance -->
+    <string name="payment_choose_method">Choose payment method</string>
+    <string name="payment_order_total">Order total: %1$s</string>
+    <string name="payment_your_balance">Your balance: %1$s</string>
+    <string name="payment_pay_with_balance">Pay with balance</string>
+    <string name="payment_pay_with_card">Pay by card</string>
+    <string name="payment_insufficient_balance">Insufficient balance: -%1$s</string>
+    <string name="payment_remaining_balance">Remaining: %1$s</string>
+    <string name="payment_successful">Payment successful!</string>
+    <string name="payment_result">Payment result</string>
+    <string name="payment_verifying">Verifying payment...</string>
+    <string name="payment_in_processing">Payment is being processed. Check your order history later.</string>
+    <string name="payment_failed">Payment failed</string>
+    <string name="payment_view_orders">View orders</string>
+    <string name="payment_pay_now">Pay now</string>
 </resources>

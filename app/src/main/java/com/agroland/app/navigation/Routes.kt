@@ -134,3 +134,23 @@ data class LocationSelectionRoute(val prefill: SelectedLocation? = null)
 /** Тапсырыс деталы (себет/чекаут/buy-now жасаған тапсырыстар). */
 @Serializable
 data class OrderDetailRoute(val orderId: Long)
+
+// ---- Төлемдер (Phase 9) ----
+
+/** Halyk ePay нәтижесі — поллинг 2с/60с, WebView-тан қайтқанда ашылады. */
+@Serializable
+data class PaymentResultRoute(val orderId: Long)
+
+/**
+ * WebView: Halyk payment_url немесе BCC legacy 3D Secure HTML формасы.
+ * exitRedirectUrl-ға (agroland.kz) жеткенде/артқа шыққанда жабылады;
+ * paymentResultOrderId толтырылса — жабылғаннан кейін нәтижше бетіне өтеді.
+ */
+@Serializable
+data class WebViewRoute(
+    val url: String = "",
+    val html: String? = null,
+    val title: String? = null,
+    val exitRedirectUrl: String? = null,
+    val paymentResultOrderId: Long? = null,
+)

@@ -40,7 +40,9 @@ fun Failure.toCartError(): CartError = when (this) {
 /** Себет экрандарының бір реттелген оқиғалары. */
 sealed interface CartEvent {
     data class ShowError(val error: CartError) : CartEvent
-    data class CheckoutDone(val orderIds: List<Long>) : CartEvent
+
+    /** Чекаут сәтті — orderIds + таңдалған тауарлардың сомасы (төлем парағына). */
+    data class CheckoutDone(val orderIds: List<Long>, val totalAmount: Double) : CartEvent
     data object AddedToCart : CartEvent
     data object ReorderDone : CartEvent
     data object ReceiptConfirmed : CartEvent

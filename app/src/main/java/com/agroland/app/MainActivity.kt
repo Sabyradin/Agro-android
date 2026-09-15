@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,7 +52,10 @@ import com.agroland.app.navigation.SplashRoute
 import com.agroland.app.navigation.SubcategoriesRoute
 import com.agroland.app.navigation.VerificationRoute
 import com.agroland.app.navigation.OrderDetailRoute
+import com.agroland.app.navigation.PaymentResultRoute
+import com.agroland.app.navigation.WebViewRoute
 import com.agroland.core.common.settings.ThemeMode
+import com.agroland.core.l10n.R as L10nR
 import com.agroland.core.ui.theme.AgroTheme
 import com.agroland.feature.auth.session.SessionState
 import com.agroland.feature.auth.ui.AppLockGate
@@ -80,6 +84,9 @@ import com.agroland.feature.marketplace.ui.MakeOfferPage
 import com.agroland.feature.marketplace.ui.MyAnnouncementsPage
 import com.agroland.feature.marketplace.ui.OwnerAnnouncementPage
 import com.agroland.feature.marketplace.ui.SubcategoriesPage
+import com.agroland.feature.payment.ui.HalykLaunch
+import com.agroland.feature.payment.ui.PaymentResultPage
+import com.agroland.feature.payment.ui.WebViewPage
 import com.agroland.feature.profile.ui.AddressEditPage
 import com.agroland.feature.profile.ui.CompanySection
 import com.agroland.feature.profile.ui.CompanySectionPage
@@ -139,6 +146,7 @@ class MainActivity : AppCompatActivity() {
                         isAuthorized = session == SessionState.Authorized,
                         themeMode = themeMode,
                         localeTag = localeTag,
+                        appViewModel = appViewModel,
                         onThemeChange = { shellViewModel.setThemeMode(it) },
                         onAppRegionSelected = { countryId, regionId ->
                             shellViewModel.setAppRegion(countryId, regionId)
@@ -155,10 +163,41 @@ private fun AppNavHost(
     isAuthorized: Boolean,
     themeMode: ThemeMode,
     localeTag: String?,
+    appViewModel: AppViewModel,
     onThemeChange: (ThemeMode) -> Unit,
     onAppRegionSelected: (Int, Int) -> Unit,
 ) {
     val navController = rememberNavController()
+
+    // Суық старт кезінде үзілген Halyk төлемін қалпына келтіру (бір рет).
+    var resumedPendingPayment by remember { mutableStateOf(false) }
+    LaunchedEffect(isAuthorized) {
+        if (isAuthorized && !resumedPendingPayment) {
+            resumedPendingPayment = true
+            appViewModel.pendingPaymentOrderId()?.let { orderId ->
+                navController.navigate(PaymentResultRoute(orderId))
+            }
+        }
+    }
+
+    // Halyk төлемін ашу: mock — тікелей нәтижше бетіне; әйтпесе WebView,
+    // ол жабылғанда нәтижше бетіне өтеді (Flutter payment_method_sheet).
+    val paymentResultTitle = stringResource(L10nR.string.payment_result)
+    val openHalyk: (HalykLaunch) -> Unit = { launch ->
+        if (launch.mock) {
+            navController.navigate(PaymentResultRoute(launch.orderId))
+        } else {
+            navController.navigate(
+                WebViewRoute(
+                    url = launch.paymentUrl,
+                    title = paymentResultTitle,
+                    exitRedirectUrl = HALYK_EXIT_HOST,
+                    paymentResultOrderId = launch.orderId,
+                ),
+            )
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = SplashRoute,
@@ -216,6 +255,7 @@ private fun AppNavHost(
                     if (isAuthorized) {
                         CartPage(
                             onOpenOrder = { navController.navigate(OrderDetailRoute(it)) },
+                            onOpenHalyk = openHalyk,
                         )
                     } else {
                         GuestCartTab(onLoginClick = { navController.navigate(AuthRoute) })
@@ -513,10 +553,37 @@ private fun AppNavHost(
             OrderDetailPage(
                 orderId = entry.toRoute<OrderDetailRoute>().orderId,
                 onBack = { navController.popBackStack() },
+                onOpenHalyk = openHalyk,
+            )
+        }
+
+        // ---- Төлемдер (Phase 9) ----
+        composable<PaymentResultRoute> { entry ->
+            PaymentResultPage(
+                orderId = entry.toRoute<PaymentResultRoute>().orderId,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<WebViewRoute> { entry ->
+            val route = entry.toRoute<WebViewRoute>()
+            WebViewPage(
+                title = route.title,
+                url = route.url,
+                html = route.html,
+                exitRedirectUrl = route.exitRedirectUrl,
+                onFinished = {
+                    navController.popBackStack()
+                    route.paymentResultOrderId?.let { orderId ->
+                        navController.navigate(PaymentResultRoute(orderId))
+                    }
+                },
             )
         }
     }
 }
+
+/** Halyk төлемі аяқталғанда redirect жасайтын хост (Flutter exitRedirectUrl). */
+private const val HALYK_EXIT_HOST = "agroland.kz"
 
 /** FilterPage → AnnouncementsListPage нәтиже кілті. */
 private const val FILTER_RESULT_KEY = "filter"

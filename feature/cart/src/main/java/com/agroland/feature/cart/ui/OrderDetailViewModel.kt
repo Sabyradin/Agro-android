@@ -7,6 +7,7 @@ import com.agroland.feature.cart.data.CartRepository
 import com.agroland.feature.cart.data.Order
 import com.agroland.feature.cart.data.OrderStatus
 import com.agroland.feature.cart.data.OrderTracking
+import com.agroland.feature.profile.data.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,11 +18,13 @@ import kotlinx.coroutines.launch
 
 /**
  * OrderDetailViewModel — тапсырыс деталы: толық тапсырыс + трекинг (үнсіз
- * қателермен), болдырмау/қабылдау/қайта тапсырыс әрекеттері.
+ * қателермен), болдырмау/қабылдау/қайта тапсырыс әрекеттері + төлем (Фаза 9:
+ * «Төлеу» батырмасы — баланс + Halyk).
  */
 @HiltViewModel
 class OrderDetailViewModel @Inject constructor(
     private val repository: CartRepository,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val _order = MutableStateFlow<Order?>(null)
@@ -41,6 +44,10 @@ class OrderDetailViewModel @Inject constructor(
 
     private val _actionLoading = MutableStateFlow(false)
     val actionLoading: StateFlow<Boolean> = _actionLoading
+
+    /** Пайдаланушы балансы — төлем парағының жеткіліктігін тексереді (Фаза 9). */
+    private val _balance = MutableStateFlow(0.0)
+    val balance: StateFlow<Double> = _balance
 
     private var currentId: Long? = null
 
@@ -112,5 +119,22 @@ class OrderDetailViewModel @Inject constructor(
                 is ApiResult.Error -> _events.emit(CartEvent.ShowError(result.failure.toCartError()))
             }
         }
+    }
+
+    /** Төлем парағы ашылар алдында баланс қайта оқылады. */
+    fun loadBalance() {
+        viewModelScope.launch {
+            when (val result = profileRepository.getProfile()) {
+                is ApiResult.Success -> _balance.value = result.value.balance
+                is ApiResult.Error -> Unit
+            }
+        }
+    }
+
+    /** Төлемнен кейін тапсырысты мәжбүрлі қайта жүктеу (Flutter _pay → _load). */
+    fun reload() {
+        val id = currentId ?: return
+        currentId = null
+        load(id)
     }
 }

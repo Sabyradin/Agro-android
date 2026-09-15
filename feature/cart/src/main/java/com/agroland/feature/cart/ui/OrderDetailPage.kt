@@ -59,17 +59,21 @@ import com.agroland.core.ui.components.StatusChip
 import com.agroland.core.ui.theme.extendedColors
 import com.agroland.feature.cart.data.Order
 import com.agroland.feature.cart.data.OrderStatus
+import com.agroland.feature.cart.data.PaymentStatus
 import com.agroland.feature.cart.data.canConfirmReceipt
+import com.agroland.feature.payment.ui.HalykLaunch
+import com.agroland.feature.payment.ui.PaymentMethodSheet
 
 /**
  * OrderDetailPage — Flutter order_detail_page: статусы, тауарлар + Smart
  * Calculator чекі, жеткізу/өзі алу мәліметтері, timeline, сатушы карточкасы,
- * болдырмау/қабылдау/қайта тапсырыс. Төлем батырмасы — Фаза 9 (Halyk).
+ * төлем (Фаза 9), болдырмау/қабылдау/қайта тапсырыс.
  */
 @Composable
 fun OrderDetailPage(
     orderId: Long,
     onBack: () -> Unit,
+    onOpenHalyk: (HalykLaunch) -> Unit = {},
     viewModel: OrderDetailViewModel = hiltViewModel(),
 ) {
     val order by viewModel.order.collectAsState()
@@ -77,6 +81,7 @@ fun OrderDetailPage(
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
     val actionLoading by viewModel.actionLoading.collectAsState()
+    val balance by viewModel.balance.collectAsState()
 
     val snackbar = remember { SnackbarHostState() }
     val noInternetText = stringResource(L10nR.string.error_no_internet)
@@ -84,6 +89,9 @@ fun OrderDetailPage(
     val cancelToast = stringResource(L10nR.string.cart_order_cancelled)
     val reorderToast = stringResource(L10nR.string.cart_reorder_success)
     val receiptToast = stringResource(L10nR.string.cart_receipt_confirmed)
+    // «Төлеу» батырмасы — төлем парағы (баланспен/картамен, Фаза 9).
+    var paySheetVisible by remember { mutableStateOf(false) }
+    var balancePaidDialog by remember { mutableStateOf(false) }
     LaunchedEffect(orderId) { viewModel.load(orderId) }
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -122,6 +130,10 @@ fun OrderDetailPage(
                     onCancel = viewModel::cancelOrder,
                     onConfirmReceipt = viewModel::confirmReceipt,
                     onReorder = viewModel::reorder,
+                    onPay = {
+                        viewModel.loadBalance()
+                        paySheetVisible = true
+                    },
                 )
                 else -> CenteredContent { LoadingWidget() }
             }
@@ -130,6 +142,41 @@ fun OrderDetailPage(
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
+    }
+
+    // ── Төлем парағы: баланспен төлеу немесе Halyk ePay картасы (Фаза 9) ──
+    val currentOrder = order
+    if (paySheetVisible && currentOrder != null) {
+        PaymentMethodSheet(
+            orderIds = listOf(currentOrder.id),
+            totalAmount = currentOrder.orderTotal,
+            balance = balance,
+            onDismiss = {
+                paySheetVisible = false
+                viewModel.reload()
+            },
+            onBalancePaid = {
+                paySheetVisible = false
+                balancePaidDialog = true
+                viewModel.reload()
+            },
+            onHalykReady = { halyk ->
+                paySheetVisible = false
+                viewModel.reload()
+                onOpenHalyk(halyk)
+            },
+        )
+    }
+    if (balancePaidDialog) {
+        AlertDialog(
+            onDismissRequest = { balancePaidDialog = false },
+            title = { Text(stringResource(L10nR.string.payment_successful)) },
+            confirmButton = {
+                TextButton(onClick = { balancePaidDialog = false }) {
+                    Text(stringResource(L10nR.string.common_close))
+                }
+            },
+        )
     }
 }
 
@@ -141,6 +188,7 @@ private fun OrderDetailContent(
     onCancel: () -> Unit,
     onConfirmReceipt: () -> Unit,
     onReorder: () -> Unit,
+    onPay: () -> Unit,
 ) {
     var cancelDialog by remember { mutableStateOf(false) }
     var confirmDialog by remember { mutableStateOf(false) }
@@ -161,6 +209,7 @@ private fun OrderDetailContent(
                 onCancel = { cancelDialog = true },
                 onConfirmReceipt = { confirmDialog = true },
                 onReorder = onReorder,
+                onPay = onPay,
             )
         }
         item { Spacer(Modifier.height(24.dp)) }
@@ -516,7 +565,7 @@ private fun SellerCard(order: Order) {
     }
 }
 
-/** Болдырмау / қабылдау / қайта тапсырыс батырмалары. */
+/** Төлем / болдырмау / қабылдау / қайта тапсырыс батырмалары. */
 @Composable
 private fun ActionButtons(
     order: Order,
@@ -524,9 +573,25 @@ private fun ActionButtons(
     onCancel: () -> Unit,
     onConfirmReceipt: () -> Unit,
     onReorder: () -> Unit,
+    onPay: () -> Unit,
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        // Төлем батырмасы Фаза 9-да қосылады (Halyk payment sheet).
+        // «Төлеу» — төленбеген және supplier_query/supplier_confirmed/logistics_search
+        // күйлерінде (Flutter _canPay) → PaymentMethodSheet.
+        val canPay = order.orderPaymentStatus != PaymentStatus.PAID &&
+            order.orderStatus in listOf(
+                OrderStatus.SUPPLIER_QUERY,
+                OrderStatus.SUPPLIER_CONFIRMED,
+                OrderStatus.LOGISTICS_SEARCH,
+            )
+        if (canPay) {
+            AgroButton(
+                text = stringResource(L10nR.string.payment_pay_now),
+                onClick = onPay,
+                enabled = !loading,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
         if (order.canConfirmReceipt) {
             AgroButton(
                 text = stringResource(L10nR.string.cart_confirm_receipt),

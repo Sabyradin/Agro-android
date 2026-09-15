@@ -118,6 +118,10 @@ class CartViewModel @Inject constructor(
     private val _checkout = MutableStateFlow(CheckoutUiState())
     val checkout: StateFlow<CheckoutUiState> = _checkout.asStateFlow()
 
+    /** Пайдаланушы балансы — төлем парағының жеткіліктігін тексереді (Фаза 9). */
+    private val _balance = MutableStateFlow(0.0)
+    val balance: StateFlow<Double> = _balance.asStateFlow()
+
     private val _events = MutableSharedFlow<CartEvent>(extraBufferCapacity = 16)
     val events: SharedFlow<CartEvent> = _events
 
@@ -299,6 +303,16 @@ class CartViewModel @Inject constructor(
         _checkout.update { it.copy(visible = false) }
     }
 
+    /** Төлем парағы ашылар алдында баланс қайта оқылады. */
+    fun loadBalance() {
+        viewModelScope.launch {
+            when (val result = profileRepository.getProfile()) {
+                is ApiResult.Success -> _balance.value = result.value.balance
+                is ApiResult.Error -> Unit // баланс оқылмаса — парақ 0 ₸ көрсетеді
+            }
+        }
+    }
+
     /** Тауар режимін ауыстыру: жеткізуге болатын тауарлар ғана (pickupOnly құлыптайды). */
     fun toggleItemDelivery(cartItemId: Long) {
         _checkout.update { state ->
@@ -365,8 +379,14 @@ class CartViewModel @Inject constructor(
             _checkout.update { it.copy(submitting = false) }
             when (result) {
                 is ApiResult.Success -> {
+                    // Flutter: totalAmount = Σ таңдалған тауарлар price × quantity
+                    // (жеткізу құнысынсыз — PaymentMethodSheet көрсетуі үшін).
+                    val totalAmount = state.items.sumOf { line ->
+                        (line.item.announcement?.base?.price ?: 0.0) * line.item.quantity
+                    }
                     _checkout.update { CheckoutUiState() }
-                    _events.emit(CartEvent.CheckoutDone(result.value.orderIds))
+                    _events.emit(CartEvent.CheckoutDone(result.value.orderIds, totalAmount))
+                    loadBalance()
                     refresh()
                 }
                 is ApiResult.Error -> {

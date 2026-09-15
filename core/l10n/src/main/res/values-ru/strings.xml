@@ -437,4 +437,20 @@
         <item quantity="many">%1$d товаров</item>
         <item quantity="other">%1$d товара</item>
     </plurals>
+
+    <!-- Платежи (Phase 9): Halyk ePay + оплата с баланса -->
+    <string name="payment_choose_method">Выберите способ оплаты</string>
+    <string name="payment_order_total">Итого: %1$s</string>
+    <string name="payment_your_balance">Ваш баланс: %1$s</string>
+    <string name="payment_pay_with_balance">Оплатить с баланса</string>
+    <string name="payment_pay_with_card">Оплатить картой</string>
+    <string name="payment_insufficient_balance">Недостаточно средств: -%1$s</string>
+    <string name="payment_remaining_balance">Остаток: %1$s</string>
+    <string name="payment_successful">Оплата прошла успешно!</string>
+    <string name="payment_result">Результат оплаты</string>
+    <string name="payment_verifying">Платёж проверяется...</string>
+    <string name="payment_in_processing">Платёж в обработке. Проверьте историю заказов позже.</string>
+    <string name="payment_failed">Ошибка оплаты</string>
+    <string name="payment_view_orders">Смотреть заказы</string>
+    <string name="payment_pay_now">Оплатить</string>
 </resources>

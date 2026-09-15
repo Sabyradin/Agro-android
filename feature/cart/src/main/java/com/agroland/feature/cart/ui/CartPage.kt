@@ -65,15 +65,25 @@ import com.agroland.feature.cart.data.CartItem
 import com.agroland.feature.cart.data.CartSection
 import com.agroland.feature.cart.data.Order
 import com.agroland.feature.cart.data.canConfirmReceipt
+import com.agroland.feature.payment.ui.HalykLaunch
+import com.agroland.feature.payment.ui.PaymentMethodSheet
+
+/** Чекауттан кейінгі төлем парағының жүктемесі. */
+private data class PaymentLaunch(
+    val orderIds: List<Long>,
+    val totalAmount: Double,
+)
 
 /**
  * CartPage — Flutter cart_page: 5 бөлім (себет/төленді/күтілуде/жеткізілген/тарих),
- * себет тақталары + оптимистік сан/өшіру, тапсырыс бөлімдері, чекаут төменнен.
+ * себет тақталары + оптимистік сан/өшіру, тапсырыс бөлімдері, чекаут төменнен,
+ * чекауттан кейін төлем парағы (Фаза 9: баланспен/картамен төлеу).
  */
 @Composable
 fun CartPage(
     onOpenOrder: (Long) -> Unit,
     onOpenAnnouncement: (Long) -> Unit = {},
+    onOpenHalyk: (HalykLaunch) -> Unit = {},
     viewModel: CartViewModel = hiltViewModel(),
 ) {
     val items by viewModel.items.collectAsState()
@@ -95,13 +105,18 @@ fun CartPage(
     val addedToast = stringResource(L10nR.string.cart_added_to_cart_toast)
     val reorderToast = stringResource(L10nR.string.cart_reorder_success)
     val receiptToast = stringResource(L10nR.string.cart_receipt_confirmed)
-    var successOrderIds by remember { mutableStateOf<List<Long>?>(null) }
+    val balance by viewModel.balance.collectAsState()
+    // Чекауттан кейін төлем парағы (Flutter PaymentMethodSheet.show).
+    var paymentLaunch by remember { mutableStateOf<PaymentLaunch?>(null) }
+    // Баланспен төлеу сәтті — қысқа растау диалогі.
+    var balancePaidDialog by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is CartEvent.ShowError ->
                     snackbar.showSnackbar(event.error.displayText(noInternetText, genericErrorText))
-                is CartEvent.CheckoutDone -> successOrderIds = event.orderIds
+                is CartEvent.CheckoutDone ->
+                    paymentLaunch = PaymentLaunch(event.orderIds, event.totalAmount)
                 CartEvent.AddedToCart -> snackbar.showSnackbar(addedToast)
                 CartEvent.ReorderDone -> snackbar.showSnackbar(reorderToast)
                 CartEvent.ReceiptConfirmed -> snackbar.showSnackbar(receiptToast)
@@ -180,22 +195,36 @@ fun CartPage(
         )
     }
 
-    // Чекаут сәтті — «Өтініміңіз қабылданды!» диалогі (Flutter CheckoutSuccessDialog).
-    val ids = successOrderIds
-    if (ids != null) {
-        AlertDialog(
-            onDismissRequest = { successOrderIds = null },
-            title = { Text(stringResource(L10nR.string.cart_order_accepted)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    successOrderIds = null
-                    ids.firstOrNull()?.let(onOpenOrder)
-                }) {
-                    Text(stringResource(L10nR.string.cart_order))
-                }
+    // ── Төлем парағы: баланспен төлеу немесе Halyk ePay картасы (Фаза 9) ──
+    val launch = paymentLaunch
+    if (launch != null) {
+        PaymentMethodSheet(
+            orderIds = launch.orderIds,
+            totalAmount = launch.totalAmount,
+            balance = balance,
+            onDismiss = {
+                paymentLaunch = null
+                // Парақ жабылғанда себет/тапсырыстар сервер күйіне келеді.
+                viewModel.refresh()
             },
-            dismissButton = {
-                TextButton(onClick = { successOrderIds = null }) {
+            onBalancePaid = {
+                paymentLaunch = null
+                balancePaidDialog = true
+                viewModel.refresh()
+            },
+            onHalykReady = { halyk ->
+                paymentLaunch = null
+                viewModel.refresh()
+                onOpenHalyk(halyk)
+            },
+        )
+    }
+    if (balancePaidDialog) {
+        AlertDialog(
+            onDismissRequest = { balancePaidDialog = false },
+            title = { Text(stringResource(L10nR.string.payment_successful)) },
+            confirmButton = {
+                TextButton(onClick = { balancePaidDialog = false }) {
                     Text(stringResource(L10nR.string.common_close))
                 }
             },

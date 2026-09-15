@@ -5,6 +5,7 @@ import com.agroland.core.network.error.ApiErrorParser
 import com.agroland.core.network.error.Failure
 import com.agroland.core.network.error.TariffLimitException
 import com.agroland.core.network.interceptors.MonitoringInterceptor
+import com.agroland.core.network.interceptors.PlatformInterceptor
 import com.agroland.core.network.interceptors.RetryInterceptor
 import com.agroland.core.network.interceptors.TariffLimitInterceptor
 import com.agroland.core.network.json.JsonParser
@@ -36,6 +37,7 @@ object NetworkModule {
      * 2) Monitoring — логтар
      * 3) Retry     — GET-only, max 2, 800мс экспоненциал
      * 4) TariffLimit — 403 TARIFF_LIMIT_* → типтелген ерекшелік
+     * 5) Platform  — төлем сұрауларына X-Platform: android (spec §5)
      */
     @Provides
     @Singleton
@@ -44,6 +46,7 @@ object NetworkModule {
         monitoringInterceptor: MonitoringInterceptor,
         retryInterceptor: RetryInterceptor,
         tariffLimitInterceptor: TariffLimitInterceptor,
+        platformInterceptor: PlatformInterceptor,
     ): OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(Duration.ofSeconds(20))
         .readTimeout(Duration.ofSeconds(60))
@@ -52,6 +55,7 @@ object NetworkModule {
         .addInterceptor(monitoringInterceptor)
         .addInterceptor(retryInterceptor)
         .addInterceptor(tariffLimitInterceptor)
+        .addInterceptor(platformInterceptor)
         .build()
 
     @Provides

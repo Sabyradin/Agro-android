@@ -20,7 +20,7 @@
 | 6 | Маркетплейс (жазу) | Create/Preview/Edit (multipart images+video), activate/deactivate/delete, bulk-upload, AI ad-content, MakeOffer, status беттері | ✅ |
 | 7 | Локация / карта | Картамен таңдау, reverse geocode → каталог ID, Country/Region/District селекторлары, app-region persist | ✅ |
 | 8 | Себет / чекаут / тапсырыстар | CartPage (оптимистік qty), Smart Calculator preview (warnings сүзу+локализация), SupplierPicker, Checkout, OrderDetail+timeline, тарих қойындылары | ✅ |
-| 9 | Төлемдер | Halyk ePay (invoice_url+poll 2с/60с), баланспен төлеу, BCC 3DS (HMAC-SHA1 P_SIGN), mock режим, pending resume, X-Platform: android | ⬜ |
+| 9 | Төлемдер | Halyk ePay (invoice_url+poll 2с/60с), баланспен төлеу, BCC 3DS (HMAC-SHA1 P_SIGN), mock режим, pending resume, X-Platform: android | ✅ |
 | 10 | Әмиян | Balance, hold, транзакциялар, шығару (мин 5000₸, IBAN/BIK), /business/* жолдар | ⬜ |
 | 11 | Push | FCM, каналдар, POST /device, deep-link 4 түрі, өлі күй реплейі, бейдж | ⬜ |
 | 12 | Чат | Socket.IO client (websocket-only, auth Bearer+language), тізім (merge, other_user_name, жүйелік чат 31/1001-1005), бөлме (join retry 4/8/16, оптимистік localId, infer_message_type 1:1, CR/LF санитайзер, typing, load_older, дауыстық, медиа) | ⬜ |
