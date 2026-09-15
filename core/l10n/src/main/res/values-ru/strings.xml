@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Agroland</string>
+
+    <string name="common_retry">Повторить</string>
+    <string name="common_cancel">Отменить</string>
+    <string name="common_back">Назад</string>
+    <string name="common_next">Далее</string>
+    <string name="common_yes">Да</string>
+    <string name="common_no">Нет</string>
+    <string name="common_save">Сохранить</string>
+    <string name="common_delete">Удалить</string>
+    <string name="common_edit">Изменить</string>
+    <string name="common_close">Закрыть</string>
+    <string name="common_send">Отправить</string>
+    <string name="common_search">Поиск</string>
+    <string name="common_loading">Загрузка…</string>
+    <string name="common_more">Подробнее</string>
+    <string name="common_share">Поделиться</string>
+    <string name="common_ok">Понятно</string>
+
+    <string name="error_generic_title">Произошла ошибка</string>
+    <string name="error_generic_message">Что-то пошло не так. Попробуйте еще раз.</string>
+    <string name="error_no_internet">Нет подключения к интернету. Проверьте соединение и попробуйте снова.</string>
+    <string name="empty_generic_title">Пока пусто</string>
+    <string name="empty_generic_message">Здесь пока ничего нет</string>
+    <string name="coming_soon_title">Скоро</string>
+    <string name="coming_soon_message">Этот раздел скоро появится</string>
+
+    <string name="language_title">Выберите язык</string>
+    <string name="language_subtitle">Язык приложения</string>
+
+    <string name="tab_home">Главная</string>
+    <string name="tab_chat">Чат</string>
+    <string name="tab_cart">Корзина</string>
+    <string name="tab_services">Услуги</string>
+    <string name="tab_create">Создать</string>
+
+    <string name="home_search_hint">Поиск товара или услуги…</string>
+    <string name="home_filter">Фильтр</string>
+    <string name="home_tab_announcements">Объявления</string>
+    <string name="home_tab_agro">Agro маркет</string>
+    <string name="home_tab_china">Товары из Китая</string>
+    <string name="home_scan_qr">Сканировать QR</string>
+
+    <string name="guest">Гость</string>
+
+    <!-- Auth (Phase 3) -->
+    <string name="auth_login_title">Вход</string>
+    <string name="auth_register_title">Регистрация</string>
+    <string name="auth_phone_hint">Номер телефона</string>
+    <string name="auth_phone_error">Неверный номер телефона</string>
+    <string name="auth_name_hint">Ваше имя</string>
+    <string name="auth_name_error">Введите ваше имя</string>
+    <string name="auth_user_type_title">Кто вы?</string>
+    <string name="auth_user_type_individual">Частное лицо</string>
+    <string name="auth_user_type_business">Бизнес</string>
+    <string name="auth_company_bin_hint">БИН компании</string>
+    <string name="auth_company_bin_error">БИН должен состоять из 12 цифр</string>
+    <string name="auth_email_hint">Email (необязательно)</string>
+    <string name="auth_otp_title">Введите код</string>
+    <string name="auth_otp_sent_to">SMS-код отправлен на номер %s</string>
+    <string name="auth_otp_error">Неверный код. Попробуйте еще раз.</string>
+    <string name="auth_otp_resend">Отправить повторно</string>
+    <string name="auth_otp_send_email">Отправить код на email</string>
+    <string name="auth_biometric_login">Вход по биометрии</string>
+    <string name="auth_biometric_prompt">Открыть приложение Agroland</string>
+    <string name="auth_biometric_error">Не удалось пройти биометрию</string>
+    <string name="auth_user_not_found">Пользователь с этим номером не найден. Зарегистрируйтесь.</string>
+    <string name="auth_logout">Выйти</string>
+    <string name="auth_code_not_entered">Введите код</string>
+    <string name="auth_sms_limit">Достигнут лимит отправки SMS. Подождите немного.</string>
+
+    <!-- App lock / PIN (Phase 3) -->
+    <string name="pin_setup_title">Придумайте PIN-код</string>
+    <string name="pin_confirm_title">Повторите PIN-код</string>
+    <string name="pin_enter_title">Введите PIN-код</string>
+    <string name="pin_mismatch">PIN-коды не совпадают</string>
+    <string name="pin_wrong">Неверный PIN-код</string>
+    <string name="pin_forgot">Забыли PIN? Войдите заново</string>
+    <string name="pin_unlock_biometric">Открыть биометрией</string>
+</resources>

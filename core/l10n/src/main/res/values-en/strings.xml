@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Agroland</string>
+
+    <string name="common_retry">Retry</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_back">Back</string>
+    <string name="common_next">Next</string>
+    <string name="common_yes">Yes</string>
+    <string name="common_no">No</string>
+    <string name="common_save">Save</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_edit">Edit</string>
+    <string name="common_close">Close</string>
+    <string name="common_send">Send</string>
+    <string name="common_search">Search</string>
+    <string name="common_loading">Loading…</string>
+    <string name="common_more">Details</string>
+    <string name="common_share">Share</string>
+    <string name="common_ok">Got it</string>
+
+    <string name="error_generic_title">Something went wrong</string>
+    <string name="error_generic_message">Something went wrong. Please try again.</string>
+    <string name="error_no_internet">No internet connection. Check your connection and try again.</string>
+    <string name="empty_generic_title">Nothing here yet</string>
+    <string name="empty_generic_message">There\'s nothing here yet</string>
+    <string name="coming_soon_title">Coming soon</string>
+    <string name="coming_soon_message">This section is coming soon</string>
+
+    <string name="language_title">Choose language</string>
+    <string name="language_subtitle">App language</string>
+
+    <string name="tab_home">Home</string>
+    <string name="tab_chat">Chat</string>
+    <string name="tab_cart">Cart</string>
+    <string name="tab_services">Services</string>
+    <string name="tab_create">Create</string>
+
+    <string name="home_search_hint">Search products or services…</string>
+    <string name="home_filter">Filter</string>
+    <string name="home_tab_announcements">Announcements</string>
+    <string name="home_tab_agro">Agro market</string>
+    <string name="home_tab_china">China goods</string>
+    <string name="home_scan_qr">Scan QR code</string>
+
+    <string name="guest">Guest</string>
+
+    <!-- Auth (Phase 3) -->
+    <string name="auth_login_title">Sign in</string>
+    <string name="auth_register_title">Sign up</string>
+    <string name="auth_phone_hint">Phone number</string>
+    <string name="auth_phone_error">Invalid phone number</string>
+    <string name="auth_name_hint">Your name</string>
+    <string name="auth_name_error">Enter your name</string>
+    <string name="auth_user_type_title">Who are you?</string>
+    <string name="auth_user_type_individual">Individual</string>
+    <string name="auth_user_type_business">Business</string>
+    <string name="auth_company_bin_hint">Company BIN</string>
+    <string name="auth_company_bin_error">BIN must be 12 digits</string>
+    <string name="auth_email_hint">Email (optional)</string>
+    <string name="auth_otp_title">Enter the code</string>
+    <string name="auth_otp_sent_to">SMS code sent to %s</string>
+    <string name="auth_otp_error">Wrong code. Try again.</string>
+    <string name="auth_otp_resend">Resend</string>
+    <string name="auth_otp_send_email">Send code by email</string>
+    <string name="auth_biometric_login">Sign in with biometrics</string>
+    <string name="auth_biometric_prompt">Unlock Agroland</string>
+    <string name="auth_biometric_error">Biometric authentication failed</string>
+    <string name="auth_user_not_found">No user found with this number. Please sign up.</string>
+    <string name="auth_logout">Log out</string>
+    <string name="auth_code_not_entered">Enter the code</string>
+    <string name="auth_sms_limit">SMS sending limit reached. Please wait.</string>
+
+    <!-- App lock / PIN (Phase 3) -->
+    <string name="pin_setup_title">Create a PIN</string>
+    <string name="pin_confirm_title">Confirm your PIN</string>
+    <string name="pin_enter_title">Enter your PIN</string>
+    <string name="pin_mismatch">PINs do not match</string>
+    <string name="pin_wrong">Wrong PIN</string>
+    <string name="pin_forgot">Forgot your PIN? Sign in again</string>
+    <string name="pin_unlock_biometric">Unlock with biometrics</string>
+</resources>

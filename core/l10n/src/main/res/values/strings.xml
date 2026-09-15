@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ӘДЕПКІ ТІЛ — ҚАЗАҚША (kk). Барлық пайдаланушыға көрінетін мәтін осында. -->
+<resources>
+    <string name="app_name">Agroland</string>
+
+    <!-- Ортақ -->
+    <string name="common_retry">Қайталау</string>
+    <string name="common_cancel">Болдырмау</string>
+    <string name="common_back">Артқа</string>
+    <string name="common_next">Әрі қарай</string>
+    <string name="common_yes">Иә</string>
+    <string name="common_no">Жоқ</string>
+    <string name="common_save">Сақтау</string>
+    <string name="common_delete">Өшіру</string>
+    <string name="common_edit">Өңдеу</string>
+    <string name="common_close">Жабу</string>
+    <string name="common_send">Жіберу</string>
+    <string name="common_search">Іздеу</string>
+    <string name="common_loading">Жүктелуде…</string>
+    <string name="common_more">Толығырақ</string>
+    <string name="common_share">Бөлісу</string>
+    <string name="common_ok">Түсіндім</string>
+
+    <!-- Күйлер -->
+    <string name="error_generic_title">Қате орын алды</string>
+    <string name="error_generic_message">Бірдеңе дұрыс болмады. Қайталап көріңіз.</string>
+    <string name="error_no_internet">Интернет байланысы жоқ. Байланысты тексеріп, қайталап көріңіз.</string>
+    <string name="empty_generic_title">Әзірге бос</string>
+    <string name="empty_generic_message">Мұнда әлі ештеңе жоқ</string>
+    <string name="coming_soon_title">Жақын арада</string>
+    <string name="coming_soon_message">Бұл бөлім жақын арада қосылады</string>
+
+    <!-- Тіл таңдау -->
+    <string name="language_title">Тілді таңдаңыз</string>
+    <string name="language_subtitle">Қосымша тілі</string>
+
+    <!-- Табтар -->
+    <string name="tab_home">Басты бет</string>
+    <string name="tab_chat">Чат</string>
+    <string name="tab_cart">Себет</string>
+    <string name="tab_services">Қызметтер</string>
+    <string name="tab_create">Құру</string>
+
+    <!-- Басты бет -->
+    <string name="home_search_hint">Тауар немесе қызмет іздеу…</string>
+    <string name="home_filter">Сүзгі</string>
+    <string name="home_tab_announcements">Жарнамалар</string>
+    <string name="home_tab_agro">Agro маркет</string>
+    <string name="home_tab_china">Қытай тауарлары</string>
+    <string name="home_scan_qr">QR сканерлеу</string>
+
+    <!-- Профиль / кіру (Phase 3 кеңейтіледі) -->
+    <string name="guest">Қонақ</string>
+
+    <!-- Auth (Phase 3) -->
+    <string name="auth_login_title">Кіру</string>
+    <string name="auth_register_title">Тіркелу</string>
+    <string name="auth_phone_hint">Телефон номері</string>
+    <string name="auth_phone_error">Телефон номері дұрыс емес</string>
+    <string name="auth_name_hint">Аты-жөніңіз</string>
+    <string name="auth_name_error">Атыңызды енгізіңіз</string>
+    <string name="auth_user_type_title">Сіз кімсіз?</string>
+    <string name="auth_user_type_individual">Жеке тұлға</string>
+    <string name="auth_user_type_business">Бизнес</string>
+    <string name="auth_company_bin_hint">Компания БИН-і</string>
+    <string name="auth_company_bin_error">БИН 12 цифрдан тұруы керек</string>
+    <string name="auth_email_hint">Email (қалауынша)</string>
+    <string name="auth_otp_title">Кодты енгізіңіз</string>
+    <string name="auth_otp_sent_to">SMS код %s номеріне жіберілді</string>
+    <string name="auth_otp_error">Қате код. Қайталап көріңіз.</string>
+    <string name="auth_otp_resend">Қайта жіберу</string>
+    <string name="auth_otp_send_email">Кодты email арқылы жіберу</string>
+    <string name="auth_biometric_login">Биометриямен кіру</string>
+    <string name="auth_biometric_prompt">Agroland қосымшасын ашу</string>
+    <string name="auth_biometric_error">Биометрия сәтсіз аяқталды</string>
+    <string name="auth_user_not_found">Бұл номермен пайдаланушы табылмады. Тіркеліңіз.</string>
+    <string name="auth_logout">Шығу</string>
+    <string name="auth_code_not_entered">Кодты енгізіңіз</string>
+    <string name="auth_sms_limit">SMS жіберу шегіне жеттіңіз. Біраз күтіңіз.</string>
+
+    <!-- App lock / PIN (Phase 3) -->
+    <string name="pin_setup_title">PIN код ойлап табыңыз</string>
+    <string name="pin_confirm_title">PIN кодты қайталаңыз</string>
+    <string name="pin_enter_title">PIN кодты енгізіңіз</string>
+    <string name="pin_mismatch">PIN кодтар сәйкес келмейді</string>
+    <string name="pin_wrong">Қате PIN код</string>
+    <string name="pin_forgot">PIN ұмыттыңыз ба? Қайта кіріңіз</string>
+    <string name="pin_unlock_biometric">Биометриямен ашу</string>
+</resources>

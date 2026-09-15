@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Басты тема — AppCompatActivity талап етеді (пер-апп локальдар үшін). -->
+    <style name="Theme.Agroland" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@color/agroland_background</item>
+    </style>
+
+    <!-- Жүйелік splash (core-splashscreen) — Theme.Agroland-қа өтеді. -->
+    <style name="Theme.Agroland.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/agroland_primary</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.Agroland</item>
+    </style>
+</resources>
