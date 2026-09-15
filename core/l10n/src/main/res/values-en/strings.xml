@@ -451,4 +451,38 @@
     <string name="payment_failed">Payment failed</string>
     <string name="payment_view_orders">View orders</string>
     <string name="payment_pay_now">Pay now</string>
+
+    <!-- Әмиян (Phase 10) -->
+    <string name="wallet_title">Balance and withdraw</string>
+    <string name="wallet_available">Available</string>
+    <string name="wallet_pending">Pending</string>
+    <string name="wallet_hold">On hold</string>
+    <string name="wallet_transactions">Transactions</string>
+    <string name="wallet_empty">No transactions yet</string>
+    <string name="wallet_withdraw">Withdraw funds</string>
+    <string name="wallet_tx_accrual">Accrual</string>
+    <string name="wallet_tx_withdraw">Withdraw</string>
+    <string name="wallet_tx_hold">Hold</string>
+    <string name="wallet_tx_unknown">Transaction</string>
+    <string name="wallet_withdraw_title">Withdraw</string>
+    <string name="wallet_withdraw_confirm">Confirm withdrawal</string>
+    <string name="wallet_withdraw_amount">Amount</string>
+    <string name="wallet_withdraw_min">Minimum withdrawal is 5 000 ₸</string>
+    <string name="wallet_withdraw_too_high">Amount exceeds available balance</string>
+    <string name="wallet_withdraw_iban_format">Invalid IBAN format (KZ + 17 digits)</string>
+    <string name="wallet_bank_name">Bank name</string>
+    <string name="wallet_bank_bik">BIC/SWIFT</string>
+    <string name="wallet_bank_account">Account number</string>
+    <string name="wallet_withdraw_success">Withdrawal request submitted</string>
+    <string name="wallet_replenish">Top up wallet</string>
+    <string name="wallet_confirm">Confirm</string>
+    <string name="wallet_topup_amount">Payment amount</string>
+    <string name="wallet_topup_service">Service for replenishment</string>
+    <string name="wallet_bank_cards">Bank cards</string>
+    <string name="wallet_units_description">One unit is equal to 1 tenge or in another currency at the rate of the National Bank of the Republic of Kazakhstan on the day of purchase</string>
+    <string name="wallet_your_balance">Your balance</string>
+    <string name="wallet_transaction_history">Transaction history</string>
+    <string name="wallet_enter_valid_amount">Enter an amount greater than zero</string>
+    <string name="wallet_field_required">Fill in the field</string>
+    <string name="wallet_enter_hint">Enter</string>
 </resources>

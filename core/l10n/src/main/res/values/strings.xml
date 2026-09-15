@@ -461,4 +461,38 @@
     <string name="payment_failed">Төлем сәтсіз болды</string>
     <string name="payment_view_orders">Тапсырыстарды қарау</string>
     <string name="payment_pay_now">Төлеу</string>
+
+    <!-- Әмиян (Phase 10) -->
+    <string name="wallet_title">Баланс және шығару</string>
+    <string name="wallet_available">Қолжетімді</string>
+    <string name="wallet_pending">Күтуде</string>
+    <string name="wallet_hold">Ұсталған</string>
+    <string name="wallet_transactions">Транзакциялар</string>
+    <string name="wallet_empty">Транзакциялар әлі жоқ</string>
+    <string name="wallet_withdraw">Қаражатты шығару</string>
+    <string name="wallet_tx_accrual">Есептеу</string>
+    <string name="wallet_tx_withdraw">Шығару</string>
+    <string name="wallet_tx_hold">Ұстау</string>
+    <string name="wallet_tx_unknown">Транзакция</string>
+    <string name="wallet_withdraw_title">Қаражатты шығару</string>
+    <string name="wallet_withdraw_confirm">Шығаруды растау</string>
+    <string name="wallet_withdraw_amount">Сома</string>
+    <string name="wallet_withdraw_min">Минималды шығару сома — 5 000 ₸</string>
+    <string name="wallet_withdraw_too_high">Сома қолжетімді баланстан асады</string>
+    <string name="wallet_withdraw_iban_format">IBAN форматы қате (KZ + 17 таңба)</string>
+    <string name="wallet_bank_name">Банк атауы</string>
+    <string name="wallet_bank_bik">БИК/SWIFT</string>
+    <string name="wallet_bank_account">Шот нөмірі</string>
+    <string name="wallet_withdraw_success">Шығару өтініші қабылданды</string>
+    <string name="wallet_replenish">Әмиянды толтыру</string>
+    <string name="wallet_confirm">Растау</string>
+    <string name="wallet_topup_amount">Төлем сомасы</string>
+    <string name="wallet_topup_service">Толтыру қызметі</string>
+    <string name="wallet_bank_cards">Банк карталары</string>
+    <string name="wallet_units_description">Бір бірлік 1 теңгеге тең немесе сатып алу күніндегі Қазақстан Республикасы Ұлттық Банкінің бағамы бойынша басқа валютада</string>
+    <string name="wallet_your_balance">Сіздің балансыңыз</string>
+    <string name="wallet_transaction_history">Транзакциялар тарихы</string>
+    <string name="wallet_enter_valid_amount">Нөлден үлкен соманы енгізіңіз</string>
+    <string name="wallet_field_required">Өрісті толтырыңыз</string>
+    <string name="wallet_enter_hint">Енгізу</string>
 </resources>

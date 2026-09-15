@@ -16,10 +16,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.Icon
@@ -38,8 +40,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.agroland.core.common.formatters.PriceFormatter
 import com.agroland.core.common.settings.ThemeMode
 import com.agroland.core.l10n.R as L10nR
 import com.agroland.core.ui.components.AgroAppBar
@@ -69,6 +73,9 @@ fun ProfilePage(
     onAddresses: () -> Unit,
     onCompanySettings: () -> Unit,
     onVerification: () -> Unit,
+    onOpenWallet: () -> Unit = {},
+    onOpenTransactions: () -> Unit = {},
+    onOpenTopUp: () -> Unit = {},
     onMyAnnouncements: (String) -> Unit = {},
 ) {
     val viewModel = rememberProfileViewModel()
@@ -131,6 +138,9 @@ fun ProfilePage(
                     onAddresses = onAddresses,
                     onCompanySettings = onCompanySettings,
                     onVerification = onVerification,
+                    onOpenWallet = onOpenWallet,
+                    onOpenTransactions = onOpenTransactions,
+                    onOpenTopUp = onOpenTopUp,
                     onMyAnnouncements = onMyAnnouncements,
                 )
             }
@@ -170,6 +180,9 @@ private fun AuthorizedProfileContent(
     onAddresses: () -> Unit,
     onCompanySettings: () -> Unit,
     onVerification: () -> Unit,
+    onOpenWallet: () -> Unit,
+    onOpenTransactions: () -> Unit,
+    onOpenTopUp: () -> Unit,
     onMyAnnouncements: (String) -> Unit,
 ) {
     val isDealer = profile.userType.equals("dealer", ignoreCase = true) ||
@@ -197,6 +210,7 @@ private fun AuthorizedProfileContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item { ProfileInfoCard(profile) }
+        item { ProfileWalletCard(balance = profile.balance, onOpenTopUp = onOpenTopUp) }
         item { ProfileAdsCard(profile, onMyAnnouncements) }
         item {
             ProfileSectionCard(title = null) {
@@ -223,7 +237,17 @@ private fun AuthorizedProfileContent(
                         leading = { SectionIcon(Icons.Outlined.Badge) },
                         onClick = onCompanySettings,
                     )
+                    AgroListTile(
+                        title = stringResource(L10nR.string.wallet_title),
+                        leading = { SectionIcon(Icons.Outlined.AccountBalanceWallet) },
+                        onClick = onOpenWallet,
+                    )
                 }
+                AgroListTile(
+                    title = stringResource(L10nR.string.wallet_transaction_history),
+                    leading = { SectionIcon(Icons.Outlined.ReceiptLong) },
+                    onClick = onOpenTransactions,
+                )
             }
         }
         if (isBioAvailable && viewModel.pinManager.isPinSet) {
@@ -262,6 +286,40 @@ private fun AuthorizedProfileContent(
                 )
             }
         }
+    }
+}
+
+/**
+ * Әмиян қысқаша картасы (Flutter profile_info): баланс + «Әмиянды толтыру»
+ * батырмасы — барлық авторизацияланған қолданушыға көрінеді.
+ */
+@Composable
+private fun ProfileWalletCard(balance: Double, onOpenTopUp: () -> Unit) {
+    val ext = extendedColors()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(ext.card)
+            .padding(16.dp),
+    ) {
+        Text(
+            text = stringResource(L10nR.string.wallet_your_balance),
+            style = MaterialTheme.typography.bodySmall,
+            color = ext.secondaryText,
+        )
+        Text(
+            text = PriceFormatter.format(balance),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = ext.primaryText,
+            modifier = Modifier.padding(top = 4.dp, bottom = 14.dp),
+        )
+        AgroButton(
+            text = stringResource(L10nR.string.wallet_replenish),
+            onClick = onOpenTopUp,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 

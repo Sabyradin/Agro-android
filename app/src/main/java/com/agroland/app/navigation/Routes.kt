@@ -154,3 +154,21 @@ data class WebViewRoute(
     val exitRedirectUrl: String? = null,
     val paymentResultOrderId: Long? = null,
 )
+
+// ---- Әмиян (Phase 10) ----
+
+/** Әмиян: баланс (қолжетімді/күтуде/ұсталған) + ledger (Flutter BalancePage). */
+@Serializable
+data object BalanceRoute
+
+/** Қаражат шығару — қолжетімді баланс query параметрімен (Flutter withdraw). */
+@Serializable
+data class WithdrawRoute(val availableBalance: Double = 0.0)
+
+/** Транзакциялар тарихы — профиль мәзірі ашады. */
+@Serializable
+data object TransactionHistoryRoute
+
+/** Әмиянды толтыру — BCC 3DS HTML формасы WebView-қа ашылады. */
+@Serializable
+data object TopUpRoute

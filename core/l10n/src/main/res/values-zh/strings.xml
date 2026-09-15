@@ -450,4 +450,38 @@
     <string name="payment_failed">支付失败</string>
     <string name="payment_view_orders">查看订单</string>
     <string name="payment_pay_now">立即支付</string>
+
+    <!-- Әмиян (Phase 10) -->
+    <string name="wallet_title">余额与提现</string>
+    <string name="wallet_available">可用</string>
+    <string name="wallet_pending">待处理</string>
+    <string name="wallet_hold">冻结</string>
+    <string name="wallet_transactions">交易记录</string>
+    <string name="wallet_empty">暂无交易</string>
+    <string name="wallet_withdraw">提现</string>
+    <string name="wallet_tx_accrual">入账</string>
+    <string name="wallet_tx_withdraw">提现</string>
+    <string name="wallet_tx_hold">冻结</string>
+    <string name="wallet_tx_unknown">交易</string>
+    <string name="wallet_withdraw_title">提现</string>
+    <string name="wallet_withdraw_confirm">确认提现</string>
+    <string name="wallet_withdraw_amount">金额</string>
+    <string name="wallet_withdraw_min">最低提现金额 5 000 ₸</string>
+    <string name="wallet_withdraw_too_high">金额超过可用余额</string>
+    <string name="wallet_withdraw_iban_format">IBAN 格式无效（KZ + 17 位数字）</string>
+    <string name="wallet_bank_name">银行名称</string>
+    <string name="wallet_bank_bik">BIC/SWIFT</string>
+    <string name="wallet_bank_account">账号</string>
+    <string name="wallet_withdraw_success">提现申请已提交</string>
+    <string name="wallet_replenish">充值钱包</string>
+    <string name="wallet_confirm">确认</string>
+    <string name="wallet_topup_amount">付款金额</string>
+    <string name="wallet_topup_service">补货服务</string>
+    <string name="wallet_bank_cards">银行卡</string>
+    <string name="wallet_units_description">一个单位等于1坚戈或以购买当天哈萨克斯坦共和国国家银行的汇率换算的其他货币</string>
+    <string name="wallet_your_balance">您的余额</string>
+    <string name="wallet_transaction_history">交易历史</string>
+    <string name="wallet_enter_valid_amount">请输入大于零的金额</string>
+    <string name="wallet_field_required">请填写此项</string>
+    <string name="wallet_enter_hint">输入</string>
 </resources>

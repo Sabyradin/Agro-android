@@ -54,6 +54,10 @@ import com.agroland.app.navigation.VerificationRoute
 import com.agroland.app.navigation.OrderDetailRoute
 import com.agroland.app.navigation.PaymentResultRoute
 import com.agroland.app.navigation.WebViewRoute
+import com.agroland.app.navigation.BalanceRoute
+import com.agroland.app.navigation.TransactionHistoryRoute
+import com.agroland.app.navigation.TopUpRoute
+import com.agroland.app.navigation.WithdrawRoute
 import com.agroland.core.common.settings.ThemeMode
 import com.agroland.core.l10n.R as L10nR
 import com.agroland.core.ui.theme.AgroTheme
@@ -87,6 +91,10 @@ import com.agroland.feature.marketplace.ui.SubcategoriesPage
 import com.agroland.feature.payment.ui.HalykLaunch
 import com.agroland.feature.payment.ui.PaymentResultPage
 import com.agroland.feature.payment.ui.WebViewPage
+import com.agroland.feature.wallet.ui.BalancePage
+import com.agroland.feature.wallet.ui.TopUpPage
+import com.agroland.feature.wallet.ui.TransactionHistoryPage
+import com.agroland.feature.wallet.ui.WithdrawPage
 import com.agroland.feature.profile.ui.AddressEditPage
 import com.agroland.feature.profile.ui.CompanySection
 import com.agroland.feature.profile.ui.CompanySectionPage
@@ -198,6 +206,15 @@ private fun AppNavHost(
         }
     }
 
+    // Әмиянды толтыру: BCC 3D Secure HTML формасы WebView-қа ашылады,
+    // exit-хостқа (agroland.kz) жеткенде жабылады (Flutter payment_page).
+    val topUpTitle = stringResource(L10nR.string.wallet_replenish)
+    val openTopUpWebView: (String) -> Unit = { html ->
+        navController.navigate(
+            WebViewRoute(html = html, title = topUpTitle, exitRedirectUrl = HALYK_EXIT_HOST),
+        )
+    }
+
     NavHost(
         navController = navController,
         startDestination = SplashRoute,
@@ -271,6 +288,9 @@ private fun AppNavHost(
                         onAddresses = { navController.navigate(ProfileAddressesRoute) },
                         onCompanySettings = { navController.navigate(CompanySettingsRoute) },
                         onVerification = { navController.navigate(VerificationRoute) },
+                        onOpenWallet = { navController.navigate(BalanceRoute) },
+                        onOpenTransactions = { navController.navigate(TransactionHistoryRoute) },
+                        onOpenTopUp = { navController.navigate(TopUpRoute) },
                         onMyAnnouncements = { status ->
                             navController.navigate(MyAnnouncementsRoute(status))
                         },
@@ -577,6 +597,32 @@ private fun AppNavHost(
                         navController.navigate(PaymentResultRoute(orderId))
                     }
                 },
+            )
+        }
+
+        // ---- Әмиян (Phase 10) ----
+        composable<BalanceRoute> {
+            BalancePage(
+                onBack = { navController.popBackStack() },
+                onWithdraw = { available ->
+                    navController.navigate(WithdrawRoute(available))
+                },
+            )
+        }
+        composable<WithdrawRoute> { entry ->
+            WithdrawPage(
+                availableBalance = entry.toRoute<WithdrawRoute>().availableBalance,
+                onBack = { navController.popBackStack() },
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable<TransactionHistoryRoute> {
+            TransactionHistoryPage(onBack = { navController.popBackStack() })
+        }
+        composable<TopUpRoute> {
+            TopUpPage(
+                onBack = { navController.popBackStack() },
+                onOpenWebView = openTopUpWebView,
             )
         }
     }

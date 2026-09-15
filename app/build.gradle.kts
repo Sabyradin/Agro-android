@@ -80,6 +80,7 @@ dependencies {
     implementation(project(":feature:marketplace"))
     implementation(project(":feature:cart"))
     implementation(project(":feature:payment"))
+    implementation(project(":feature:wallet"))
     implementation(project(":feature:location"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))

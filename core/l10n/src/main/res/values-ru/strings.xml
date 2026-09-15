@@ -453,4 +453,38 @@
     <string name="payment_failed">Ошибка оплаты</string>
     <string name="payment_view_orders">Смотреть заказы</string>
     <string name="payment_pay_now">Оплатить</string>
+
+    <!-- Әмиян (Phase 10) -->
+    <string name="wallet_title">Баланс и вывод</string>
+    <string name="wallet_available">Доступно</string>
+    <string name="wallet_pending">Ожидает</string>
+    <string name="wallet_hold">Заморожено</string>
+    <string name="wallet_transactions">Транзакции</string>
+    <string name="wallet_empty">Транзакций пока нет</string>
+    <string name="wallet_withdraw">Вывести средства</string>
+    <string name="wallet_tx_accrual">Начисление</string>
+    <string name="wallet_tx_withdraw">Вывод</string>
+    <string name="wallet_tx_hold">Удержание</string>
+    <string name="wallet_tx_unknown">Транзакция</string>
+    <string name="wallet_withdraw_title">Вывод средств</string>
+    <string name="wallet_withdraw_confirm">Подтвердить вывод</string>
+    <string name="wallet_withdraw_amount">Сумма</string>
+    <string name="wallet_withdraw_min">Минимальная сумма вывода — 5 000 ₸</string>
+    <string name="wallet_withdraw_too_high">Сумма превышает доступный баланс</string>
+    <string name="wallet_withdraw_iban_format">Неверный формат IBAN (KZ + 17 цифр)</string>
+    <string name="wallet_bank_name">Наименование банка</string>
+    <string name="wallet_bank_bik">БИК/SWIFT</string>
+    <string name="wallet_bank_account">Номер счёта</string>
+    <string name="wallet_withdraw_success">Заявка на вывод принята</string>
+    <string name="wallet_replenish">Пополнить кошелек</string>
+    <string name="wallet_confirm">Подтвердить</string>
+    <string name="wallet_topup_amount">Сумма пополнения</string>
+    <string name="wallet_topup_service">Сервис для пополнения</string>
+    <string name="wallet_bank_cards">Банковские карты</string>
+    <string name="wallet_units_description">Одна единица равна 1 тенге или в другой валюте по курсу Национального Банка Республики Казахстан на день покупки</string>
+    <string name="wallet_your_balance">Ваш баланс</string>
+    <string name="wallet_transaction_history">История транзакций</string>
+    <string name="wallet_enter_valid_amount">Введите сумму больше нуля</string>
+    <string name="wallet_field_required">Заполните поле</string>
+    <string name="wallet_enter_hint">Введите</string>
 </resources>
