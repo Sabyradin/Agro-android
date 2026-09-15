@@ -72,6 +72,7 @@ dependencies {
     implementation(project(":feature:shell"))
     implementation(project(":feature:auth"))
     implementation(project(":feature:profile"))
+    implementation(project(":feature:marketplace"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))

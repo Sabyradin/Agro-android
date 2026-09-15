@@ -1,5 +1,6 @@
 package com.agroland.app.navigation
 
+import com.agroland.feature.marketplace.data.AnnouncementFilter
 import com.agroland.feature.profile.ui.CompanySection
 import kotlinx.serialization.Serializable
 
@@ -52,3 +53,29 @@ data object VerificationRoute
 /** Бизнес шарттар — standalone режим (403 DEALER_TERMS_NOT_ACCEPTED). */
 @Serializable
 data object DealerTermsRoute
+
+// ---- Маркетплейс (Phase 5) ----
+
+/** Сүзгіленген жарнама лентасы (сүзгі route параметрі). */
+@Serializable
+data class AnnouncementsListRoute(val filter: AnnouncementFilter)
+
+/** Жарнама деталы (id). */
+@Serializable
+data class AnnouncementDetailRoute(val id: Long)
+
+/** Категориялар — 6 bucket. */
+@Serializable
+data object CategoriesRoute
+
+/** Категория сабкатегориялары. */
+@Serializable
+data class SubcategoriesRoute(val categoryId: Int)
+
+/** Таңдаулылар. */
+@Serializable
+data object FavoritesRoute
+
+/** Сүзгі редакторы — нәтиже caller-дің savedStateHandle-ына қайтады. */
+@Serializable
+data class FilterRoute(val filter: AnnouncementFilter)

@@ -78,7 +78,12 @@ object JsonParser {
     fun bool(root: JsonObject?, key: String): Boolean? {
         val el = root?.get(key) ?: return null
         return (el as? JsonPrimitive)?.let {
-            it.booleanOrNull ?: it.contentOrNull?.lowercase()?.toBooleanStrictOrNull()
+            it.booleanOrNull ?: when (val content = it.contentOrNull) {
+                null -> null
+                "1" -> true
+                "0" -> false
+                else -> content.lowercase().toBooleanStrictOrNull()
+            }
         }
     }
 }

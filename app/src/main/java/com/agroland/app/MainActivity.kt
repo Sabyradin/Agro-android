@@ -21,16 +21,22 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.agroland.app.navigation.AnnouncementDetailRoute
+import com.agroland.app.navigation.AnnouncementsListRoute
 import com.agroland.app.navigation.AuthRoute
+import com.agroland.app.navigation.CategoriesRoute
 import com.agroland.app.navigation.CompanySectionRoute
 import com.agroland.app.navigation.CompanySettingsRoute
 import com.agroland.app.navigation.DealerTermsRoute
 import com.agroland.app.navigation.EditProfileRoute
+import com.agroland.app.navigation.FavoritesRoute
+import com.agroland.app.navigation.FilterRoute
 import com.agroland.app.navigation.LanguageRoute
 import com.agroland.app.navigation.MainShellRoute
 import com.agroland.app.navigation.PinSetupRoute
 import com.agroland.app.navigation.ProfileAddressesRoute
 import com.agroland.app.navigation.SplashRoute
+import com.agroland.app.navigation.SubcategoriesRoute
 import com.agroland.app.navigation.VerificationRoute
 import com.agroland.core.common.settings.ThemeMode
 import com.agroland.core.ui.theme.AgroTheme
@@ -38,6 +44,14 @@ import com.agroland.feature.auth.session.SessionState
 import com.agroland.feature.auth.ui.AppLockGate
 import com.agroland.feature.auth.ui.AuthFlowPage
 import com.agroland.feature.auth.ui.PinSetupPage
+import com.agroland.feature.marketplace.data.AnnouncementFilter
+import com.agroland.feature.marketplace.ui.AnnouncementDetailPage
+import com.agroland.feature.marketplace.ui.AnnouncementsListPage
+import com.agroland.feature.marketplace.ui.CategoriesPage
+import com.agroland.feature.marketplace.ui.FavoritesPage
+import com.agroland.feature.marketplace.ui.FilterPage
+import com.agroland.feature.marketplace.ui.HomeFeedPage
+import com.agroland.feature.marketplace.ui.SubcategoriesPage
 import com.agroland.feature.profile.ui.CompanySection
 import com.agroland.feature.profile.ui.CompanySectionPage
 import com.agroland.feature.profile.ui.CompanySettingsPage
@@ -145,6 +159,21 @@ private fun AppNavHost(
                         navController.navigate(AuthRoute)
                     }
                 },
+                homeContent = {
+                    HomeFeedPage(
+                        onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
+                        onOpenAll = { query ->
+                            navController.navigate(
+                                AnnouncementsListRoute(
+                                    AnnouncementFilter(query = query.takeIf { it.isNotBlank() }),
+                                ),
+                            )
+                        },
+                        onOpenFilter = { navController.navigate(FilterRoute(AnnouncementFilter())) },
+                        onOpenFavorites = { navController.navigate(FavoritesRoute) },
+                        onOpenCategories = { navController.navigate(CategoriesRoute) },
+                    )
+                },
                 servicesContent = {
                     ProfilePage(
                         isAuthorized = isAuthorized,
@@ -224,5 +253,75 @@ private fun AppNavHost(
                 onBack = { navController.popBackStack() },
             )
         }
+
+        // ---- Маркетплейс (Phase 5) ----
+        composable<AnnouncementsListRoute> { entry ->
+            val route = entry.toRoute<AnnouncementsListRoute>()
+            // FilterPage нәтижесі осы entry-дің savedStateHandle-ына жазылады.
+            val filter by entry.savedStateHandle
+                .getStateFlow(FILTER_RESULT_KEY, route.filter)
+                .collectAsState()
+            AnnouncementsListPage(
+                filter = filter,
+                onBack = { navController.popBackStack() },
+                onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
+                onOpenFilter = { navController.navigate(FilterRoute(filter)) },
+            )
+        }
+        composable<FilterRoute> { entry ->
+            val route = entry.toRoute<FilterRoute>()
+            FilterPage(
+                initialFilter = route.filter,
+                onBack = { navController.popBackStack() },
+                onApply = { newFilter ->
+                    val previous = navController.previousBackStackEntry
+                    if (previous?.destination?.route?.contains("AnnouncementsListRoute") == true) {
+                        // Лентадан ашылды — нәтижені сол экранға қайтарып, артқа шығамыз.
+                        previous.savedStateHandle[FILTER_RESULT_KEY] = newFilter
+                        navController.popBackStack()
+                    } else {
+                        // Home-дан ашылды — сүзгімен лента экранына тікелей кіреміз.
+                        navController.navigate(AnnouncementsListRoute(newFilter)) {
+                            popUpTo(FilterRoute::class) { inclusive = true }
+                        }
+                    }
+                },
+            )
+        }
+        composable<AnnouncementDetailRoute> { entry ->
+            AnnouncementDetailPage(
+                announcementId = entry.toRoute<AnnouncementDetailRoute>().id,
+                onBack = { navController.popBackStack() },
+                onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
+            )
+        }
+        composable<CategoriesRoute> {
+            CategoriesPage(
+                onBack = { navController.popBackStack() },
+                onOpenSubcategories = { navController.navigate(SubcategoriesRoute(it)) },
+            )
+        }
+        composable<SubcategoriesRoute> { entry ->
+            SubcategoriesPage(
+                categoryId = entry.toRoute<SubcategoriesRoute>().categoryId,
+                onBack = { navController.popBackStack() },
+                onOpenFeed = { categoryId, subcategoryId ->
+                    navController.navigate(
+                        AnnouncementsListRoute(
+                            AnnouncementFilter(categoryId = categoryId, subcategoryId = subcategoryId),
+                        ),
+                    )
+                },
+            )
+        }
+        composable<FavoritesRoute> {
+            FavoritesPage(
+                onBack = { navController.popBackStack() },
+                onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
+            )
+        }
     }
 }
+
+/** FilterPage → AnnouncementsListPage нәтиже кілті. */
+private const val FILTER_RESULT_KEY = "filter"

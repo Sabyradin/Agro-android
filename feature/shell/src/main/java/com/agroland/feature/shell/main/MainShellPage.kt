@@ -66,6 +66,7 @@ private val TAB_SPECS = listOf(
 @Composable
 fun MainShellPage(
     onCreateClick: () -> Unit,
+    homeContent: @Composable () -> Unit = { HomePage() },
     servicesContent: @Composable () -> Unit = { ComingSoonTab() },
 ) {
     var selected by rememberSaveable { mutableIntStateOf(0) }
@@ -73,7 +74,7 @@ fun MainShellPage(
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             when (ShellTab.entries.getOrNull(selected)) {
-                ShellTab.HOME -> HomePage()
+                ShellTab.HOME -> homeContent()
                 ShellTab.SERVICES -> servicesContent()
                 else -> ComingSoonTab()
             }
