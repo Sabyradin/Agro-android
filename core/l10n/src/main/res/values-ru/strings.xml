@@ -487,4 +487,9 @@
     <string name="wallet_enter_valid_amount">Введите сумму больше нуля</string>
     <string name="wallet_field_required">Заполните поле</string>
     <string name="wallet_enter_hint">Введите</string>
+    <!-- Push каналы (Фаза 11) -->
+    <string name="push_channel_chat">Чат</string>
+    <string name="push_channel_orders">Заказы</string>
+    <string name="push_channel_calls">Звонки</string>
+    <string name="push_channel_marketing">Новости</string>
 </resources>

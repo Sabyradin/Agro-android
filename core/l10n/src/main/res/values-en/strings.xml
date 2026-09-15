@@ -485,4 +485,9 @@
     <string name="wallet_enter_valid_amount">Enter an amount greater than zero</string>
     <string name="wallet_field_required">Fill in the field</string>
     <string name="wallet_enter_hint">Enter</string>
+    <!-- Push channels (Phase 11) -->
+    <string name="push_channel_chat">Chat</string>
+    <string name="push_channel_orders">Orders</string>
+    <string name="push_channel_calls">Calls</string>
+    <string name="push_channel_marketing">News</string>
 </resources>

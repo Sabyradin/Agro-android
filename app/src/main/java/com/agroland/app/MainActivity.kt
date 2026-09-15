@@ -1,7 +1,13 @@
 package com.agroland.app
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
@@ -15,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -91,6 +98,9 @@ import com.agroland.feature.marketplace.ui.SubcategoriesPage
 import com.agroland.feature.payment.ui.HalykLaunch
 import com.agroland.feature.payment.ui.PaymentResultPage
 import com.agroland.feature.payment.ui.WebViewPage
+import com.agroland.feature.push.domain.PushController
+import com.agroland.feature.push.domain.PushDestination
+import com.agroland.feature.push.service.PushNotificationShower
 import com.agroland.feature.wallet.ui.BalancePage
 import com.agroland.feature.wallet.ui.TopUpPage
 import com.agroland.feature.wallet.ui.TransactionHistoryPage
@@ -110,19 +120,57 @@ import com.agroland.feature.shell.main.MainShellPage
 import com.agroland.feature.shell.splash.SplashPage
 import com.agroland.feature.shell.splash.SplashTarget
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    @Inject
+    lateinit var pushController: PushController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        // Push хабарламасынан ашылғанда (өлі күй реплейі де осы арқылы):
+        // payload pending межеге сақталып, сессия дайын болғанда навигацияланады.
+        handlePushIntent(intent)
         setContent {
             val shellViewModel: ShellViewModel = hiltViewModel()
             val appViewModel: AppViewModel = hiltViewModel()
             val themeMode by shellViewModel.themeMode.collectAsState()
             val localeTag by shellViewModel.localeTag.collectAsState()
             val session by appViewModel.session.collectAsState()
+
+            // Push (Фаза 11): POST_NOTIFICATIONS — API 33+ рұқсат сұрауы
+            // (берілмесе хабарлама көрінбейді, тіркеу жалғасады).
+            val notifPermission = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission(),
+            ) { }
+            LaunchedEffect(Unit) {
+                if (Build.VERSION.SDK_INT >= 33 &&
+                    ContextCompat.checkSelfPermission(
+                        this@MainActivity,
+                        Manifest.permission.POST_NOTIFICATIONS,
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+
+            // Push тіркеу/өшіру (Flutter root_page auth-listener):
+            // Authorized → POST /device (тек токен жаңа болса), Guest → DELETE.
+            LaunchedEffect(session) {
+                when (session) {
+                    SessionState.Authorized -> pushController.ensureRegistered(localeTag ?: "kk")
+                    SessionState.Guest -> pushController.unregister()
+                    SessionState.Loading -> Unit
+                }
+            }
+
+            // Тіл өзгерсе — кэштелген токенмен қайта тіркеу (push локализациясы).
+            LaunchedEffect(localeTag) {
+                localeTag?.let { pushController.onLanguageChanged(it) }
+            }
 
             // Пер-апп локальдар (API 33-тен төменде де жұмыс істейді).
             val currentTags = AppCompatDelegate.getApplicationLocales().toLanguageTags()
@@ -155,6 +203,7 @@ class MainActivity : AppCompatActivity() {
                         themeMode = themeMode,
                         localeTag = localeTag,
                         appViewModel = appViewModel,
+                        pushController = pushController,
                         onThemeChange = { shellViewModel.setThemeMode(it) },
                         onAppRegionSelected = { countryId, regionId ->
                             shellViewModel.setAppRegion(countryId, regionId)
@@ -162,6 +211,41 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Push хабарламасы қосымша АШЫҚ күйінде басылды (Flutter onActionReceivedMethod).
+        handlePushIntent(intent)
+    }
+
+    /**
+     * Intent extras-тан push payload шығарады (екі дереккөз: біздің PendingIntent
+     * маркермен; FCM өзі көрсеткен хабарлама — google.* кілттері жанындағы data).
+     * Оқылған extras тазартылады — config change кезінде қайта ойналмайды.
+     */
+    private fun handlePushIntent(intent: Intent?) {
+        if (intent == null) return
+        val extras = intent.extras ?: return
+        val data = HashMap<String, String>()
+        var marked = false
+        for (key in extras.keySet()) {
+            if (key == PushNotificationShower.EXTRA_PUSH_MARKER) {
+                marked = true
+                continue
+            }
+            if (key.startsWith("google.") || key.startsWith("android.") ||
+                key.startsWith("gcm.")
+            ) {
+                continue
+            }
+            (extras.get(key) as? String)?.let { value -> data[key] = value }
+        }
+        if (!marked && data.isEmpty()) return
+        pushController.handlePushData(data)
+        for (key in extras.keySet().toList()) {
+            intent.removeExtra(key)
         }
     }
 }
@@ -172,10 +256,32 @@ private fun AppNavHost(
     themeMode: ThemeMode,
     localeTag: String?,
     appViewModel: AppViewModel,
+    pushController: PushController,
     onThemeChange: (ThemeMode) -> Unit,
     onAppRegionSelected: (Int, Int) -> Unit,
 ) {
     val navController = rememberNavController()
+
+    // Push межесі (өлі күй реплейі де осыған келеді): сессия дайын болғанда
+    // БІР рет навигация жасап, pending күйді тазартамыз.
+    val pendingPush by pushController.pendingDestination.collectAsState()
+    LaunchedEffect(pendingPush, isAuthorized) {
+        val destination = pendingPush ?: return@LaunchedEffect
+        if (!isAuthorized) return@LaunchedEffect
+        when (destination) {
+            is PushDestination.OrderDetail ->
+                navController.navigate(OrderDetailRoute(destination.orderId))
+            is PushDestination.Announcement ->
+                navController.navigate(AnnouncementDetailRoute(destination.announcementId))
+            PushDestination.Verification -> navController.navigate(VerificationRoute)
+            PushDestination.Balance -> navController.navigate(BalanceRoute)
+            // Чат бөлмесі мен хабарламалар тізімі экрандары Фаза 12-де қосылады —
+            // осы межелер сол кезде навигацияға жалғанады (ISSUES.md #24).
+            is PushDestination.ChatRoom -> Unit
+            is PushDestination.Notifications -> Unit
+        }
+        pushController.consumePending()
+    }
 
     // Суық старт кезінде үзілген Halyk төлемін қалпына келтіру (бір рет).
     var resumedPendingPayment by remember { mutableStateOf(false) }

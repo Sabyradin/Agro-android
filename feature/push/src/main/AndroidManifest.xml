@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Push-хабарламалар (API 33+ рұқсат сұрауы MainActivity-де). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Түскен қоңырау — full-screen intent (spec §11 «қоңырау» каналы). -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <application>
+        <!-- FCM өзі көрсететін фондық notification-дардың әдепкі каналы (24.x). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="agroland_marketing" />
+
+        <!-- FCM қызметі: деректік хабарламалар → жергілікті notification. -->
+        <service
+            android:name="com.agroland.feature.push.service.AgroFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

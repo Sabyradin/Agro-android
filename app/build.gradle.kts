@@ -5,6 +5,9 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    // google-services.json — flavor source setтерінде (app/src/dev, app/src/prod);
+    // плейсхолдер конфигте push үнсіз ыдырайды (ISSUES.md #1).
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -81,6 +84,7 @@ dependencies {
     implementation(project(":feature:cart"))
     implementation(project(":feature:payment"))
     implementation(project(":feature:wallet"))
+    implementation(project(":feature:push"))
     implementation(project(":feature:location"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
@@ -101,6 +105,10 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+
+    // Push (Фаза 11): FCM токендері плейсхолдер конфигте де қауіпсіз ыдырайды.
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 

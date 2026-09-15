@@ -495,4 +495,9 @@
     <string name="wallet_enter_valid_amount">Нөлден үлкен соманы енгізіңіз</string>
     <string name="wallet_field_required">Өрісті толтырыңыз</string>
     <string name="wallet_enter_hint">Енгізу</string>
+    <!-- Push каналдары (Фаза 11) -->
+    <string name="push_channel_chat">Чат</string>
+    <string name="push_channel_orders">Тапсырыстар</string>
+    <string name="push_channel_calls">Қоңыраулар</string>
+    <string name="push_channel_marketing">Жаңалықтар</string>
 </resources>

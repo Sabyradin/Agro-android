@@ -484,4 +484,9 @@
     <string name="wallet_enter_valid_amount">请输入大于零的金额</string>
     <string name="wallet_field_required">请填写此项</string>
     <string name="wallet_enter_hint">输入</string>
+    <!-- 推送频道（第11阶段） -->
+    <string name="push_channel_chat">聊天</string>
+    <string name="push_channel_orders">订单</string>
+    <string name="push_channel_calls">通话</string>
+    <string name="push_channel_marketing">消息</string>
 </resources>
