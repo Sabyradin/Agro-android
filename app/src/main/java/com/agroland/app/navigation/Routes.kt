@@ -128,3 +128,9 @@ data class AddressEditRoute(val locationId: Long = 0L)
 /** Карта арқылы локация таңдау — нәтиже caller-дің savedStateHandle-ына қайтады. */
 @Serializable
 data class LocationSelectionRoute(val prefill: SelectedLocation? = null)
+
+// ---- Себет / тапсырыстар (Phase 8) ----
+
+/** Тапсырыс деталы (себет/чекаут/buy-now жасаған тапсырыстар). */
+@Serializable
+data class OrderDetailRoute(val orderId: Long)

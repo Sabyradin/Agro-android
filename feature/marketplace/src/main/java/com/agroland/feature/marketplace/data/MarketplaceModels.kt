@@ -41,6 +41,42 @@ data class Announcement(
     val pickupAddress: String?,
 )
 
+/**
+ * Жарнаманың жеткізу зонасы — AnnouncementDeliveryZoneInfo (Flutter):
+ * себет/чекаудтағы зона таңдауы осы пішімді оқиды (delivery_zones өрісі).
+ */
+data class AnnouncementDeliveryZone(
+    val id: Long,
+    val deliveryCost: Double,
+    val regionId: Int?,
+    val regionName: String?,
+    val name: String?,
+    val deliveryDaysMin: Int?,
+    val deliveryDaysMax: Int?,
+) {
+    /** Атау: name → region_name → «Зона #id». */
+    val displayName: String
+        get() = name?.takeIf { it.isNotEmpty() }
+            ?: regionName?.takeIf { it.isNotEmpty() }
+            ?: "Zone #$id"
+
+    /** Күндер диапазоны бірліксіз («3–5», «≥3», «») — бірлікте caller қосады. */
+    val daysRangeRaw: String
+        get() = when {
+            deliveryDaysMin != null && deliveryDaysMax != null -> "$deliveryDaysMin–$deliveryDaysMax"
+            deliveryDaysMin != null -> "≥$deliveryDaysMin"
+            else -> ""
+        }
+}
+
+/** GET /announcements/{id}/delivery-check нәтижесі (buy sheet жеткізу тексеруі). */
+data class DeliveryCheckResult(
+    val canDeliver: Boolean,
+    val zone: AnnouncementDeliveryZone?,
+    val pickupAvailable: Boolean,
+    val pickupAddress: String?,
+)
+
 /** Толық деталь — FullAnnouncementModel: + description, seller, contacts, similar. */
 data class FullAnnouncement(
     val base: Announcement,
@@ -57,6 +93,8 @@ data class FullAnnouncement(
     val stockQuantity: Int?,
     val additional: List<Announcement>,
     val similar: List<Announcement>,
+    /** Dealer жарнамаларының жеткізу зоналары (Фаза 8: себет/чекаут). */
+    val deliveryZones: List<AnnouncementDeliveryZone> = emptyList(),
 )
 
 data class Seller(
@@ -254,8 +292,36 @@ object MarketplaceParser {
                 .mapNotNull { parseAnnouncement(it as? JsonObject) },
             similar = JsonParser.arrayOrSingle(root, "similar_announcements")
                 .mapNotNull { parseAnnouncement(it as? JsonObject) },
+            deliveryZones = parseDeliveryZoneInfos(root),
         )
     }
+
+    /** Жарнама жауабындағы delivery_zones — [{id, name, region_name, delivery_cost, delivery_days_min/max}]. */
+    fun parseDeliveryZoneInfos(root: JsonObject?): List<AnnouncementDeliveryZone> =
+        JsonParser.arrayOrSingle(root, "delivery_zones").mapNotNull { parseDeliveryZone(it as? JsonObject) }
+
+    /** Бір зона нысаны — id немесе delivery_zone_id (екеуі де келеді). */
+    fun parseDeliveryZone(obj: JsonObject?): AnnouncementDeliveryZone? {
+        if (obj == null) return null
+        val id = JsonParser.long(obj, "id") ?: JsonParser.long(obj, "delivery_zone_id") ?: return null
+        return AnnouncementDeliveryZone(
+            id = id,
+            deliveryCost = JsonParser.double(obj, "delivery_cost") ?: 0.0,
+            regionId = JsonParser.int(obj, "region_id"),
+            regionName = JsonParser.string(obj, "region_name"),
+            name = JsonParser.string(obj, "name"),
+            deliveryDaysMin = JsonParser.int(obj, "delivery_days_min"),
+            deliveryDaysMax = JsonParser.int(obj, "delivery_days_max"),
+        )
+    }
+
+    /** delivery-check жауабы — {can_deliver, zone, pickup_available, pickup_address}. */
+    fun parseDeliveryCheck(root: JsonObject?): DeliveryCheckResult = DeliveryCheckResult(
+        canDeliver = JsonParser.bool(root, "can_deliver") ?: false,
+        zone = parseDeliveryZone(JsonParser.obj(root, "zone")),
+        pickupAvailable = JsonParser.bool(root, "pickup_available") ?: false,
+        pickupAddress = JsonParser.string(root, "pickup_address"),
+    )
 
     fun parseSeller(obj: JsonObject?): Seller? {
         if (obj == null) return null

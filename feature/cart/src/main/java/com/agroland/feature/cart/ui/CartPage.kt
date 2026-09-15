@@ -1,0 +1,617 @@
+package com.agroland.feature.cart.ui
+
+import android.content.Intent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Inbox
+import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.agroland.core.common.formatters.DateFormatter
+import com.agroland.core.common.formatters.PriceFormatter
+import com.agroland.core.l10n.R as L10nR
+import com.agroland.core.ui.components.AgroButton
+import com.agroland.core.ui.components.AgroCheckbox
+import com.agroland.core.ui.components.CachedImage
+import com.agroland.core.ui.components.CenteredContent
+import com.agroland.core.ui.components.EmptyView
+import com.agroland.core.ui.components.ErrorWithRetry
+import com.agroland.core.ui.components.ShimmerCard
+import com.agroland.core.ui.components.StatusChip
+import com.agroland.core.ui.theme.extendedColors
+import com.agroland.feature.cart.data.CartItem
+import com.agroland.feature.cart.data.CartSection
+import com.agroland.feature.cart.data.Order
+import com.agroland.feature.cart.data.canConfirmReceipt
+
+/**
+ * CartPage — Flutter cart_page: 5 бөлім (себет/төленді/күтілуде/жеткізілген/тарих),
+ * себет тақталары + оптимистік сан/өшіру, тапсырыс бөлімдері, чекаут төменнен.
+ */
+@Composable
+fun CartPage(
+    onOpenOrder: (Long) -> Unit,
+    onOpenAnnouncement: (Long) -> Unit = {},
+    viewModel: CartViewModel = hiltViewModel(),
+) {
+    val items by viewModel.items.collectAsState()
+    val loading by viewModel.loading.collectAsState()
+    val ordersLoading by viewModel.ordersLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val selectedIds by viewModel.selectedIds.collectAsState()
+    val section by viewModel.section.collectAsState()
+    val sectionOrders by viewModel.sectionOrders.collectAsState()
+    val checkout by viewModel.checkout.collectAsState()
+    val supplierPickerVisible by viewModel.supplierPickerVisible.collectAsState()
+    val supplierGroups by viewModel.supplierGroups.collectAsState()
+
+    val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val shareHeader = stringResource(L10nR.string.cart_share_header)
+    val noInternetText = stringResource(L10nR.string.error_no_internet)
+    val genericErrorText = stringResource(L10nR.string.error_generic_message)
+    val addedToast = stringResource(L10nR.string.cart_added_to_cart_toast)
+    val reorderToast = stringResource(L10nR.string.cart_reorder_success)
+    val receiptToast = stringResource(L10nR.string.cart_receipt_confirmed)
+    var successOrderIds by remember { mutableStateOf<List<Long>?>(null) }
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is CartEvent.ShowError ->
+                    snackbar.showSnackbar(event.error.displayText(noInternetText, genericErrorText))
+                is CartEvent.CheckoutDone -> successOrderIds = event.orderIds
+                CartEvent.AddedToCart -> snackbar.showSnackbar(addedToast)
+                CartEvent.ReorderDone -> snackbar.showSnackbar(reorderToast)
+                CartEvent.ReceiptConfirmed -> snackbar.showSnackbar(receiptToast)
+                CartEvent.OrderCancelled -> Unit
+            }
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            SectionSelector(
+                section = section,
+                basketCount = items.size,
+                sectionOrders = sectionOrders,
+                onSelect = viewModel::setSection,
+            )
+            Box(modifier = Modifier.weight(1f)) {
+                when {
+                    loading -> Column { repeat(5) { ShimmerCard() } }
+                    error != null -> CenteredContent {
+                        ErrorWithRetry(onRetry = viewModel::refresh, message = error!!.displayText())
+                    }
+                    else -> when (section) {
+                        CartSection.BASKET_ITEMS -> BasketContent(
+                            items = items,
+                            selectedIds = selectedIds,
+                            onToggle = viewModel::toggleSelected,
+                            onToggleSelectAll = viewModel::toggleSelectAll,
+                            onQuantity = viewModel::changeQuantity,
+                            onDelete = viewModel::deleteItem,
+                            onCheckout = viewModel::startCheckout,
+                            onShare = {
+                                val text = viewModel.buildShareText(shareHeader)
+                                if (text.isNotBlank()) {
+                                    val intent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, text)
+                                    }
+                                    context.startActivity(Intent.createChooser(intent, shareHeader))
+                                }
+                            },
+                        )
+                        else -> OrdersSectionContent(
+                            section = section,
+                            orders = sectionOrders[section].orEmpty(),
+                            loading = ordersLoading,
+                            onOpenOrder = onOpenOrder,
+                            onConfirmReceipt = viewModel::confirmReceipt,
+                        )
+                    }
+                }
+            }
+        }
+
+        SnackbarHost(
+            hostState = snackbar,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+
+    if (checkout.visible) {
+        CheckoutSheet(
+            state = checkout,
+            onDismiss = viewModel::dismissCheckout,
+            onToggleDelivery = viewModel::toggleItemDelivery,
+            onSetZone = viewModel::setItemZone,
+            onSelectAddress = viewModel::selectAddress,
+            onSubmit = viewModel::submitCheckout,
+        )
+    }
+    if (supplierPickerVisible) {
+        SupplierPickerSheet(
+            groups = supplierGroups,
+            onChoose = viewModel::chooseSupplier,
+            onDismiss = viewModel::dismissSupplierPicker,
+        )
+    }
+
+    // Чекаут сәтті — «Өтініміңіз қабылданды!» диалогі (Flutter CheckoutSuccessDialog).
+    val ids = successOrderIds
+    if (ids != null) {
+        AlertDialog(
+            onDismissRequest = { successOrderIds = null },
+            title = { Text(stringResource(L10nR.string.cart_order_accepted)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    successOrderIds = null
+                    ids.firstOrNull()?.let(onOpenOrder)
+                }) {
+                    Text(stringResource(L10nR.string.cart_order))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { successOrderIds = null }) {
+                    Text(stringResource(L10nR.string.common_close))
+                }
+            },
+        )
+    }
+}
+
+/** Үстіңгі дөңгелек бөлім таңдаушы — 5 бөлім + санда. */
+@Composable
+private fun SectionSelector(
+    section: CartSection,
+    basketCount: Int,
+    sectionOrders: Map<CartSection, List<Order>>,
+    onSelect: (CartSection) -> Unit,
+) {
+    val ext = extendedColors()
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(ext.card)
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item { Spacer(Modifier.width(16.dp)) }
+        items(CartSection.entries) { entry ->
+            val count = when (entry) {
+                CartSection.BASKET_ITEMS -> basketCount
+                else -> sectionOrders[entry]?.size ?: 0
+            }
+            SectionChip(
+                label = stringResource(sectionLabelRes(entry)),
+                count = count,
+                selected = entry == section,
+                onClick = { onSelect(entry) },
+            )
+        }
+        item { Spacer(Modifier.width(16.dp)) }
+    }
+}
+
+private fun sectionLabelRes(section: CartSection): Int = when (section) {
+    CartSection.BASKET_ITEMS -> L10nR.string.cart_section_basket
+    CartSection.PAID_PENDING -> L10nR.string.cart_section_paid
+    CartSection.IN_PROGRESS -> L10nR.string.cart_section_pending
+    CartSection.DELIVERED -> L10nR.string.cart_section_delivered
+    CartSection.ORDER_HISTORY -> L10nR.string.cart_section_history
+}
+
+@Composable
+private fun SectionChip(label: String, count: Int, selected: Boolean, onClick: () -> Unit) {
+    val ext = extendedColors()
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(if (selected) MaterialTheme.colorScheme.primary else ext.grey)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = if (count > 0) "$label ($count)" else label,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (selected) ext.white else ext.primaryText,
+            maxLines = 1,
+        )
+    }
+}
+
+/** Себет бөлімі: тақталар + төменгі төлем жолағы. */
+@Composable
+private fun BasketContent(
+    items: List<CartItem>,
+    selectedIds: Set<Long>,
+    onToggle: (Long) -> Unit,
+    onToggleSelectAll: () -> Unit,
+    onQuantity: (CartItem, Double) -> Unit,
+    onDelete: (CartItem) -> Unit,
+    onCheckout: () -> Unit,
+    onShare: () -> Unit,
+) {
+    if (items.isEmpty()) {
+        CenteredContent {
+            EmptyView(
+                icon = Icons.Outlined.ShoppingCart,
+                title = stringResource(L10nR.string.cart_empty),
+                message = stringResource(L10nR.string.cart_empty_hint),
+            )
+        }
+        return
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(L10nR.string.cart_select_all),
+                style = MaterialTheme.typography.labelLarge,
+                color = extendedColors().primaryText,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = onToggleSelectAll)
+                    .padding(vertical = 8.dp),
+            )
+            IconButton(onClick = onShare) {
+                Icon(
+                    imageVector = Icons.Outlined.Share,
+                    contentDescription = null,
+                    tint = extendedColors().secondaryText,
+                )
+            }
+        }
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            items(items, key = { it.id }) { item ->
+                CartTile(
+                    item = item,
+                    selected = item.id in selectedIds,
+                    onToggle = { onToggle(item.id) },
+                    onQuantity = { delta -> onQuantity(item, (item.quantity + delta).coerceAtLeast(1.0)) },
+                    onDelete = { onDelete(item) },
+                )
+            }
+            item { Spacer(Modifier.height(80.dp)) }
+        }
+        Surface(color = extendedColors().card) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                if (selectedIds.isNotEmpty()) {
+                    Text(
+                        text = stringResource(L10nR.string.cart_items_selected, selectedIds.size),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = extendedColors().secondaryText,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                }
+                AgroButton(
+                    text = stringResource(L10nR.string.cart_proceed_to_payment),
+                    onClick = onCheckout,
+                    enabled = selectedIds.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+    }
+}
+
+/** Себет тақтасы: құсбелгі + сурет + атау/баға + сан + өшіру. */
+@Composable
+private fun CartTile(
+    item: CartItem,
+    selected: Boolean,
+    onToggle: () -> Unit,
+    onQuantity: (Double) -> Unit,
+    onDelete: () -> Unit,
+) {
+    val ext = extendedColors()
+    val base = item.announcement?.base
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        AgroCheckbox(checked = selected, onCheckedChange = { onToggle() })
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(ext.grey),
+        ) {
+            CachedImage(
+                url = base?.imageUrl,
+                contentDescription = base?.title,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = base?.title?.takeIf { it.isNotBlank() } ?: "#${item.announcementId}",
+                style = MaterialTheme.typography.bodySmall,
+                color = ext.primaryText,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = PriceFormatter.formatPrecise(base?.price, base?.currency ?: "₸"),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.height(6.dp))
+            QuantityStepper(
+                quantity = item.quantity,
+                unit = item.measurementUnit ?: base?.measurementUnit,
+                onChange = onQuantity,
+            )
+        }
+        IconButton(onClick = onDelete) {
+            Icon(
+                imageVector = Icons.Outlined.Delete,
+                contentDescription = null,
+                tint = ext.secondaryText,
+            )
+        }
+    }
+}
+
+/** Сан басқарғышы: «−» [сан бірлік] «+» (Flutter QuantitySelector). */
+@Composable
+private fun QuantityStepper(
+    quantity: Double,
+    unit: String?,
+    onChange: (Double) -> Unit,
+) {
+    val ext = extendedColors()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        IconButton(
+            onClick = { onChange(-1.0) },
+            enabled = quantity > 1.0,
+            modifier = Modifier.size(30.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Remove,
+                contentDescription = null,
+                tint = if (quantity > 1.0) ext.primaryText else ext.divider,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+        Text(
+            text = formatQuantity(quantity) + (unit?.takeIf { it.isNotBlank() }?.let { " $it" } ?: ""),
+            style = MaterialTheme.typography.labelLarge,
+            color = ext.primaryText,
+        )
+        IconButton(onClick = { onChange(1.0) }, modifier = Modifier.size(30.dp)) {
+            Icon(
+                imageVector = Icons.Outlined.Add,
+                contentDescription = null,
+                tint = ext.primaryText,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
+}
+
+internal fun formatQuantity(value: Double): String =
+    if (value == value.toLong().toDouble()) value.toLong().toString() else value.toString()
+
+/** Тапсырыс бөлімі: тапсырыс тақталары + «Тауарды қабылдау». */
+@Composable
+private fun OrdersSectionContent(
+    section: CartSection,
+    orders: List<Order>,
+    loading: Boolean,
+    onOpenOrder: (Long) -> Unit,
+    onConfirmReceipt: (Order) -> Unit,
+) {
+    if (loading && orders.isEmpty()) {
+        Column { repeat(4) { ShimmerCard() } }
+        return
+    }
+    if (orders.isEmpty()) {
+        CenteredContent {
+            EmptyView(
+                icon = Icons.Outlined.Inbox,
+                title = stringResource(L10nR.string.cart_section_empty),
+            )
+        }
+        return
+    }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        items(orders, key = { it.id }) { order ->
+            OrderTile(
+                order = order,
+                onClick = { onOpenOrder(order.id) },
+                onConfirmReceipt = { onConfirmReceipt(order) },
+            )
+        }
+        item { Spacer(Modifier.height(16.dp)) }
+    }
+}
+
+/** Тапсырыс тақтасы — тізім бөлімдерінде (деталь беті емес). */
+@Composable
+private fun OrderTile(
+    order: Order,
+    onClick: () -> Unit,
+    onConfirmReceipt: () -> Unit,
+) {
+    val ext = extendedColors()
+    var confirmDialog by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(ext.card)
+            .clickable(onClick = onClick)
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(L10nR.string.cart_order_number, order.id),
+                style = MaterialTheme.typography.labelLarge,
+                color = ext.primaryText,
+                modifier = Modifier.weight(1f),
+            )
+            StatusChip(
+                text = stringResource(order.statusLabelRes()),
+                color = order.orderStatus.statusColor(),
+            )
+        }
+        val title = order.firstItemTitle
+            ?: order.announcement?.base?.title?.takeIf { it.isNotBlank() }
+        if (!title.isNullOrBlank()) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodySmall,
+                color = ext.primaryText,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        val extras = order.itemsCount
+            ?.takeIf { it > 1 }
+            ?.let { stringResource(L10nR.string.cart_order_more_items, it - 1) }
+        if (extras != null) {
+            Text(
+                text = extras,
+                style = MaterialTheme.typography.labelMedium,
+                color = ext.secondaryText,
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = PriceFormatter.formatPrecise(order.orderTotal, order.currency ?: "₸"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                val date = DateFormatter.formatDate(order.createdAt)
+                if (date.isNotBlank()) {
+                    Text(
+                        text = date,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = ext.secondaryText,
+                    )
+                }
+            }
+            if (order.canConfirmReceipt) {
+                AgroButton(
+                    text = stringResource(L10nR.string.cart_confirm_receipt),
+                    onClick = { confirmDialog = true },
+                    modifier = Modifier.height(44.dp),
+                )
+            }
+        }
+    }
+
+    if (confirmDialog) {
+        AlertDialog(
+            onDismissRequest = { confirmDialog = false },
+            title = {
+                Text(stringResource(L10nR.string.cart_confirm_receipt_question))
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDialog = false
+                    onConfirmReceipt()
+                }) {
+                    Text(stringResource(L10nR.string.cart_accept))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDialog = false }) {
+                    Text(stringResource(L10nR.string.cart_no))
+                }
+            },
+        )
+    }
+}
+
+/** Қонақ күйі — кіру үшін түйме (Flutter guest prompt). */
+@Composable
+fun GuestCartTab(onLoginClick: () -> Unit) {
+    CenteredContent {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Outlined.ShoppingCart,
+                contentDescription = null,
+                tint = extendedColors().divider,
+                modifier = Modifier.size(72.dp),
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = stringResource(L10nR.string.cart_login_prompt),
+                style = MaterialTheme.typography.bodySmall,
+                color = extendedColors().secondaryText,
+            )
+            Spacer(Modifier.height(16.dp))
+            AgroButton(
+                text = stringResource(L10nR.string.auth_login_title),
+                onClick = onLoginClick,
+                modifier = Modifier.padding(horizontal = 48.dp).fillMaxWidth(),
+            )
+        }
+    }
+}

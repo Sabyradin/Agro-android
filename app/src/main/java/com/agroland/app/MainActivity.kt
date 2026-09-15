@@ -50,12 +50,17 @@ import com.agroland.app.navigation.RegionListRoute
 import com.agroland.app.navigation.SplashRoute
 import com.agroland.app.navigation.SubcategoriesRoute
 import com.agroland.app.navigation.VerificationRoute
+import com.agroland.app.navigation.OrderDetailRoute
 import com.agroland.core.common.settings.ThemeMode
 import com.agroland.core.ui.theme.AgroTheme
 import com.agroland.feature.auth.session.SessionState
 import com.agroland.feature.auth.ui.AppLockGate
 import com.agroland.feature.auth.ui.AuthFlowPage
 import com.agroland.feature.auth.ui.PinSetupPage
+import com.agroland.feature.cart.ui.CartPage
+import com.agroland.feature.cart.ui.DetailBuyBar
+import com.agroland.feature.cart.ui.GuestCartTab
+import com.agroland.feature.cart.ui.OrderDetailPage
 import com.agroland.feature.location.data.LOCATION_RESULT_KEY
 import com.agroland.feature.location.data.SelectedLocation
 import com.agroland.feature.location.ui.CountryListPage
@@ -207,6 +212,15 @@ private fun AppNavHost(
                         onOpenCategories = { navController.navigate(CategoriesRoute) },
                     )
                 },
+                cartContent = {
+                    if (isAuthorized) {
+                        CartPage(
+                            onOpenOrder = { navController.navigate(OrderDetailRoute(it)) },
+                        )
+                    } else {
+                        GuestCartTab(onLoginClick = { navController.navigate(AuthRoute) })
+                    }
+                },
                 servicesContent = {
                     ProfilePage(
                         isAuthorized = isAuthorized,
@@ -334,6 +348,14 @@ private fun AppNavHost(
                 announcementId = entry.toRoute<AnnouncementDetailRoute>().id,
                 onBack = { navController.popBackStack() },
                 onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
+                bottomBar = {
+                    if (isAuthorized) {
+                        DetailBuyBar(
+                            detailViewModel = hiltViewModel(viewModelStoreOwner = entry),
+                            onOpenOrder = { navController.navigate(OrderDetailRoute(it)) },
+                        )
+                    }
+                },
             )
         }
         composable<CategoriesRoute> {
@@ -483,6 +505,14 @@ private fun AppNavHost(
                     navController.previousBackStackEntry?.savedStateHandle?.set(LOCATION_RESULT_KEY, selected)
                     navController.popBackStack()
                 },
+            )
+        }
+
+        // ---- Себет / тапсырыстар (Phase 8) ----
+        composable<OrderDetailRoute> { entry ->
+            OrderDetailPage(
+                orderId = entry.toRoute<OrderDetailRoute>().orderId,
+                onBack = { navController.popBackStack() },
             )
         }
     }

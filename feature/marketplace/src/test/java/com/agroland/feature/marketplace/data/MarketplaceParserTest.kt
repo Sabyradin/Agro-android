@@ -263,4 +263,59 @@ class MarketplaceParserTest {
         assertFalse(noLocation.containsKey("country_id"))
         assertTrue(AnnouncementFilter().isDefault())
     }
+
+    // ── Фаза 8: жеткізу зоналары + delivery-check ──
+
+    @Test
+    fun `жеткізу зоналары delivery_zones ішінен id alias-ымен оқылады`() {
+        val zones = MarketplaceParser.parseDeliveryZoneInfos(
+            obj(
+                """
+                {
+                  "delivery_zones": [
+                    {"id": 7, "delivery_cost": 2500, "region_name": "Алматы облысы",
+                     "delivery_days_min": 1, "delivery_days_max": 3},
+                    {"delivery_zone_id": 8, "delivery_cost": 0, "name": "Астана"},
+                    {"delivery_cost": 999},
+                    null
+                  ],
+                  "delivery_zones_alias": []
+                }
+                """.trimIndent(),
+            ),
+        )
+        assertEquals(2, zones.size)
+        assertEquals(7L, zones[0].id)
+        assertEquals("Алматы облысы", zones[0].displayName)
+        assertEquals("1–3", zones[0].daysRangeRaw)
+        // id delivery_zone_id түрінде де оқылады; delivery_cost 0 — тегін.
+        assertEquals(8L, zones[1].id)
+        assertEquals("Астана", zones[1].displayName)
+        // id-сіз жолдар құлады.
+        assertTrue(zones.none { it.deliveryCost == 999.0 })
+    }
+
+    @Test
+    fun `delivery-check can_deliver zone pickup оқылады`() {
+        val check = MarketplaceParser.parseDeliveryCheck(
+            obj(
+                """
+                {
+                  "can_deliver": true,
+                  "zone": {"id": 7, "delivery_cost": 2500, "region_name": "Алматы"},
+                  "pickup_available": true,
+                  "pickup_address": "Алматы, базар"
+                }
+                """.trimIndent(),
+            ),
+        )
+        assertTrue(check.canDeliver)
+        assertEquals(7L, check.zone!!.id)
+        assertTrue(check.pickupAvailable)
+        assertEquals("Алматы, базар", check.pickupAddress)
+
+        val empty = MarketplaceParser.parseDeliveryCheck(obj("""{"can_deliver": false}"""))
+        assertFalse(empty.canDeliver)
+        assertNull(empty.zone)
+    }
 }

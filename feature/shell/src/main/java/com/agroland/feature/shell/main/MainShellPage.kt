@@ -67,6 +67,7 @@ private val TAB_SPECS = listOf(
 fun MainShellPage(
     onCreateClick: () -> Unit,
     homeContent: @Composable () -> Unit = { HomePage() },
+    cartContent: @Composable () -> Unit = { ComingSoonTab() },
     servicesContent: @Composable () -> Unit = { ComingSoonTab() },
 ) {
     var selected by rememberSaveable { mutableIntStateOf(0) }
@@ -75,8 +76,9 @@ fun MainShellPage(
         Box(modifier = Modifier.weight(1f)) {
             when (ShellTab.entries.getOrNull(selected)) {
                 ShellTab.HOME -> homeContent()
+                ShellTab.CART -> cartContent()
                 ShellTab.SERVICES -> servicesContent()
-                else -> ComingSoonTab()
+                else -> ComingSoonTab() // chat — фаза 12
             }
         }
         GlassBottomBar(

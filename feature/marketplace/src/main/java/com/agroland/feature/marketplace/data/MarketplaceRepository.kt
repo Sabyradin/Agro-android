@@ -141,6 +141,13 @@ class MarketplaceRepository @Inject constructor(
     suspend fun getDeliveryZones(): ApiResult<List<DeliveryZone>> =
         safeCall { WriteParser.parseDeliveryZones(writeApi.getDeliveryZones()) }
 
+    /**
+     * Smart Calculator (M12): сатушы бұл ауданға жеткізе ала ма.
+     * {can_deliver, zone{...}, pickup_available, pickup_address}.
+     */
+    suspend fun deliveryCheck(announcementId: Long, districtId: Int): ApiResult<DeliveryCheckResult> =
+        safeCall { MarketplaceParser.parseDeliveryCheck(catalogApi.deliveryCheck(announcementId, districtId)) }
+
     /** Bulk-upload нәтижесі. */
     suspend fun bulkUpload(file: MultipartBody.Part): ApiResult<BulkUploadResult> =
         safeCall { WriteParser.parseBulkResult(writeApi.bulkUpload(file)) }

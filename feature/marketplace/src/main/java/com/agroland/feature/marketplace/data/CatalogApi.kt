@@ -73,6 +73,13 @@ interface CatalogApi {
 
     @retrofit2.http.GET("favorites/{id}/status")
     suspend fun getFavoriteStatus(@retrofit2.http.Path("id") id: Long): JsonObject
+
+    /** Smart Calculator (M12): сатушы бұл ауданға жеткізе ала ма — {can_deliver, zone, pickup_available, pickup_address}. */
+    @retrofit2.http.GET("announcements/{id}/delivery-check")
+    suspend fun deliveryCheck(
+        @retrofit2.http.Path("id") id: Long,
+        @retrofit2.http.Query("district_id") districtId: Int,
+    ): JsonObject
 }
 
 @Module
