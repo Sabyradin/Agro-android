@@ -20,17 +20,32 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.agroland.app.navigation.AuthRoute
+import com.agroland.app.navigation.CompanySectionRoute
+import com.agroland.app.navigation.CompanySettingsRoute
+import com.agroland.app.navigation.DealerTermsRoute
+import com.agroland.app.navigation.EditProfileRoute
 import com.agroland.app.navigation.LanguageRoute
 import com.agroland.app.navigation.MainShellRoute
 import com.agroland.app.navigation.PinSetupRoute
+import com.agroland.app.navigation.ProfileAddressesRoute
 import com.agroland.app.navigation.SplashRoute
+import com.agroland.app.navigation.VerificationRoute
 import com.agroland.core.common.settings.ThemeMode
 import com.agroland.core.ui.theme.AgroTheme
 import com.agroland.feature.auth.session.SessionState
 import com.agroland.feature.auth.ui.AppLockGate
 import com.agroland.feature.auth.ui.AuthFlowPage
 import com.agroland.feature.auth.ui.PinSetupPage
+import com.agroland.feature.profile.ui.CompanySection
+import com.agroland.feature.profile.ui.CompanySectionPage
+import com.agroland.feature.profile.ui.CompanySettingsPage
+import com.agroland.feature.profile.ui.DealerTermsPage
+import com.agroland.feature.profile.ui.EditProfilePage
+import com.agroland.feature.profile.ui.ProfileAddressesPage
+import com.agroland.feature.profile.ui.ProfilePage
+import com.agroland.feature.profile.ui.VerificationPage
 import com.agroland.feature.shell.ShellViewModel
 import com.agroland.feature.shell.language.LanguagePage
 import com.agroland.feature.shell.main.MainShellPage
@@ -77,7 +92,11 @@ class MainActivity : AppCompatActivity() {
                         onUnlocked = { locked = false },
                     )
                 } else {
-                    AppNavHost(isAuthorized = session == SessionState.Authorized)
+                    AppNavHost(
+                        isAuthorized = session == SessionState.Authorized,
+                        themeMode = themeMode,
+                        onThemeChange = { shellViewModel.setThemeMode(it) },
+                    )
                 }
             }
         }
@@ -85,7 +104,11 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun AppNavHost(isAuthorized: Boolean) {
+private fun AppNavHost(
+    isAuthorized: Boolean,
+    themeMode: ThemeMode,
+    onThemeChange: (ThemeMode) -> Unit,
+) {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
@@ -122,6 +145,18 @@ private fun AppNavHost(isAuthorized: Boolean) {
                         navController.navigate(AuthRoute)
                     }
                 },
+                servicesContent = {
+                    ProfilePage(
+                        isAuthorized = isAuthorized,
+                        themeMode = themeMode,
+                        onThemeChange = onThemeChange,
+                        onLoginClick = { navController.navigate(AuthRoute) },
+                        onEditProfile = { navController.navigate(EditProfileRoute) },
+                        onAddresses = { navController.navigate(ProfileAddressesRoute) },
+                        onCompanySettings = { navController.navigate(CompanySettingsRoute) },
+                        onVerification = { navController.navigate(VerificationRoute) },
+                    )
+                },
             )
         }
         composable<AuthRoute> {
@@ -156,6 +191,37 @@ private fun AppNavHost(isAuthorized: Boolean) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
+            )
+        }
+
+        // ---- Профиль (Phase 4) ----
+        composable<EditProfileRoute> {
+            EditProfilePage(onBack = { navController.popBackStack() })
+        }
+        composable<ProfileAddressesRoute> {
+            ProfileAddressesPage(onBack = { navController.popBackStack() })
+        }
+        composable<CompanySettingsRoute> {
+            CompanySettingsPage(
+                onBack = { navController.popBackStack() },
+                onOpenSection = { section ->
+                    navController.navigate(CompanySectionRoute(section))
+                },
+            )
+        }
+        composable<CompanySectionRoute> { entry ->
+            CompanySectionPage(
+                section = entry.toRoute<CompanySectionRoute>().section,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<VerificationRoute> {
+            VerificationPage(onBack = { navController.popBackStack() })
+        }
+        composable<DealerTermsRoute> {
+            DealerTermsPage(
+                standalone = true,
+                onBack = { navController.popBackStack() },
             )
         }
     }

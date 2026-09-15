@@ -79,4 +79,80 @@
     <string name="pin_wrong">PIN 码错误</string>
     <string name="pin_forgot">忘记 PIN 码？请重新登录</string>
     <string name="pin_unlock_biometric">使用生物识别解锁</string>
+
+    <!-- 个人资料（Phase 4） -->
+    <string name="profile_title">个人资料</string>
+    <string name="profile_edit">编辑个人资料</string>
+    <string name="profile_addresses">我的地址</string>
+    <string name="profile_verification">实名认证</string>
+    <string name="profile_company_settings">公司设置</string>
+    <string name="profile_biometric_lock">生物识别登录（应用锁）</string>
+    <string name="profile_theme">主题</string>
+    <string name="theme_system">跟随系统</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_dark">深色</string>
+    <string name="profile_verified">已认证</string>
+    <string name="profile_vip">VIP 卖家</string>
+    <string name="profile_vat">增值税纳税人</string>
+    <string name="profile_ads_active">在售</string>
+    <string name="profile_ads_pending">审核中</string>
+    <string name="profile_saved_toast">已保存</string>
+    <string name="profile_avatar_toast">头像已更新</string>
+    <string name="profile_change_photo">点击更换头像</string>
+    <string name="profile_email_invalid">邮箱无效或域名不允许</string>
+    <string name="profile_email_support">允许的域名：gmail.com、icloud.com、mail.ru</string>
+    <string name="profile_terms_accepted_toast">条款已接受</string>
+
+    <!-- 商务条款 -->
+    <string name="profile_terms_title">商务条款</string>
+    <string name="profile_terms_bullet_1">作为卖家，您的商品信息必须真实准确</string>
+    <string name="profile_terms_bullet_2">您承诺及时接收并履行订单</string>
+    <string name="profile_terms_bullet_3">您将与买家保持礼貌沟通</string>
+    <string name="profile_terms_bullet_4">完整规则详见使用条款</string>
+    <string name="profile_terms_accept">我接受</string>
+
+    <!-- 地址 -->
+    <string name="address_add">添加地址</string>
+    <string name="address_edit">编辑地址</string>
+    <string name="address_title_hint">名称（如：家、办公室）</string>
+    <string name="address_address_hint">地址</string>
+    <string name="address_city_hint">城市</string>
+    <string name="address_title_error">请输入名称</string>
+    <string name="address_address_error">请输入地址</string>
+    <string name="address_empty_title">暂无地址</string>
+    <string name="address_empty_message">添加您的第一个地址</string>
+    <string name="address_deleted_toast">地址已删除</string>
+
+    <!-- 公司 -->
+    <string name="company_data_title">公司代表</string>
+    <string name="company_about_title">关于公司</string>
+    <string name="company_contacts_title">联系方式</string>
+    <string name="company_decor_title">Logo 和横幅</string>
+    <string name="company_rep_name_hint">代表姓名</string>
+    <string name="company_rep_position_hint">职务</string>
+    <string name="company_position_error">职务可不填</string>
+    <string name="company_about_hint">公司简介</string>
+    <string name="company_phone_hint">电话</string>
+    <string name="company_website_hint">网站</string>
+    <string name="company_telegram_hint">Telegram</string>
+    <string name="company_whatsapp_hint">WhatsApp</string>
+    <string name="company_decor_logo">Logo</string>
+    <string name="company_decor_banner">横幅</string>
+
+    <!-- KYC 实名认证 -->
+    <string name="verification_full_name">您的姓名（全称）</string>
+    <string name="verification_iin">个人识别号 IIN（12 位数字）</string>
+    <string name="verification_iin_error">IIN 必须为 12 位数字</string>
+    <string name="verification_documents">文件（1–5 个，每个 ≤10 MB）</string>
+    <string name="verification_pick">选择文件</string>
+    <string name="verification_submit">提交</string>
+    <string name="verification_min_files">请至少选择一个文件</string>
+    <string name="verification_max_files">最多 5 个文件</string>
+    <string name="verification_file_error">无法读取文件（请选择小于 10 MB 的图片/PDF）</string>
+    <string name="verification_submitted_toast">文件已提交审核</string>
+    <string name="verification_status_approved">您已完成认证</string>
+    <string name="verification_status_pending">申请审核中</string>
+    <string name="verification_status_rejected">申请被拒绝</string>
+    <string name="verification_rejection_reason">原因：%s</string>
+    <string name="verification_locked">申请已提交，暂不能修改</string>
 </resources>

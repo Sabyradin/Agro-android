@@ -86,4 +86,80 @@
     <string name="pin_wrong">Қате PIN код</string>
     <string name="pin_forgot">PIN ұмыттыңыз ба? Қайта кіріңіз</string>
     <string name="pin_unlock_biometric">Биометриямен ашу</string>
+
+    <!-- Профиль (Phase 4) -->
+    <string name="profile_title">Профиль</string>
+    <string name="profile_edit">Жеке деректерді өңдеу</string>
+    <string name="profile_addresses">Мекенжайлар</string>
+    <string name="profile_verification">Верификация</string>
+    <string name="profile_company_settings">Компания параметрлері</string>
+    <string name="profile_biometric_lock">Биометриямен кіру (app-lock)</string>
+    <string name="profile_theme">Тема</string>
+    <string name="theme_system">Жүйе бойынша</string>
+    <string name="theme_light">Ашық</string>
+    <string name="theme_dark">Қараңғы</string>
+    <string name="profile_verified">Растықталған</string>
+    <string name="profile_vip">VIP сатушы</string>
+    <string name="profile_vat">ҚҚС төлеуші</string>
+    <string name="profile_ads_active">Белсенді</string>
+    <string name="profile_ads_pending">Қаралуда</string>
+    <string name="profile_saved_toast">Сақталды</string>
+    <string name="profile_avatar_toast">Сурет өзгертілді</string>
+    <string name="profile_change_photo">Суретті өзгерту үшін басыңыз</string>
+    <string name="profile_email_invalid">Email дұрыс емес немесе рұқсат етілмеген домен</string>
+    <string name="profile_email_support">Қолдауы бар домендер: gmail.com, icloud.com, mail.ru</string>
+    <string name="profile_terms_accepted_toast">Шарттар қабылданды</string>
+
+    <!-- Бизнес шарттар (DealerTerms гейт) -->
+    <string name="profile_terms_title">Бизнес шарттары</string>
+    <string name="profile_terms_bullet_1">Сатушы ретінде жарнамаларыңыз нақты және дұрыс болуы керек</string>
+    <string name="profile_terms_bullet_2">Тапсырыстарды уақытында қабылдап, орындауға міндеттенесіз</string>
+    <string name="profile_terms_bullet_3">Сатып алушылармен дұрыс қарым-қатынас жүргізесіз</string>
+    <string name="profile_terms_bullet_4">Қосымша ережелері Пайдалану шарттарында толық жазылады</string>
+    <string name="profile_terms_accept">Қабыл аламын</string>
+
+    <!-- Мекенжайлар -->
+    <string name="address_add">Мекенжай қосу</string>
+    <string name="address_edit">Мекенжайды өңдеу</string>
+    <string name="address_title_hint">Атауы (мыс. Үй, Кәсіпорын)</string>
+    <string name="address_address_hint">Мекенжай</string>
+    <string name="address_city_hint">Қала</string>
+    <string name="address_title_error">Атауын енгізіңіз</string>
+    <string name="address_address_error">Мекенжайды енгізіңіз</string>
+    <string name="address_empty_title">Мекенжайлар жоқ</string>
+    <string name="address_empty_message">Бірінші мекенжайды қосыңыз</string>
+    <string name="address_deleted_toast">Мекенжай өшірілді</string>
+
+    <!-- Компания -->
+    <string name="company_data_title">Компания өкілі</string>
+    <string name="company_about_title">Компания туралы</string>
+    <string name="company_contacts_title">Байланыстар</string>
+    <string name="company_decor_title">Логотип және баннер</string>
+    <string name="company_rep_name_hint">Өкілдің аты-жөні</string>
+    <string name="company_rep_position_hint">Лауазымы</string>
+    <string name="company_position_error">Лауазымы көрсетілмейді</string>
+    <string name="company_about_hint">Компания туралы мәтін</string>
+    <string name="company_phone_hint">Телефон</string>
+    <string name="company_website_hint">Веб-сайт</string>
+    <string name="company_telegram_hint">Telegram</string>
+    <string name="company_whatsapp_hint">WhatsApp</string>
+    <string name="company_decor_logo">Логотип</string>
+    <string name="company_decor_banner">Баннер</string>
+
+    <!-- KYC верификация -->
+    <string name="verification_full_name">Аты-жөніңіз (толық)</string>
+    <string name="verification_iin">ЖСН (12 цифр)</string>
+    <string name="verification_iin_error">ЖСН 12 цифрдан тұруы керек</string>
+    <string name="verification_documents">Құжаттар (1–5 файл, әрқайсысы ≤10 МБ)</string>
+    <string name="verification_pick">Файл таңдау</string>
+    <string name="verification_submit">Жіберу</string>
+    <string name="verification_min_files">Кемінде бір құжат таңдаңыз</string>
+    <string name="verification_max_files">5 құжаттан аспайды</string>
+    <string name="verification_file_error">Файлды оқу мүмкін болмады (10 МБ-тан кіші сурет/PDF таңдаңыз)</string>
+    <string name="verification_submitted_toast">Құжаттар жіберілді, қаралуда</string>
+    <string name="verification_status_approved">Сіз растықталдыңыз</string>
+    <string name="verification_status_pending">Сұраныс қаралып жатыр</string>
+    <string name="verification_status_rejected">Сұраныс қабылданбады</string>
+    <string name="verification_rejection_reason">Себебі: %s</string>
+    <string name="verification_locked">Сұраныс жіберілген — өзгертулер жабық</string>
 </resources>

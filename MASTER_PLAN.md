@@ -12,10 +12,10 @@
 
 | # | Фаза | Мазмұны | Статус |
 |---|------|---------|--------|
-| 1 | Қаңқа + дизайн-жүйе | Gradle қаңқа, flavors, тема/түс/қаріп токендері, ортақ компоненттер, 5-таб shell + «+», Splash, Тіл | ⬜ |
-| 2 | Желі + күй инфрақұрылымы | Retrofit/OkHttp, interceptor тізбегі (Auth single-flight 401 → Monitoring → Retry → TariffLimit), Failure, кешірімді JSON парсер, TokenStore, AppConfig, URL resolver | ⬜ |
-| 3 | Auth + app-lock | Телефон+OTP HATEOAS (task_id+links), signup individual/dealer, PIN SHA-256+salt, биометрия, DealerTerms гейт | ⬜ |
-| 4 | Профиль, компания, KYC | Профиль хаб, өңдеу (additive PATCH, avatar multipart), мекенжай CRUD, компания саб-ресурстары, VerificationPage | ⬜ |
+| 1 | Қаңқа + дизайн-жүйе | Gradle қаңқа, flavors, тема/түс/қаріп токендері, ортақ компоненттер, 5-таб shell + «+», Splash, Тіл | ✅ |
+| 2 | Желі + күй инфрақұрылымы | Retrofit/OkHttp, interceptor тізбегі (Auth single-flight 401 → Monitoring → Retry → TariffLimit), Failure, кешірімді JSON парсер, TokenStore, AppConfig, URL resolver | ✅ |
+| 3 | Auth + app-lock | Телефон+OTP HATEOAS (task_id+links), signup individual/dealer, PIN SHA-256+salt, биометрия, DealerTerms гейт | ✅ ( DealerTerms гейт — фаза 4-ке қалды) |
+| 4 | Профиль, компания, KYC | Профиль хаб, өңдеу (additive PATCH, avatar multipart), мекенжай CRUD, компания саб-ресурстары, VerificationPage | ✅ |
 | 5 | Маркетплейс (оқу) | Категориялар (6 bucket), лента (VIP 4+2 аралас), recommended (order_random+country_id=4), іздеу debounce 500ms, сүзгі, таңдаулылар, деталь | ⬜ |
 | 6 | Маркетплейс (жазу) | Create/Preview/Edit (multipart images+video), activate/deactivate/delete, bulk-upload, AI ad-content, MakeOffer, status беттері | ⬜ |
 | 7 | Локация / карта | Картамен таңдау, reverse geocode → каталог ID, Country/Region/District селекторлары, app-region persist | ⬜ |

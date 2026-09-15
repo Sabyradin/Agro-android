@@ -79,4 +79,80 @@
     <string name="pin_wrong">Неверный PIN-код</string>
     <string name="pin_forgot">Забыли PIN? Войдите заново</string>
     <string name="pin_unlock_biometric">Открыть биометрией</string>
+
+    <!-- Профиль (Phase 4) -->
+    <string name="profile_title">Профиль</string>
+    <string name="profile_edit">Редактировать личные данные</string>
+    <string name="profile_addresses">Мои адреса</string>
+    <string name="profile_verification">Верификация</string>
+    <string name="profile_company_settings">Настройки компании</string>
+    <string name="profile_biometric_lock">Вход по биометрии (app-lock)</string>
+    <string name="profile_theme">Тема</string>
+    <string name="theme_system">Системная</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="profile_verified">Верифицирован</string>
+    <string name="profile_vip">VIP-продавец</string>
+    <string name="profile_vat">Плательщик НДС</string>
+    <string name="profile_ads_active">Активные</string>
+    <string name="profile_ads_pending">На модерации</string>
+    <string name="profile_saved_toast">Сохранено</string>
+    <string name="profile_avatar_toast">Фото обновлено</string>
+    <string name="profile_change_photo">Нажмите, чтобы изменить фото</string>
+    <string name="profile_email_invalid">Некорректный email или запрещённый домен</string>
+    <string name="profile_email_support">Разрешённые домены: gmail.com, icloud.com, mail.ru</string>
+    <string name="profile_terms_accepted_toast">Условия приняты</string>
+
+    <!-- Бизнес-условия -->
+    <string name="profile_terms_title">Бизнес-условия</string>
+    <string name="profile_terms_bullet_1">Ваши объявления как продавца должны быть достоверными</string>
+    <string name="profile_terms_bullet_2">Вы обязуетесь принимать и выполнять заказы вовремя</string>
+    <string name="profile_terms_bullet_3">Вы соблюдаете корректное общение с покупателями</string>
+    <string name="profile_terms_bullet_4">Полные правила изложены в Условиях использования</string>
+    <string name="profile_terms_accept">Принимаю</string>
+
+    <!-- Адреса -->
+    <string name="address_add">Добавить адрес</string>
+    <string name="address_edit">Редактировать адрес</string>
+    <string name="address_title_hint">Название (напр. Дом, Офис)</string>
+    <string name="address_address_hint">Адрес</string>
+    <string name="address_city_hint">Город</string>
+    <string name="address_title_error">Введите название</string>
+    <string name="address_address_error">Введите адрес</string>
+    <string name="address_empty_title">Адресов пока нет</string>
+    <string name="address_empty_message">Добавьте первый адрес</string>
+    <string name="address_deleted_toast">Адрес удалён</string>
+
+    <!-- Компания -->
+    <string name="company_data_title">Представитель компании</string>
+    <string name="company_about_title">О компании</string>
+    <string name="company_contacts_title">Контакты</string>
+    <string name="company_decor_title">Логотип и баннер</string>
+    <string name="company_rep_name_hint">ФИО представителя</string>
+    <string name="company_rep_position_hint">Должность</string>
+    <string name="company_position_error">Должность не указывается</string>
+    <string name="company_about_hint">Текст о компании</string>
+    <string name="company_phone_hint">Телефон</string>
+    <string name="company_website_hint">Веб-сайт</string>
+    <string name="company_telegram_hint">Telegram</string>
+    <string name="company_whatsapp_hint">WhatsApp</string>
+    <string name="company_decor_logo">Логотип</string>
+    <string name="company_decor_banner">Баннер</string>
+
+    <!-- KYC верификация -->
+    <string name="verification_full_name">Ваше ФИО (полностью)</string>
+    <string name="verification_iin">ИИН (12 цифр)</string>
+    <string name="verification_iin_error">ИИН должен состоять из 12 цифр</string>
+    <string name="verification_documents">Документы (1–5 файлов, каждый ≤10 МБ)</string>
+    <string name="verification_pick">Выбрать файлы</string>
+    <string name="verification_submit">Отправить</string>
+    <string name="verification_min_files">Выберите хотя бы один документ</string>
+    <string name="verification_max_files">Не более 5 документов</string>
+    <string name="verification_file_error">Не удалось прочитать файл (выберите изображение/PDF до 10 МБ)</string>
+    <string name="verification_submitted_toast">Документы отправлены на проверку</string>
+    <string name="verification_status_approved">Вы верифицированы</string>
+    <string name="verification_status_pending">Заявка на рассмотрении</string>
+    <string name="verification_status_rejected">Заявка отклонена</string>
+    <string name="verification_rejection_reason">Причина: %s</string>
+    <string name="verification_locked">Заявка отправлена — изменения недоступны</string>
 </resources>

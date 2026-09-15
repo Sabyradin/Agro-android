@@ -79,4 +79,80 @@
     <string name="pin_wrong">Wrong PIN</string>
     <string name="pin_forgot">Forgot your PIN? Sign in again</string>
     <string name="pin_unlock_biometric">Unlock with biometrics</string>
+
+    <!-- Profile (Phase 4) -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_edit">Edit personal data</string>
+    <string name="profile_addresses">My addresses</string>
+    <string name="profile_verification">Verification</string>
+    <string name="profile_company_settings">Company settings</string>
+    <string name="profile_biometric_lock">Biometric sign-in (app lock)</string>
+    <string name="profile_theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="profile_verified">Verified</string>
+    <string name="profile_vip">VIP seller</string>
+    <string name="profile_vat">VAT payer</string>
+    <string name="profile_ads_active">Active</string>
+    <string name="profile_ads_pending">In review</string>
+    <string name="profile_saved_toast">Saved</string>
+    <string name="profile_avatar_toast">Photo updated</string>
+    <string name="profile_change_photo">Tap to change photo</string>
+    <string name="profile_email_invalid">Invalid email or disallowed domain</string>
+    <string name="profile_email_support">Allowed domains: gmail.com, icloud.com, mail.ru</string>
+    <string name="profile_terms_accepted_toast">Terms accepted</string>
+
+    <!-- Business terms -->
+    <string name="profile_terms_title">Business terms</string>
+    <string name="profile_terms_bullet_1">Your listings as a seller must be accurate</string>
+    <string name="profile_terms_bullet_2">You agree to accept and fulfil orders on time</string>
+    <string name="profile_terms_bullet_3">You communicate respectfully with buyers</string>
+    <string name="profile_terms_bullet_4">Full rules are set out in the Terms of Use</string>
+    <string name="profile_terms_accept">I accept</string>
+
+    <!-- Addresses -->
+    <string name="address_add">Add address</string>
+    <string name="address_edit">Edit address</string>
+    <string name="address_title_hint">Title (e.g. Home, Office)</string>
+    <string name="address_address_hint">Address</string>
+    <string name="address_city_hint">City</string>
+    <string name="address_title_error">Enter a title</string>
+    <string name="address_address_error">Enter an address</string>
+    <string name="address_empty_title">No addresses yet</string>
+    <string name="address_empty_message">Add your first address</string>
+    <string name="address_deleted_toast">Address deleted</string>
+
+    <!-- Company -->
+    <string name="company_data_title">Company representative</string>
+    <string name="company_about_title">About the company</string>
+    <string name="company_contacts_title">Contacts</string>
+    <string name="company_decor_title">Logo and banner</string>
+    <string name="company_rep_name_hint">Representative full name</string>
+    <string name="company_rep_position_hint">Position</string>
+    <string name="company_position_error">Position is optional</string>
+    <string name="company_about_hint">Text about the company</string>
+    <string name="company_phone_hint">Phone</string>
+    <string name="company_website_hint">Website</string>
+    <string name="company_telegram_hint">Telegram</string>
+    <string name="company_whatsapp_hint">WhatsApp</string>
+    <string name="company_decor_logo">Logo</string>
+    <string name="company_decor_banner">Banner</string>
+
+    <!-- KYC verification -->
+    <string name="verification_full_name">Your full name</string>
+    <string name="verification_iin">IIN (12 digits)</string>
+    <string name="verification_iin_error">IIN must be 12 digits</string>
+    <string name="verification_documents">Documents (1–5 files, each ≤10 MB)</string>
+    <string name="verification_pick">Choose files</string>
+    <string name="verification_submit">Submit</string>
+    <string name="verification_min_files">Select at least one document</string>
+    <string name="verification_max_files">No more than 5 documents</string>
+    <string name="verification_file_error">Could not read the file (pick an image/PDF under 10 MB)</string>
+    <string name="verification_submitted_toast">Documents submitted for review</string>
+    <string name="verification_status_approved">You are verified</string>
+    <string name="verification_status_pending">Application under review</string>
+    <string name="verification_status_rejected">Application rejected</string>
+    <string name="verification_rejection_reason">Reason: %s</string>
+    <string name="verification_locked">Application submitted — changes are locked</string>
 </resources>
