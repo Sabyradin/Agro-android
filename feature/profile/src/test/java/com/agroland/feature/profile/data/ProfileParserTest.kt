@@ -75,6 +75,38 @@ class ProfileParserTest {
     }
 
     @Test
+    fun `dealer_role оқылады және қақпа рөлдері есептеледі — Фаза 16`() {
+        val manager = ProfileParser.parseProfile(
+            obj("""{"user": {"id": 1, "user_type": "dealer", "dealer_role": "manager"}}"""),
+        )!!
+        assertEquals("manager", manager.dealerRole)
+        assertTrue(manager.canAccessTeamPool) // manager → TeamPool бар
+        assertFalse(manager.canManageEmployees) // бірақ қызметкертерді басқара алмайды
+
+        val director = ProfileParser.parseProfile(
+            obj("""{"user": {"id": 2, "user_type": "dealer", "dealer_role": "director"}}"""),
+        )!!
+        assertTrue(director.canAccessTeamPool)
+        assertTrue(director.canManageEmployees)
+
+        val financier = ProfileParser.parseProfile(
+            obj("""{"user": {"id": 3, "user_type": "dealer", "dealer_role": "financier"}}"""),
+        )!!
+        assertFalse(financier.canAccessTeamPool)
+        assertFalse(financier.canManageEmployees)
+
+        val noRole = ProfileParser.parseProfile(
+            obj("""{"user": {"id": 4, "user_type": "dealer"}}"""),
+        )!!
+        assertNull(noRole.dealerRole)
+        assertFalse(noRole.canAccessTeamPool)
+
+        val vatBody = ProfileRequests.isVatPayer(true)
+        assertTrue("is_vat_payer" in vatBody)
+        assertEquals("true", vatBody["is_vat_payer"]?.toString())
+    }
+
+    @Test
     fun `бос өрістер null-ге шыдайды және дефолттарды береді`() {
         val root = obj("""{"user": {"id": 1, "name": null, "user_type": "individual"}}""")
         val profile = ProfileParser.parseProfile(root)!!

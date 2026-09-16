@@ -90,6 +90,7 @@ dependencies {
     implementation(project(":feature:call"))
     implementation(project(":feature:stories"))
     implementation(project(":feature:promo"))
+    implementation(project(":feature:dealer"))
     implementation(project(":feature:notifications"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))

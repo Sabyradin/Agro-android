@@ -224,3 +224,33 @@ data object PromotedAnnouncementsRoute
 /** «Жылдам жарнамалар» — type_ad=vip лентасы (Flutter HotAnnouncementsPage). */
 @Serializable
 data object HotAnnouncementsRoute
+
+// ═══════════════ Фаза 16 — Дилер консолі ═══════════════
+
+/** Дилер өнімдері хабы — 4 таб (products/logistics/promotion/analytics). */
+@Serializable
+data class DealerProductsRoute(val initialTab: Int = 0)
+
+/** Дилер тапсырыстары — 5 таб (new/confirmed/in_transit/delivered/cancelled). */
+@Serializable
+data class DealerOrdersRoute(val initialTab: Int = 0)
+
+/** Тапсырыстар пулы — бөлінбеген тапсырыстар + claim (manager|director). */
+@Serializable
+data object TeamPoolRoute
+
+/** Қызметкертерді басқару — director ғана. */
+@Serializable
+data object DealerEmployeesRoute
+
+/** Тапсырыс трекингі — GET /orders/{id}/tracking. */
+@Serializable
+data class OrderTrackingRoute(val orderId: Long)
+
+/** Жеткізу зонасын қосу/өңдеу (-1 = жаңа). */
+@Serializable
+data class AddEditDeliveryZoneRoute(val zoneId: Long = -1)
+
+/** Бизнес баптаулары — баланс + ҚҚС төлеуші тумблері. */
+@Serializable
+data object DealerSettingsRoute

@@ -63,11 +63,13 @@ fun AgroAppBar(
 fun AgroScaffold(
     topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
+    floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (Modifier) -> Unit,
 ) {
     Scaffold(
         topBar = topBar,
         bottomBar = bottomBar,
+        floatingActionButton = floatingActionButton,
         containerColor = MaterialTheme.colorScheme.background,
         contentColor = extendedColors().primaryText,
     ) { innerPadding ->

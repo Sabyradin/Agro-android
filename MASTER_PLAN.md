@@ -27,7 +27,7 @@
 | 13 | Қоңырау | stream-webrtc-android, call:* сигналинг, TURN кэш 5мин, ICE restart (offerer, 1 рет), Telecom ConnectionService + full-screen intent + CallStyle, missed-call реплей | ✅ (missed-call реплей — Фаза 11 push + Фаза 12 CallMessage маркерлері арқылы) |
 | 14 | Stories, баннерлер | BannerStoryViewer (5с, прогресс, пауза, свайп), StoriesListView, markViewed (auth), маркетинг клик/көру, 4 статикалық промо | ✅ (жарнама/Қытай/көтерілгендер промо-мақсаттары — Фаза 15/17 кезінде жалғанады) |
 | 15 | Промо v2 | Catalog (activate_endpoint диспетчер, 409→PATCH), AdvertiseAd, PromoBannerForm (multipart), CurrentStatus chips, Promoted/Hot ленталары | ✅ (Hot лентасы — HotAnnouncementsRoute тіркелген; Flutter-де өлі маршрут, ISSUES #33) |
-| 16 | Дилер консолі | Products/Orders табтары, delivery-zones CRUD, қызметкерлер, TeamPool claim, аналитика (timeseries, Vico) | ⬜ |
+| 16 | Дилер консолі | Products/Orders табтары, delivery-zones CRUD, қызметкертер, TeamPool claim, аналитика (timeseries, Vico) | ✅ (трекинг өлі маршруты тіркелді — ISSUES #35; promotion TODO stub → нақты деректер, ISSUES #36) |
 | 17 | Қытай + сұраныс + EGOV | MercuryX каталог/себет/тапсырыс (consent, phone 11д 77…, BIN 12д, Int64), Demand CRUD, VIN `^[A-HJ-NPR-Z0-9]{17}$` | ⬜ |
 | 18 | Пікірлер, медиа, QR | «Менің пікірлерім» (клиент жағынан, 2 қойынды+бейдж), seller/announcement пікірлері, Photo/Video/PDF/WebView/YouTube viewer, QR сканер | ⬜ |
 | 19 | Аналитика | Firebase Analytics/Crashlytics, TikTok Business SDK (Android нұсқасы), мониторинг оқиғалары, search/log | ⬜ |

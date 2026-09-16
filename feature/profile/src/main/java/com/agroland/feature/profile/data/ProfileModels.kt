@@ -23,12 +23,25 @@ data class UserProfile(
     val isVipSeller: Boolean,
     val dealerStatus: String?,
     val dealerTermsAccepted: Boolean,
+    /**
+     * Дилер рөлі (user.dealer_role) — Қызметкерлер/TeamPool қақпалары:
+     * manager|financier (қызметкер) | director (меншікті иесі).
+     */
+    val dealerRole: String? = null,
     /** Әмиян балансы (₸) — PaymentMethodSheet жеткіліктігін тексереді (Фаза 9). */
     val balance: Double = 0.0,
     val company: CompanyInfo?,
     val locations: List<UserLocation>,
     val announcements: AnnouncementCounts?,
-)
+) {
+    /** TeamPool — manager және director ғана (Flutter canAccessTeamPool). */
+    val canAccessTeamPool: Boolean
+        get() = dealerRole == "manager" || dealerRole == "director"
+
+    /** Қызметкерлерді басқару — тек director (Flutter canManageEmployees). */
+    val canManageEmployees: Boolean
+        get() = dealerRole == "director"
+}
 
 /** Компания туралы мәліметтер — user.company_info. */
 data class CompanyInfo(
@@ -134,6 +147,7 @@ object ProfileParser {
             dealerStatus = JsonParser.string(user, "dealer_status") ?: JsonParser.string(user, "business_status"),
             dealerTermsAccepted = JsonParser.bool(user, "dealer_terms_accepted")
                 ?: JsonParser.bool(user, "business_terms_accepted") ?: false,
+            dealerRole = JsonParser.string(user, "dealer_role"),
             balance = JsonParser.double(user, "balance") ?: 0.0,
             company = parseCompany(JsonParser.obj(user, "company_info")),
             locations = JsonParser.arrayOrSingle(root, "locations").mapNotNull { parseLocation(it as? JsonObject) },
@@ -216,6 +230,11 @@ object ProfileRequests {
     fun updateProfile(name: String?, email: String?): JsonObject = buildJsonObject {
         if (name != null) put("name", name)
         if (email != null) put("email", email) // "" → backend NULL (тазарту)
+    }
+
+    /** VAT тумблері — PATCH /user/profile {is_vat_payer} (Flutter dealer settings). */
+    fun isVatPayer(value: Boolean): JsonObject = buildJsonObject {
+        put("is_vat_payer", value)
     }
 
     /**

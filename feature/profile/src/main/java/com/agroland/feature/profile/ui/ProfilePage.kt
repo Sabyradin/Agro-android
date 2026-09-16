@@ -20,10 +20,13 @@ import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.Headset
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -79,6 +82,9 @@ fun ProfilePage(
     onOpenTopUp: () -> Unit = {},
     onMyAnnouncements: (String) -> Unit = {},
     onOpenSupportChat: () -> Unit = {},
+    onDealerProducts: (Int) -> Unit = {},
+    onDealerOrders: (Int) -> Unit = {},
+    onDealerSettings: () -> Unit = {},
 ) {
     val viewModel = rememberProfileViewModel()
     val profile by viewModel.profile.collectAsState()
@@ -145,6 +151,9 @@ fun ProfilePage(
                     onOpenTopUp = onOpenTopUp,
                     onMyAnnouncements = onMyAnnouncements,
                     onOpenSupportChat = onOpenSupportChat,
+                    onDealerProducts = onDealerProducts,
+                    onDealerOrders = onDealerOrders,
+                    onDealerSettings = onDealerSettings,
                 )
             }
             SnackbarHost(hostState = snackbar, modifier = Modifier.align(Alignment.BottomCenter))
@@ -188,6 +197,9 @@ private fun AuthorizedProfileContent(
     onOpenTopUp: () -> Unit,
     onMyAnnouncements: (String) -> Unit,
     onOpenSupportChat: () -> Unit,
+    onDealerProducts: (Int) -> Unit,
+    onDealerOrders: (Int) -> Unit,
+    onDealerSettings: () -> Unit,
 ) {
     val isDealer = profile.userType.equals("dealer", ignoreCase = true) ||
         profile.userType.equals("business", ignoreCase = true)
@@ -216,6 +228,29 @@ private fun AuthorizedProfileContent(
         item { ProfileInfoCard(profile) }
         item { ProfileWalletCard(balance = profile.balance, onOpenTopUp = onOpenTopUp) }
         item { ProfileAdsCard(profile, onMyAnnouncements) }
+        // ── Дилер консолі — Фаза 16 (Flutter DealerSection): тауарлар хабы,
+        // тапсырыстар және бизнес баптаулары (ҚҚС). ──
+        if (isDealer) {
+            item {
+                ProfileSectionCard(title = null) {
+                    AgroListTile(
+                        title = stringResource(L10nR.string.dealer_my_products),
+                        leading = { SectionIcon(Icons.Outlined.Inventory2) },
+                        onClick = { onDealerProducts(0) },
+                    )
+                    AgroListTile(
+                        title = stringResource(L10nR.string.dealer_my_orders),
+                        leading = { SectionIcon(Icons.Outlined.ShoppingBag) },
+                        onClick = { onDealerOrders(0) },
+                    )
+                    AgroListTile(
+                        title = stringResource(L10nR.string.dealer_settings),
+                        leading = { SectionIcon(Icons.Outlined.Tune) },
+                        onClick = onDealerSettings,
+                    )
+                }
+            }
+        }
         item {
             ProfileSectionCard(title = null) {
                 AgroListTile(

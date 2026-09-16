@@ -73,6 +73,13 @@ import com.agroland.app.navigation.WithdrawRoute
 import com.agroland.app.navigation.AdvertiseAdRoute
 import com.agroland.app.navigation.PromotedAnnouncementsRoute
 import com.agroland.app.navigation.HotAnnouncementsRoute
+import com.agroland.app.navigation.DealerProductsRoute
+import com.agroland.app.navigation.DealerOrdersRoute
+import com.agroland.app.navigation.TeamPoolRoute
+import com.agroland.app.navigation.DealerEmployeesRoute
+import com.agroland.app.navigation.OrderTrackingRoute
+import com.agroland.app.navigation.AddEditDeliveryZoneRoute
+import com.agroland.app.navigation.DealerSettingsRoute
 import com.agroland.core.common.settings.ThemeMode
 import com.agroland.core.l10n.R as L10nR
 import com.agroland.core.ui.theme.AgroTheme
@@ -136,6 +143,13 @@ import com.agroland.feature.profile.ui.EditProfilePage
 import com.agroland.feature.profile.ui.ProfileAddressesPage
 import com.agroland.feature.profile.ui.ProfilePage
 import com.agroland.feature.profile.ui.VerificationPage
+import com.agroland.feature.dealer.ui.AddEditDeliveryZonePage
+import com.agroland.feature.dealer.ui.DealerEmployeesPage
+import com.agroland.feature.dealer.ui.DealerOrdersPage
+import com.agroland.feature.dealer.ui.DealerProductsPage
+import com.agroland.feature.dealer.ui.DealerSettingsPage
+import com.agroland.feature.dealer.ui.OrderTrackingPage
+import com.agroland.feature.dealer.ui.TeamPoolPage
 import com.agroland.feature.shell.ShellViewModel
 import com.agroland.feature.shell.language.LanguagePage
 import com.agroland.feature.shell.main.MainShellPage
@@ -541,6 +555,14 @@ private fun AppNavHost(
                                 ChatRoomRoute(otherUserId = 31L, isSystemChat = true),
                             )
                         },
+                        // Фаза 16: дилер консолі — профильден кіру.
+                        onDealerProducts = { tab ->
+                            navController.navigate(DealerProductsRoute(tab))
+                        },
+                        onDealerOrders = { tab ->
+                            navController.navigate(DealerOrdersRoute(tab))
+                        },
+                        onDealerSettings = { navController.navigate(DealerSettingsRoute) },
                     )
                 },
             )
@@ -997,6 +1019,51 @@ private fun AppNavHost(
                 titleOverride = stringResource(L10nR.string.hot_announcements),
                 emptyMessageOverride = stringResource(L10nR.string.no_hot_announcements),
                 showFilterControls = false,
+            )
+        }
+
+        // ---- Дилер консолі (Фаза 16) ----
+        composable<DealerProductsRoute> { entry ->
+            val route = entry.toRoute<DealerProductsRoute>()
+            DealerProductsPage(
+                initialTab = route.initialTab,
+                onBack = { navController.popBackStack() },
+                onEditProduct = { navController.navigate(EditAdRoute(it)) },
+                onAddZone = { navController.navigate(AddEditDeliveryZoneRoute()) },
+                onEditZone = { navController.navigate(AddEditDeliveryZoneRoute(it)) },
+                // Жарнама пакетін таңдау — активті жарнамалар тізімі арқылы
+                // → onPromote → AdvertiseAdPage (Фаза 15 wiring-ты қайта пайдаланады).
+                onPickAnnouncement = { navController.navigate(MyAnnouncementsRoute("active")) },
+            )
+        }
+        composable<DealerOrdersRoute> { entry ->
+            val route = entry.toRoute<DealerOrdersRoute>()
+            DealerOrdersPage(
+                initialTab = route.initialTab,
+                onBack = { navController.popBackStack() },
+                onOpenTeamPool = { navController.navigate(TeamPoolRoute) },
+                onOpenTracking = { navController.navigate(OrderTrackingRoute(it)) },
+            )
+        }
+        composable<TeamPoolRoute> {
+            TeamPoolPage(
+                onBack = { navController.popBackStack() },
+                onOpenEmployees = { navController.navigate(DealerEmployeesRoute) },
+            )
+        }
+        composable<DealerEmployeesRoute> {
+            DealerEmployeesPage(onBack = { navController.popBackStack() })
+        }
+        composable<OrderTrackingRoute> {
+            OrderTrackingPage(onBack = { navController.popBackStack() })
+        }
+        composable<AddEditDeliveryZoneRoute> {
+            AddEditDeliveryZonePage(onBack = { navController.popBackStack() })
+        }
+        composable<DealerSettingsRoute> {
+            DealerSettingsPage(
+                onBack = { navController.popBackStack() },
+                onOpenWallet = { navController.navigate(BalanceRoute) },
             )
         }
     }

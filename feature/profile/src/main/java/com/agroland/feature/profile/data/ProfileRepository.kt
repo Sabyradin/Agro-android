@@ -28,6 +28,10 @@ class ProfileRepository @Inject constructor(
     suspend fun updateProfile(name: String?, email: String?): ApiResult<UserProfile> =
         parseProfileBody { userApi.updateProfile(ProfileRequests.updateProfile(name, email)) }
 
+    /** VAT тумблері — Дилер баптаулары (Фаза 16), additive PATCH {is_vat_payer}. */
+    suspend fun updateVatPayer(value: Boolean): ApiResult<UserProfile> =
+        parseProfileBody { userApi.updateProfile(ProfileRequests.isVatPayer(value)) }
+
     suspend fun uploadAvatar(part: MultipartBody.Part): ApiResult<String?> =
         safeCall { ProfileParser.parseAvatarUrl(userApi.uploadAvatar(part)) }
 
