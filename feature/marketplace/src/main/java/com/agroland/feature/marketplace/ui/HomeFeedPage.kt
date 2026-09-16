@@ -52,6 +52,8 @@ import com.agroland.core.ui.components.LoadingWidget
 import com.agroland.core.ui.components.ShimmerCard
 import com.agroland.core.ui.theme.extendedColors
 import com.agroland.feature.marketplace.data.Suggestion
+import com.agroland.feature.stories.ui.MainBannerCarousel
+import com.agroland.feature.stories.ui.StoriesRow
 
 /** Home лентасының режимдері — Flutter үш tablet-selector-ы. */
 private enum class HomeFeedTab(val labelRes: Int) {
@@ -72,6 +74,10 @@ fun HomeFeedPage(
     onOpenFavorites: () -> Unit,
     onOpenCategories: () -> Unit,
     onOpenNotifications: () -> Unit = {},
+    onCreateAnnouncement: () -> Unit = {},
+    onOpenAdvertise: () -> Unit = {},
+    onOpenChinaCatalog: () -> Unit = {},
+    onOpenPromoted: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val ext = extendedColors()
@@ -171,6 +177,16 @@ fun HomeFeedPage(
 
         when (HomeFeedTab.entries.getOrNull(tab)) {
             HomeFeedTab.ANNOUNCEMENTS -> {
+                // Stories: баннер-карусель (96×96) + admin сторилер жолы (80×80).
+                MainBannerCarousel(
+                    onOpenAnnouncement = onOpenDetail,
+                    onOpenCreate = onCreateAnnouncement,
+                    onOpenAdvertise = onOpenAdvertise,
+                    onOpenChinaCatalog = onOpenChinaCatalog,
+                    onOpenPromoted = onOpenPromoted,
+                )
+                StoriesRow()
+
                 // Категориялар + барлық жарнамалар жолы.
                 Row(
                     modifier = Modifier

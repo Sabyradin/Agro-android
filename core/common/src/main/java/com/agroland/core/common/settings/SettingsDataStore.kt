@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -26,6 +27,7 @@ class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
         val LANGUAGE_SELECTED = booleanPreferencesKey("language_selected")
         val APP_REGION_COUNTRY_ID = intPreferencesKey("app_region_country_id")
         val APP_REGION_CITY_ID = intPreferencesKey("app_region_city_id")
+        val VIEWED_MAIN_BANNERS = stringSetPreferencesKey("VIEWED_MAIN_BANNERS")
     }
 
     /** Тіл тегі («kk»/«ru»/«en»/«zh») немесе null (таңдалмаған → Languages бетіне redirect). */
@@ -60,6 +62,20 @@ class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { prefs ->
             if (countryId != null) prefs[Keys.APP_REGION_COUNTRY_ID] = countryId
             if (cityId != null) prefs[Keys.APP_REGION_CITY_ID] = cityId
+        }
+    }
+
+    // ── Stories/баннерлер (Фаза 14) ───────────────────────────────────
+
+    /** Көрілген баннер-сторис id-лері (MainBannerViewedNotifier паритеті). */
+    val viewedBanners: Flow<Set<String>> =
+        dataStore.data.map { it[Keys.VIEWED_MAIN_BANNERS] ?: emptySet() }
+
+    suspend fun markBannerViewed(id: String) {
+        if (id.isBlank()) return
+        dataStore.edit { prefs ->
+            val current = prefs[Keys.VIEWED_MAIN_BANNERS] ?: emptySet()
+            prefs[Keys.VIEWED_MAIN_BANNERS] = current + id
         }
     }
 

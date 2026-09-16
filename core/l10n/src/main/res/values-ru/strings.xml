@@ -575,6 +575,9 @@
     <string name="order_details">Детали заказа</string>
     <string name="open_file">Открыть файл</string>
     <string name="cannot_open_link">Не удалось открыть ссылку</string>
+    <string name="story_cta">Подробнее</string>
+    <string name="story_advertise">Рекламировать</string>
+    <string name="story_promoted">Продвигаемые</string>
     <string name="call_msg_completed">Аудио звонок</string>
     <string name="call_msg_missed">Пропущенный звонок</string>
     <string name="call_msg_declined">Звонок отклонён</string>

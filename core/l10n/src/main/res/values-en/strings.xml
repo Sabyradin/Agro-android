@@ -573,6 +573,9 @@
     <string name="order_details">Order Details</string>
     <string name="open_file">Open file</string>
     <string name="cannot_open_link">Couldn\'t open the link</string>
+    <string name="story_cta">More details</string>
+    <string name="story_advertise">Advertise</string>
+    <string name="story_promoted">Promoted</string>
     <string name="call_msg_completed">Audio call</string>
     <string name="call_msg_missed">Missed call</string>
     <string name="call_msg_declined">Call declined</string>

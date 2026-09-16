@@ -136,6 +136,8 @@ import com.agroland.feature.shell.language.LanguagePage
 import com.agroland.feature.shell.main.MainShellPage
 import com.agroland.feature.shell.splash.SplashPage
 import com.agroland.feature.shell.splash.SplashTarget
+import com.agroland.feature.stories.domain.StoryViewerStateHolder
+import com.agroland.feature.stories.ui.StoryViewerScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -151,6 +153,10 @@ class MainActivity : AppCompatActivity() {
     /** Фаза 13: WebRTC дауыстық қоңырау state machine-і (singleton overlay). */
     @Inject
     lateinit var voiceCallManager: VoiceCallManager
+
+    /** Фаза 14: толықэкран сторис-viewer сессиясы (singleton overlay). */
+    @Inject
+    lateinit var storyViewerStateHolder: StoryViewerStateHolder
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -264,6 +270,13 @@ class MainActivity : AppCompatActivity() {
                             onToggleSpeaker = { voiceCallManager.toggleSpeaker() },
                             onClearTerminal = { voiceCallManager.clearTerminal() },
                         )
+                    }
+
+                    // Фаза 14: сторис-viewer overlay-і (Flutter BannerStoryViewerPage
+                    // + storyViewerOpenProvider — navbar табиғи жасырылады).
+                    val viewerSession by storyViewerStateHolder.session.collectAsState()
+                    if (viewerSession != null) {
+                        StoryViewerScreen(holder = storyViewerStateHolder)
                     }
                 }
             }
@@ -442,6 +455,15 @@ private fun AppNavHost(
                         onOpenFavorites = { navController.navigate(FavoritesRoute) },
                         onOpenCategories = { navController.navigate(CategoriesRoute) },
                         onOpenNotifications = { navController.navigate(NotificationsRoute) },
+                        // Stories статик промо-карточкалары (Фаза 14):
+                        // құру — CreateAd; жарнама/Қытай/көтерілгендер — Фаза 15/17.
+                        onCreateAnnouncement = {
+                            if (isAuthorized) {
+                                navController.navigate(CreateAdRoute)
+                            } else {
+                                navController.navigate(AuthRoute)
+                            }
+                        },
                     )
                 },
                 chatContent = {

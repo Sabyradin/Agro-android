@@ -572,6 +572,9 @@
     <string name="order_details">订单详情</string>
     <string name="open_file">打开文件</string>
     <string name="cannot_open_link">无法打开链接</string>
+    <string name="story_cta">了解更多</string>
+    <string name="story_advertise">广告公告</string>
+    <string name="story_promoted">推广</string>
     <string name="call_msg_completed">语音通话</string>
     <string name="call_msg_missed">未接来电</string>
     <string name="call_msg_declined">通话被拒绝</string>

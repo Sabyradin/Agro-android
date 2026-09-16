@@ -583,6 +583,9 @@
     <string name="order_details">Тапсырыс мәліметтері</string>
     <string name="open_file">Файлды ашу</string>
     <string name="cannot_open_link">Сілтемені ашу мүмкін болмады</string>
+    <string name="story_cta">Толығырақ</string>
+    <string name="story_advertise">Жарнаманы көтеру</string>
+    <string name="story_promoted">Көтерілгендер</string>
     <string name="call_msg_completed">Аудио қоңырау</string>
     <string name="call_msg_missed">Қабылданбаған қоңырау</string>
     <string name="call_msg_declined">Қоңырау қабылданбады</string>

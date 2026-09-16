@@ -88,6 +88,7 @@ dependencies {
     implementation(project(":feature:location"))
     implementation(project(":feature:chat"))
     implementation(project(":feature:call"))
+    implementation(project(":feature:stories"))
     implementation(project(":feature:notifications"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
