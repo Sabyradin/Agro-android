@@ -210,3 +210,17 @@ data class SingleNotificationRoute(
     val item: com.agroland.feature.notifications.data.NotificationItem,
     val type: String,
 )
+
+// ---- Промо v2 (Phase 15) ----
+
+/** Өз жарнамасын жылжыту — промо v2 каталогы + ағымдағы промо күйі. */
+@Serializable
+data class AdvertiseAdRoute(val announcementId: Long)
+
+/** Өз жарнамаларының промолары — GET /user/announcements/promotions. */
+@Serializable
+data object PromotedAnnouncementsRoute
+
+/** «Жылдам жарнамалар» — type_ad=vip лентасы (Flutter HotAnnouncementsPage). */
+@Serializable
+data object HotAnnouncementsRoute

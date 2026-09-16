@@ -70,6 +70,9 @@ import com.agroland.app.navigation.BalanceRoute
 import com.agroland.app.navigation.TransactionHistoryRoute
 import com.agroland.app.navigation.TopUpRoute
 import com.agroland.app.navigation.WithdrawRoute
+import com.agroland.app.navigation.AdvertiseAdRoute
+import com.agroland.app.navigation.PromotedAnnouncementsRoute
+import com.agroland.app.navigation.HotAnnouncementsRoute
 import com.agroland.core.common.settings.ThemeMode
 import com.agroland.core.l10n.R as L10nR
 import com.agroland.core.ui.theme.AgroTheme
@@ -108,6 +111,8 @@ import com.agroland.feature.marketplace.ui.MakeOfferPage
 import com.agroland.feature.marketplace.ui.MyAnnouncementsPage
 import com.agroland.feature.marketplace.ui.OwnerAnnouncementPage
 import com.agroland.feature.marketplace.ui.SubcategoriesPage
+import com.agroland.feature.promo.ui.AdvertiseAdPage
+import com.agroland.feature.promo.ui.PromotedAnnouncementsPage
 import com.agroland.feature.payment.ui.HalykLaunch
 import com.agroland.feature.payment.ui.PaymentResultPage
 import com.agroland.feature.payment.ui.WebViewPage
@@ -455,11 +460,28 @@ private fun AppNavHost(
                         onOpenFavorites = { navController.navigate(FavoritesRoute) },
                         onOpenCategories = { navController.navigate(CategoriesRoute) },
                         onOpenNotifications = { navController.navigate(NotificationsRoute) },
-                        // Stories статик промо-карточкалары (Фаза 14):
-                        // құру — CreateAd; жарнама/Қытай/көтерілгендер — Фаза 15/17.
+                        // Stories статик промо-карточкалары (Фаза 14/15/17):
+                        // құру — CreateAd; жарнама — өз жарнамаларынан таңдау
+                        // (Flutter-де контекстсіз advertise модельді талап етеді
+                        // — ISSUES #33); көтерілгендер — промо тізімі;
+                        // Қытай каталогы — Фаза 17 кезінде.
                         onCreateAnnouncement = {
                             if (isAuthorized) {
                                 navController.navigate(CreateAdRoute)
+                            } else {
+                                navController.navigate(AuthRoute)
+                            }
+                        },
+                        onOpenAdvertise = {
+                            if (isAuthorized) {
+                                navController.navigate(MyAnnouncementsRoute("active"))
+                            } else {
+                                navController.navigate(AuthRoute)
+                            }
+                        },
+                        onOpenPromoted = {
+                            if (isAuthorized) {
+                                navController.navigate(PromotedAnnouncementsRoute)
                             } else {
                                 navController.navigate(AuthRoute)
                             }
@@ -836,6 +858,7 @@ private fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
                 onEdit = { navController.navigate(EditAdRoute(it)) },
+                onPromote = { navController.navigate(AdvertiseAdRoute(it)) },
             )
         }
 
@@ -946,6 +969,34 @@ private fun AppNavHost(
             TopUpPage(
                 onBack = { navController.popBackStack() },
                 onOpenWebView = openTopUpWebView,
+            )
+        }
+
+        // ---- Промо v2 (Phase 15) ----
+        composable<AdvertiseAdRoute> { entry ->
+            AdvertiseAdPage(
+                announcementId = entry.toRoute<AdvertiseAdRoute>().announcementId,
+                onBack = { navController.popBackStack() },
+                onTopUp = { navController.navigate(TopUpRoute) },
+            )
+        }
+        composable<PromotedAnnouncementsRoute> {
+            PromotedAnnouncementsPage(
+                onBack = { navController.popBackStack() },
+                onOpenAnnouncement = { navController.navigate(ProfileAnnouncementRoute(it)) },
+            )
+        }
+        composable<HotAnnouncementsRoute> {
+            // Flutter HotAnnouncementsPage: GET /announcements type_ad=vip.
+            // Hot лентасы — бір турлі лента, сүзгі жолағы жоқ.
+            AnnouncementsListPage(
+                filter = AnnouncementFilter(typeAd = "vip"),
+                onBack = { navController.popBackStack() },
+                onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
+                onOpenFilter = {},
+                titleOverride = stringResource(L10nR.string.hot_announcements),
+                emptyMessageOverride = stringResource(L10nR.string.no_hot_announcements),
+                showFilterControls = false,
             )
         }
     }

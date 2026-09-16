@@ -49,6 +49,11 @@ fun AnnouncementsListPage(
     onOpenDetail: (Long) -> Unit,
     onOpenFilter: () -> Unit,
     viewModel: FeedViewModel = hiltViewModel(),
+    // Фаза 15: HotAnnouncementsPage осы бетті қайта пайдаланады —
+    // тақырып пен бос тізім мәтінін алмастырады (type_ad=vip лентасы).
+    titleOverride: String? = null,
+    emptyMessageOverride: String? = null,
+    showFilterControls: Boolean = true,
 ) {
     val items by viewModel.items.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -79,7 +84,7 @@ fun AnnouncementsListPage(
         onLoadMore = viewModel::loadMore,
     )
 
-    val title = filter.query?.takeIf { it.isNotBlank() }
+    val title = titleOverride ?: filter.query?.takeIf { it.isNotBlank() }
         ?: stringResource(L10nR.string.announcements_title)
 
     com.agroland.core.ui.components.AgroScaffold(
@@ -87,19 +92,25 @@ fun AnnouncementsListPage(
             com.agroland.core.ui.components.AgroAppBar(
                 title = title,
                 onBack = onBack,
-                actions = {
-                    AgroIconButton(
-                        icon = Icons.Outlined.FilterAlt,
-                        contentDescription = stringResource(L10nR.string.home_filter),
-                        onClick = onOpenFilter,
-                    )
+                actions = if (showFilterControls) {
+                    {
+                        AgroIconButton(
+                            icon = Icons.Outlined.FilterAlt,
+                            contentDescription = stringResource(L10nR.string.home_filter),
+                            onClick = onOpenFilter,
+                        )
+                    }
+                } else {
+                    {}
                 },
             )
         },
     ) { inner ->
         Box(modifier = inner.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
-                FilterSummaryBar(filter = filter, onOpenFilter = onOpenFilter)
+                if (showFilterControls) {
+                    FilterSummaryBar(filter = filter, onOpenFilter = onOpenFilter)
+                }
 
                 when {
                     loading -> Column {
@@ -113,7 +124,8 @@ fun AnnouncementsListPage(
                     }
                     items.isEmpty() -> EmptyView(
                         title = stringResource(L10nR.string.feed_empty_title),
-                        message = stringResource(L10nR.string.feed_empty_message),
+                        message = emptyMessageOverride
+                            ?: stringResource(L10nR.string.feed_empty_message),
                     )
                     else -> LazyColumn(
                         state = listState,

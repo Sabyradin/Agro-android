@@ -40,6 +40,8 @@ fun OwnerAnnouncementPage(
     onBack: () -> Unit,
     onOpenDetail: (Long) -> Unit,
     onEdit: (Long) -> Unit,
+    // Фаза 15: промо v2 — «Жарнама жылжыту» (AdvertiseAdPage) өтуі.
+    onPromote: (Long) -> Unit = {},
     detailViewModel: AnnouncementDetailViewModel = hiltViewModel(),
     actionsViewModel: AnnouncementActionsViewModel = hiltViewModel(),
 ) {
@@ -78,46 +80,61 @@ fun OwnerAnnouncementPage(
         onOpenDetail = onOpenDetail,
         bottomBar = {
             val ext = extendedColors()
-            Column {
+            val isActive = detail?.base?.status.equals("active", ignoreCase = true)
+            Column(modifier = Modifier.navigationBarsPadding()) {
                 SnackbarHost(hostState = snackbar)
                 Surface(color = ext.card) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .navigationBarsPadding()
                             .padding(horizontal = 12.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        val isActive = detail?.base?.status.equals("active", ignoreCase = true)
-                        AgroSmallButton(
-                            text = stringResource(
-                                if (isActive) L10nR.string.ad_action_deactivate
-                                else L10nR.string.ad_action_activate,
-                            ),
-                            onClick = {
-                                if (isActive) {
-                                    actionsViewModel.deactivate(announcementId)
-                                } else {
-                                    actionsViewModel.activate(announcementId)
-                                }
-                            },
-                            enabled = !actionInProgress,
-                            loading = actionInProgress,
-                            modifier = Modifier.weight(1f),
-                        )
-                        AgroTextButton(
-                            text = stringResource(L10nR.string.ad_action_edit),
-                            onClick = { onEdit(announcementId) },
-                            enabled = !actionInProgress,
-                            modifier = Modifier.weight(1f),
-                        )
-                        AgroTextButton(
-                            text = stringResource(L10nR.string.ad_action_delete),
-                            onClick = { confirmDelete = true },
-                            enabled = !actionInProgress,
-                            modifier = Modifier.weight(1f),
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            AgroSmallButton(
+                                text = stringResource(
+                                    if (isActive) L10nR.string.ad_action_deactivate
+                                    else L10nR.string.ad_action_activate,
+                                ),
+                                onClick = {
+                                    if (isActive) {
+                                        actionsViewModel.deactivate(announcementId)
+                                    } else {
+                                        actionsViewModel.activate(announcementId)
+                                    }
+                                },
+                                enabled = !actionInProgress,
+                                loading = actionInProgress,
+                                modifier = Modifier.weight(1f),
+                            )
+                            AgroTextButton(
+                                text = stringResource(L10nR.string.ad_action_edit),
+                                onClick = { onEdit(announcementId) },
+                                enabled = !actionInProgress,
+                                modifier = Modifier.weight(1f),
+                            )
+                            AgroTextButton(
+                                text = stringResource(L10nR.string.ad_action_delete),
+                                onClick = { confirmDelete = true },
+                                enabled = !actionInProgress,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+
+                        // Фаза 15: активті жарнаманы жылжыту — промо v2 каталогы
+                        // (Flutter profile_announcement_actions «Advertise»).
+                        if (isActive) {
+                            AgroSmallButton(
+                                text = stringResource(L10nR.string.advertise),
+                                onClick = { onPromote(announcementId) },
+                                enabled = !actionInProgress,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                     }
                 }
             }
