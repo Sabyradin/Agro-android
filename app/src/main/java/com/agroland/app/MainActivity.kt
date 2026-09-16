@@ -85,6 +85,9 @@ import com.agroland.feature.chat.ui.ArchivedChatsPage
 import com.agroland.feature.chat.ui.ChatListPage
 import com.agroland.feature.chat.ui.ChatRoomPage
 import com.agroland.feature.chat.ui.GuestChatTab
+import com.agroland.feature.call.domain.CallPhase
+import com.agroland.feature.call.domain.VoiceCallManager
+import com.agroland.feature.call.ui.VoiceCallScreen
 import com.agroland.feature.cart.ui.OrderDetailPage
 import com.agroland.feature.location.data.LOCATION_RESULT_KEY
 import com.agroland.feature.location.data.SelectedLocation
@@ -145,6 +148,10 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var chatSocketService: ChatSocketService
 
+    /** Фаза 13: WebRTC дауыстық қоңырау state machine-і (singleton overlay). */
+    @Inject
+    lateinit var voiceCallManager: VoiceCallManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -182,10 +189,13 @@ class MainActivity : AppCompatActivity() {
                         pushController.ensureRegistered(localeTag ?: "kk")
                         // Socket.IO чат қосылымы (Flutter ChatSocketService.initialize).
                         chatSocketService.start()
+                        // Дауыстық қоңырау listener-лері сол socket-та (Фаза 13).
+                        voiceCallManager.start()
                     }
                     SessionState.Guest -> {
                         pushController.unregister()
                         chatSocketService.stop()
+                        voiceCallManager.stop()
                     }
                     SessionState.Loading -> Unit
                 }
@@ -214,26 +224,47 @@ class MainActivity : AppCompatActivity() {
                 darkTheme = themeMode == ThemeMode.DARK ||
                     (themeMode == ThemeMode.SYSTEM && androidx.compose.foundation.isSystemInDarkTheme()),
             ) {
-                if (locked) {
-                    AppLockGate(
-                        pinManager = appViewModel.pinManager,
-                        activity = this,
-                        biometricAuthenticator = appViewModel.biometricAuthenticator,
-                        onUnlocked = { locked = false },
-                    )
-                } else {
-                    AppNavHost(
-                        isAuthorized = session == SessionState.Authorized,
-                        themeMode = themeMode,
-                        localeTag = localeTag,
-                        appViewModel = appViewModel,
-                        pushController = pushController,
-                        chatSocketService = chatSocketService,
-                        onThemeChange = { shellViewModel.setThemeMode(it) },
-                        onAppRegionSelected = { countryId, regionId ->
-                            shellViewModel.setAppRegion(countryId, regionId)
-                        },
-                    )
+                Box(Modifier.fillMaxSize()) {
+                    if (locked) {
+                        AppLockGate(
+                            pinManager = appViewModel.pinManager,
+                            activity = this@MainActivity,
+                            biometricAuthenticator = appViewModel.biometricAuthenticator,
+                            onUnlocked = { locked = false },
+                        )
+                    } else {
+                        AppNavHost(
+                            isAuthorized = session == SessionState.Authorized,
+                            themeMode = themeMode,
+                            localeTag = localeTag,
+                            appViewModel = appViewModel,
+                            pushController = pushController,
+                            chatSocketService = chatSocketService,
+                            voiceCallManager = voiceCallManager,
+                            onThemeChange = { shellViewModel.setThemeMode(it) },
+                            onAppRegionSelected = { countryId, regionId ->
+                                shellViewModel.setAppRegion(countryId, regionId)
+                            },
+                        )
+                    }
+
+                    // Фаза 13: қоңырау overlay-і (Flutter VoiceCallHost) —
+                    // root үстінде, құлыптаулы күйде де (қоңырау қабылдауға
+                    // болады, PIN экраны одан кейін түседі).
+                    val callState by voiceCallManager.state.collectAsState()
+                    if (callState.phase != CallPhase.IDLE || callState.terminalReason != null) {
+                        VoiceCallScreen(
+                            state = callState,
+                            onAccept = { micGranted ->
+                                voiceCallManager.accept(micGranted)
+                            },
+                            onDecline = { voiceCallManager.reject() },
+                            onHangup = { voiceCallManager.hangup() },
+                            onToggleMute = { voiceCallManager.toggleMute() },
+                            onToggleSpeaker = { voiceCallManager.toggleSpeaker() },
+                            onClearTerminal = { voiceCallManager.clearTerminal() },
+                        )
+                    }
                 }
             }
         }
@@ -283,6 +314,7 @@ private fun AppNavHost(
     appViewModel: AppViewModel,
     pushController: PushController,
     chatSocketService: ChatSocketService,
+    voiceCallManager: VoiceCallManager,
     onThemeChange: (ThemeMode) -> Unit,
     onAppRegionSelected: (Int, Int) -> Unit,
 ) {
@@ -471,9 +503,43 @@ private fun AppNavHost(
         }
         // ---- Чат (Фаза 12) ----
         composable<ChatRoomRoute> {
+            // Фаза 13: қоңырау шалу — микрофон рұқсаты берілмесе, алдымен
+            // сұралады, содан кейін invite жіберіледі (pending үлгісі).
+            var pendingCall by remember {
+                mutableStateOf<Triple<Long, String?, String?>?>(null)
+            }
+            val callMicLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission(),
+            ) { granted ->
+                val pending = pendingCall
+                pendingCall = null
+                if (granted && pending != null) {
+                    voiceCallManager.invite(
+                        peerUserId = pending.first,
+                        peerName = pending.second,
+                        peerAvatarUrl = pending.third,
+                        micGranted = true,
+                    )
+                }
+            }
+            val callState by voiceCallManager.state.collectAsState()
+            val activityContext = androidx.compose.ui.platform.LocalContext.current
             ChatRoomPage(
                 onBack = { navController.popBackStack() },
                 onOpenAnnouncement = { navController.navigate(AnnouncementDetailRoute(it)) },
+                callActive = callState.phase != CallPhase.IDLE,
+                onVoiceCall = { peerId, peerName, peerAvatarUrl ->
+                    val micGranted = androidx.core.content.ContextCompat.checkSelfPermission(
+                        activityContext,
+                        Manifest.permission.RECORD_AUDIO,
+                    ) == PackageManager.PERMISSION_GRANTED
+                    if (micGranted) {
+                        voiceCallManager.invite(peerId, peerName, peerAvatarUrl, micGranted = true)
+                    } else {
+                        pendingCall = Triple(peerId, peerName, peerAvatarUrl)
+                        callMicLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                },
             )
         }
         composable<ArchivedChatsRoute> {

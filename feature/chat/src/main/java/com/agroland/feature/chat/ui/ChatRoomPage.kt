@@ -36,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Reply
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.ClearAll
 import androidx.compose.material.icons.outlined.Close
@@ -114,6 +115,10 @@ private sealed interface RoomRow {
 fun ChatRoomPage(
     onBack: () -> Unit,
     onOpenAnnouncement: (Long) -> Unit,
+    /** Фаза 13: дауыстық қоңырау (peer-чаттерде ғана, жүйелік чатта null). */
+    onVoiceCall: ((peerId: Long, peerName: String?, peerAvatarUrl: String?) -> Unit)? = null,
+    /** Қоңырау жүріп жатқанда шалу батырмасы disabled. */
+    callActive: Boolean = false,
     viewModel: ChatRoomViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -359,6 +364,18 @@ fun ChatRoomPage(
             isOnline = peerRoom?.isOnline == true,
             isSystemChat = peerRoom?.announcementAuthorId == 0L,
             peerId = peerId,
+            onVoiceCall = if (onVoiceCall != null && peerRoom?.announcementAuthorId != 0L) {
+                {
+                    onVoiceCall(
+                        peerRoom?.otherUserId ?: 0L,
+                        peerRoom?.otherUserName ?: roomTitle,
+                        peerRoom?.otherUserAvatarUrl,
+                    )
+                }
+            } else {
+                null
+            },
+            callActive = callActive,
             menuOpen = menuOpen,
             onMenuOpenChange = { menuOpen = it },
             onClearHistory = { clearConfirmOpen = true },
@@ -671,6 +688,9 @@ private fun ChatRoomAppBar(
     isOnline: Boolean,
     isSystemChat: Boolean,
     peerId: Long?,
+    /** Дауыстық қоңырау батырмасы (peer-чаттерде ғана; null — жүйелік чат). */
+    onVoiceCall: (() -> Unit)?,
+    callActive: Boolean,
     menuOpen: Boolean,
     onMenuOpenChange: (Boolean) -> Unit,
     onClearHistory: () -> Unit,
@@ -721,6 +741,24 @@ private fun ChatRoomAppBar(
                             colors.secondaryText
                         },
                         maxLines = 1,
+                    )
+                }
+            }
+            // Фаза 13: дауыстық қоңырау (жүйелік чатта жоқ; қоңырау жүріп
+            // жатқанда disabled — сұр, басуға келмейді).
+            if (onVoiceCall != null) {
+                IconButton(
+                    onClick = onVoiceCall,
+                    enabled = !callActive,
+                ) {
+                    Icon(
+                        Icons.Filled.Phone,
+                        contentDescription = stringResource(L10nR.string.call_incoming_title),
+                        tint = if (callActive) {
+                            colors.secondaryText.copy(alpha = 0.45f)
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
                     )
                 }
             }

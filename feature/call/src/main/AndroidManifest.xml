@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Дауыстық қоңырау (WebRTC аудио). -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <!-- Self-managed Telecom қоңыраулары (ConnectionService). -->
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <application>
+        <!-- Self-managed қоңырау: жүйе қоңырау күйін біледі (дыбыс фокусы,
+             микрофон саясаты). Telecom қолжетімсіз болғанда құлап қалмау
+             үшін try/catch-пен қорғалған (IncomingCallNotifier). -->
+        <service
+            android:name=".platform.AgroCallConnectionService"
+            android:exported="false"
+            android:label="Agroland"
+            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService" />
+            </intent-filter>
+        </service>
+
+        <!-- Notification Accept/Decline әрекеттері → VoiceCallManager. -->
+        <receiver
+            android:name=".platform.CallActionReceiver"
+            android:exported="false" />
+    </application>
+</manifest>
