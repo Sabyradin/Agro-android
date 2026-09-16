@@ -70,6 +70,8 @@ fun AnnouncementDetailPage(
     announcementId: Long,
     onBack: () -> Unit,
     onOpenDetail: (Long) -> Unit,
+    /** Фаза 12: сатушымен чат — otherUserId (author_id) + announcement_id арқылы. */
+    onOpenChat: (otherUserId: Long, username: String?, announcementId: Long) -> Unit = { _, _, _ -> },
     bottomBar: (@Composable () -> Unit)? = null,
     viewModel: AnnouncementDetailViewModel = hiltViewModel(),
 ) {
@@ -160,6 +162,8 @@ fun AnnouncementDetailPage(
                 detail != null -> DetailContent(
                     detail = detail!!,
                     onOpenDetail = onOpenDetail,
+                    announcementId = announcementId,
+                    onOpenChat = onOpenChat,
                 )
                 else -> LoadingWidget(Modifier.fillMaxSize())
             }
@@ -175,6 +179,8 @@ fun AnnouncementDetailPage(
 private fun DetailContent(
     detail: com.agroland.feature.marketplace.data.FullAnnouncement,
     onOpenDetail: (Long) -> Unit,
+    announcementId: Long,
+    onOpenChat: (otherUserId: Long, username: String?, announcementId: Long) -> Unit,
 ) {
     val ext = extendedColors()
     val context = LocalContext.current
@@ -372,7 +378,7 @@ private fun DetailContent(
             }
         }
 
-        // Байланыс нөмірлері + Қоңырау шалу.
+        // Байланыс нөмірлері + Чат + Қоңырау шалу.
         item {
             val numbers = detail.contactNumbers.ifEmpty {
                 listOfNotNull(detail.seller?.phoneNumber)
@@ -383,15 +389,41 @@ private fun DetailContent(
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                numbers.firstOrNull()?.let { number ->
-                    AgroButton(
-                        text = stringResource(L10nR.string.detail_call),
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$number"))
-                            context.startActivity(intent)
-                        },
+                val authorId = base.authorId
+                if (authorId != null && authorId > 0) {
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                    )
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        AgroButton(
+                            text = stringResource(L10nR.string.chat),
+                            onClick = { onOpenChat(authorId, detail.seller?.name ?: base.title, announcementId) },
+                            modifier = Modifier.weight(1f),
+                        )
+                        if (numbers.isNotEmpty()) {
+                            AgroButton(
+                                text = stringResource(L10nR.string.detail_call),
+                                onClick = {
+                                    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${numbers.first()}"))
+                                    context.startActivity(intent)
+                                },
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
+                } else {
+                    numbers.firstOrNull()?.let { number ->
+                        AgroButton(
+                            text = stringResource(L10nR.string.detail_call),
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$number"))
+                                context.startActivity(intent)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
                 numbers.drop(1).forEach { number ->
                     Text(

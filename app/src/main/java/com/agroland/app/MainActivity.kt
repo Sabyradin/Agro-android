@@ -51,7 +51,12 @@ import com.agroland.app.navigation.LocationSelectionRoute
 import com.agroland.app.navigation.MainShellRoute
 import com.agroland.app.navigation.MakeOfferRoute
 import com.agroland.app.navigation.MyAnnouncementsRoute
+import com.agroland.app.navigation.ArchivedChatsRoute
+import com.agroland.app.navigation.ChatRoomRoute
+import com.agroland.app.navigation.NotificationsByTypeRoute
+import com.agroland.app.navigation.NotificationsRoute
 import com.agroland.app.navigation.PinSetupRoute
+import com.agroland.app.navigation.SingleNotificationRoute
 import com.agroland.app.navigation.ProfileAddressesRoute
 import com.agroland.app.navigation.ProfileAnnouncementRoute
 import com.agroland.app.navigation.RegionListRoute
@@ -75,6 +80,11 @@ import com.agroland.feature.auth.ui.PinSetupPage
 import com.agroland.feature.cart.ui.CartPage
 import com.agroland.feature.cart.ui.DetailBuyBar
 import com.agroland.feature.cart.ui.GuestCartTab
+import com.agroland.feature.chat.domain.ChatSocketService
+import com.agroland.feature.chat.ui.ArchivedChatsPage
+import com.agroland.feature.chat.ui.ChatListPage
+import com.agroland.feature.chat.ui.ChatRoomPage
+import com.agroland.feature.chat.ui.GuestChatTab
 import com.agroland.feature.cart.ui.OrderDetailPage
 import com.agroland.feature.location.data.LOCATION_RESULT_KEY
 import com.agroland.feature.location.data.SelectedLocation
@@ -98,6 +108,10 @@ import com.agroland.feature.marketplace.ui.SubcategoriesPage
 import com.agroland.feature.payment.ui.HalykLaunch
 import com.agroland.feature.payment.ui.PaymentResultPage
 import com.agroland.feature.payment.ui.WebViewPage
+import com.agroland.feature.notifications.data.NotificationType
+import com.agroland.feature.notifications.ui.NotificationsByTypePage
+import com.agroland.feature.notifications.ui.NotificationsPage
+import com.agroland.feature.notifications.ui.SingleNotificationPage
 import com.agroland.feature.push.domain.PushController
 import com.agroland.feature.push.domain.PushDestination
 import com.agroland.feature.push.service.PushNotificationShower
@@ -127,6 +141,9 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var pushController: PushController
+
+    @Inject
+    lateinit var chatSocketService: ChatSocketService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -161,8 +178,15 @@ class MainActivity : AppCompatActivity() {
             // Authorized → POST /device (тек токен жаңа болса), Guest → DELETE.
             LaunchedEffect(session) {
                 when (session) {
-                    SessionState.Authorized -> pushController.ensureRegistered(localeTag ?: "kk")
-                    SessionState.Guest -> pushController.unregister()
+                    SessionState.Authorized -> {
+                        pushController.ensureRegistered(localeTag ?: "kk")
+                        // Socket.IO чат қосылымы (Flutter ChatSocketService.initialize).
+                        chatSocketService.start()
+                    }
+                    SessionState.Guest -> {
+                        pushController.unregister()
+                        chatSocketService.stop()
+                    }
                     SessionState.Loading -> Unit
                 }
             }
@@ -204,6 +228,7 @@ class MainActivity : AppCompatActivity() {
                         localeTag = localeTag,
                         appViewModel = appViewModel,
                         pushController = pushController,
+                        chatSocketService = chatSocketService,
                         onThemeChange = { shellViewModel.setThemeMode(it) },
                         onAppRegionSelected = { countryId, regionId ->
                             shellViewModel.setAppRegion(countryId, regionId)
@@ -257,10 +282,14 @@ private fun AppNavHost(
     localeTag: String?,
     appViewModel: AppViewModel,
     pushController: PushController,
+    chatSocketService: ChatSocketService,
     onThemeChange: (ThemeMode) -> Unit,
     onAppRegionSelected: (Int, Int) -> Unit,
 ) {
     val navController = rememberNavController()
+
+    // Чат қойындысының бейджі — Socket.IO totalUnread (Flutter bottom_navbar).
+    val chatBadge by chatSocketService.totalUnread.collectAsState()
 
     // Push межесі (өлі күй реплейі де осыған келеді): сессия дайын болғанда
     // БІР рет навигация жасап, pending күйді тазартамыз.
@@ -275,10 +304,17 @@ private fun AppNavHost(
                 navController.navigate(AnnouncementDetailRoute(destination.announcementId))
             PushDestination.Verification -> navController.navigate(VerificationRoute)
             PushDestination.Balance -> navController.navigate(BalanceRoute)
-            // Чат бөлмесі мен хабарламалар тізімі экрандары Фаза 12-де қосылады —
-            // осы межелер сол кезде навигацияға жалғанады (ISSUES.md #24).
-            is PushDestination.ChatRoom -> Unit
-            is PushDestination.Notifications -> Unit
+            is PushDestination.ChatRoom -> navController.navigate(
+                ChatRoomRoute(
+                    roomId = destination.roomId,
+                    otherUserId = destination.senderId,
+                    username = destination.senderName,
+                    isSystemChat = destination.isSystemChat,
+                ),
+            )
+            is PushDestination.Notifications -> navController.navigate(
+                NotificationsByTypeRoute(destination.type ?: "service"),
+            )
         }
         pushController.consumePending()
     }
@@ -359,6 +395,7 @@ private fun AppNavHost(
                         navController.navigate(AuthRoute)
                     }
                 },
+                chatBadge = chatBadge,
                 homeContent = {
                     HomeFeedPage(
                         onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
@@ -372,7 +409,29 @@ private fun AppNavHost(
                         onOpenFilter = { navController.navigate(FilterRoute(AnnouncementFilter())) },
                         onOpenFavorites = { navController.navigate(FavoritesRoute) },
                         onOpenCategories = { navController.navigate(CategoriesRoute) },
+                        onOpenNotifications = { navController.navigate(NotificationsRoute) },
                     )
+                },
+                chatContent = {
+                    if (isAuthorized) {
+                        ChatListPage(
+                            onOpenRoom = { room, username, otherUserId, isSystemChat, announcementId ->
+                                navController.navigate(
+                                    ChatRoomRoute(
+                                        roomId = room.roomId,
+                                        otherUserId = otherUserId,
+                                        username = username,
+                                        isSystemChat = isSystemChat,
+                                        announcementId = announcementId?.toLongOrNull(),
+                                        roomAnnouncementId = room.announcementId,
+                                    ),
+                                )
+                            },
+                            onOpenArchived = { navController.navigate(ArchivedChatsRoute) },
+                        )
+                    } else {
+                        GuestChatTab(onLoginClick = { navController.navigate(AuthRoute) })
+                    }
                 },
                 cartContent = {
                     if (isAuthorized) {
@@ -400,8 +459,64 @@ private fun AppNavHost(
                         onMyAnnouncements = { status ->
                             navController.navigate(MyAnnouncementsRoute(status))
                         },
+                        // Фаза 12: қолдау чаты — жүйелік қолданушы 31 (kSupportUserId).
+                        onOpenSupportChat = {
+                            navController.navigate(
+                                ChatRoomRoute(otherUserId = 31L, isSystemChat = true),
+                            )
+                        },
                     )
                 },
+            )
+        }
+        // ---- Чат (Фаза 12) ----
+        composable<ChatRoomRoute> {
+            ChatRoomPage(
+                onBack = { navController.popBackStack() },
+                onOpenAnnouncement = { navController.navigate(AnnouncementDetailRoute(it)) },
+            )
+        }
+        composable<ArchivedChatsRoute> {
+            ArchivedChatsPage(
+                onBack = { navController.popBackStack() },
+                onOpenRoom = { room, username, otherUserId, isSystemChat, announcementId ->
+                    navController.navigate(
+                        ChatRoomRoute(
+                            roomId = room.roomId,
+                            otherUserId = otherUserId,
+                            username = username,
+                            isSystemChat = isSystemChat,
+                            announcementId = announcementId?.toLongOrNull(),
+                            roomAnnouncementId = room.announcementId,
+                        ),
+                    )
+                },
+            )
+        }
+
+        // ---- Хабарламалар (Фаза 12) ----
+        composable<NotificationsRoute> {
+            NotificationsPage(
+                onBack = { navController.popBackStack() },
+                onOpenType = { type ->
+                    navController.navigate(NotificationsByTypeRoute(type.path))
+                },
+            )
+        }
+        composable<NotificationsByTypeRoute> {
+            NotificationsByTypePage(
+                onBack = { navController.popBackStack() },
+                onOpenItem = { item, type ->
+                    navController.navigate(SingleNotificationRoute(item, type.path))
+                },
+            )
+        }
+        composable<SingleNotificationRoute> { entry ->
+            val route = entry.toRoute<SingleNotificationRoute>()
+            SingleNotificationPage(
+                item = route.item,
+                type = NotificationType.fromString(route.type),
+                onBack = { navController.popBackStack() },
             )
         }
         composable<AuthRoute> {
@@ -514,6 +629,20 @@ private fun AppNavHost(
                 announcementId = entry.toRoute<AnnouncementDetailRoute>().id,
                 onBack = { navController.popBackStack() },
                 onOpenDetail = { navController.navigate(AnnouncementDetailRoute(it)) },
+                // Фаза 12: сатушымен чат. Гость — авторизация арқылы.
+                onOpenChat = if (isAuthorized) {
+                    { otherUserId, username, annId ->
+                        navController.navigate(
+                            ChatRoomRoute(
+                                otherUserId = otherUserId,
+                                username = username,
+                                announcementId = annId,
+                            ),
+                        )
+                    }
+                } else {
+                    { _, _, _ -> navController.navigate(AuthRoute) }
+                },
                 bottomBar = {
                     if (isAuthorized) {
                         DetailBuyBar(

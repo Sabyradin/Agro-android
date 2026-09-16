@@ -172,3 +172,41 @@ data object TransactionHistoryRoute
 /** Әмиянды толтыру — BCC 3DS HTML формасы WebView-қа ашылады. */
 @Serializable
 data object TopUpRoute
+// ---- Чат (Phase 12) ----
+
+/**
+ * Чат бөлмесі. Тізімнен ашылғанда — roomId + otherUserId + username;
+ * жарнамадан басталған сұхбат — announcementId + deliveryAddress;
+ * push-тан — senderId арқылы басқарылатын межелер.
+ */
+@Serializable
+data class ChatRoomRoute(
+    val roomId: Long? = null,
+    val otherUserId: Long? = null,
+    val username: String? = null,
+    val announcementId: Long? = null,
+    val deliveryAddress: String? = null,
+    val isSystemChat: Boolean = false,
+    val roomAnnouncementId: Long? = null,
+)
+
+/** Мұрағатқа шығарылған чаттар (Flutter ArchivedChatsPage). */
+@Serializable
+data object ArchivedChatsRoute
+
+// ---- Хабарламалар (Phase 12) ----
+
+/** Хабарламалар хабы — үш бөлім (service/support/promotions). */
+@Serializable
+data object NotificationsRoute
+
+/** Бөлім хабарламалары тізімі (type = service|support|promotions). */
+@Serializable
+data class NotificationsByTypeRoute(val type: String)
+
+/** Толық хабарлама — модель навигация арқылы беріледі (Flutter model query). */
+@Serializable
+data class SingleNotificationRoute(
+    val item: com.agroland.feature.notifications.data.NotificationItem,
+    val type: String,
+)

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Campaign
+import androidx.compose.material.icons.outlined.Headset
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ReceiptLong
@@ -77,6 +78,7 @@ fun ProfilePage(
     onOpenTransactions: () -> Unit = {},
     onOpenTopUp: () -> Unit = {},
     onMyAnnouncements: (String) -> Unit = {},
+    onOpenSupportChat: () -> Unit = {},
 ) {
     val viewModel = rememberProfileViewModel()
     val profile by viewModel.profile.collectAsState()
@@ -142,6 +144,7 @@ fun ProfilePage(
                     onOpenTransactions = onOpenTransactions,
                     onOpenTopUp = onOpenTopUp,
                     onMyAnnouncements = onMyAnnouncements,
+                    onOpenSupportChat = onOpenSupportChat,
                 )
             }
             SnackbarHost(hostState = snackbar, modifier = Modifier.align(Alignment.BottomCenter))
@@ -184,6 +187,7 @@ private fun AuthorizedProfileContent(
     onOpenTransactions: () -> Unit,
     onOpenTopUp: () -> Unit,
     onMyAnnouncements: (String) -> Unit,
+    onOpenSupportChat: () -> Unit,
 ) {
     val isDealer = profile.userType.equals("dealer", ignoreCase = true) ||
         profile.userType.equals("business", ignoreCase = true)
@@ -269,6 +273,17 @@ private fun AuthorizedProfileContent(
         }
         if (!isDealer) {
             item { ProfileThemeCard(themeMode, onThemeChange) }
+        }
+        // Қолдау чаты (Flutter ProfileSupport / DealerSupportSection): жүйелік
+        // чат 31, басқа секция тәуелсіз — барлық авторизацияланған қолданушыға.
+        item {
+            ProfileSectionCard(title = null) {
+                AgroListTile(
+                    title = stringResource(L10nR.string.support),
+                    leading = { SectionIcon(Icons.Outlined.Headset) },
+                    onClick = onOpenSupportChat,
+                )
+            }
         }
         item {
             ProfileSectionCard(title = null) {

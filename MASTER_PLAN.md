@@ -22,8 +22,8 @@
 | 8 | Себет / чекаут / тапсырыстар | CartPage (оптимистік qty), Smart Calculator preview (warnings сүзу+локализация), SupplierPicker, Checkout, OrderDetail+timeline, тарих қойындылары | ✅ |
 | 9 | Төлемдер | Halyk ePay (invoice_url+poll 2с/60с), баланспен төлеу, BCC 3DS (HMAC-SHA1 P_SIGN), mock режим, pending resume, X-Platform: android | ✅ |
 | 10 | Әмиян | Balance, hold, транзакциялар, шығару (мин 5000₸, IBAN/BIK), /business/* жолдар | ✅ |
-| 11 | Push | FCM, каналдар, POST /device, deep-link 4 түрі, өлі күй реплейі, бейдж | ✅ (бейдж/чат-межелер — Фаза 12) |
-| 12 | Чат | Socket.IO client (websocket-only, auth Bearer+language), тізім (merge, other_user_name, жүйелік чат 31/1001-1005), бөлме (join retry 4/8/16, оптимистік localId, infer_message_type 1:1, CR/LF санитайзер, typing, load_older, дауыстық, медиа) | ⬜ |
+| 11 | Push | FCM, каналдар, POST /device, deep-link 4 түрі, өлі күй реплейі, бейдж | ✅ |
+| 12 | Чат | Socket.IO client (websocket-only, auth Bearer+language), тізім (merge, other_user_name, жүйелік чат 31/1001-1005), бөлме (join retry 4/8/16, оптимистік localId, infer_message_type 1:1, CR/LF санитайзер, typing, load_older, дауыстық, медиа) + feature/notifications (хаб/3 секция, тізім, толық бет), чат бейджі, push ChatRoom/Notifications межелері, деталь-чат батырмасы, қолдау чаты (id 31) | ✅ (видео сығу Transformer — Фаза 18, қоңырау — Фаза 13) |
 | 13 | Қоңырау | stream-webrtc-android, call:* сигналинг, TURN кэш 5мин, ICE restart (offerer, 1 рет), Telecom ConnectionService + full-screen intent + CallStyle, missed-call реплей | ⬜ |
 | 14 | Stories, баннерлер | BannerStoryViewer (5с, прогресс, пауза, свайп), StoriesListView, markViewed (auth), маркетинг клик/көру, 4 статикалық промо | ⬜ |
 | 15 | Промо v2 | Catalog (activate_endpoint диспетчер, 409→PATCH), AdvertiseAd, PromoBannerForm (multipart), CurrentStatus chips, Promoted/Hot ленталары | ⬜ |

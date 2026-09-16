@@ -4,4 +4,11 @@
     <cache-path
         name="templates"
         path="templates/" />
+    <!-- Чат: жүктелген файлдар (ChatFileOpener) + камера нәтижелері. -->
+    <cache-path
+        name="chat_files"
+        path="chat_files/" />
+    <cache-path
+        name="camera"
+        path="camera/" />
 </paths>

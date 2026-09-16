@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -67,8 +68,11 @@ private val TAB_SPECS = listOf(
 fun MainShellPage(
     onCreateClick: () -> Unit,
     homeContent: @Composable () -> Unit = { HomePage() },
+    chatContent: @Composable () -> Unit = { ComingSoonTab() },
     cartContent: @Composable () -> Unit = { ComingSoonTab() },
     servicesContent: @Composable () -> Unit = { ComingSoonTab() },
+    /** Чат қойындысының оқылмаған бейджі (Socket.IO totalUnread). */
+    chatBadge: Int = 0,
 ) {
     var selected by rememberSaveable { mutableIntStateOf(0) }
 
@@ -76,15 +80,17 @@ fun MainShellPage(
         Box(modifier = Modifier.weight(1f)) {
             when (ShellTab.entries.getOrNull(selected)) {
                 ShellTab.HOME -> homeContent()
+                ShellTab.CHAT -> chatContent()
                 ShellTab.CART -> cartContent()
                 ShellTab.SERVICES -> servicesContent()
-                else -> ComingSoonTab() // chat — фаза 12
+                else -> ComingSoonTab()
             }
         }
         GlassBottomBar(
             selected = selected,
             onSelect = { selected = it },
             onCreateClick = onCreateClick,
+            chatBadge = chatBadge,
         )
     }
 }
@@ -95,6 +101,7 @@ private fun GlassBottomBar(
     selected: Int,
     onSelect: (Int) -> Unit,
     onCreateClick: () -> Unit,
+    chatBadge: Int = 0,
 ) {
     val ext = extendedColors()
     Box(
@@ -136,6 +143,7 @@ private fun GlassBottomBar(
                     spec = TAB_SPECS[index],
                     label = stringResource(tab.labelRes),
                     selected = selected == index,
+                    badgeCount = if (tab == ShellTab.CHAT) chatBadge else 0,
                     onClick = { onSelect(index) },
                     modifier = Modifier.weight(1f),
                 )
@@ -151,6 +159,7 @@ private fun BottomBarItem(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    badgeCount: Int = 0,
 ) {
     val ext = extendedColors()
     Column(
@@ -160,12 +169,32 @@ private fun BottomBarItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(
-            imageVector = if (selected) spec.selectedIcon else spec.icon,
-            contentDescription = label,
-            tint = if (selected) MaterialTheme.colorScheme.primary else ext.secondaryText,
-            modifier = Modifier.size(24.dp),
-        )
+        Box {
+            Icon(
+                imageVector = if (selected) spec.selectedIcon else spec.icon,
+                contentDescription = label,
+                tint = if (selected) MaterialTheme.colorScheme.primary else ext.secondaryText,
+                modifier = Modifier.size(24.dp),
+            )
+            // Оқылмаған бейдж — иконканың жоғарғы оң жағында.
+            if (badgeCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(x = 10.dp, y = (-4).dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.error),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = if (badgeCount > 99) "99+" else badgeCount.toString(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onError,
+                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                    )
+                }
+            }
+        }
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,

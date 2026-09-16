@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.FilterAlt
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +71,7 @@ fun HomeFeedPage(
     onOpenFilter: () -> Unit,
     onOpenFavorites: () -> Unit,
     onOpenCategories: () -> Unit,
+    onOpenNotifications: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val ext = extendedColors()
@@ -107,6 +109,11 @@ fun HomeFeedPage(
                 },
                 hint = stringResource(L10nR.string.home_search_hint),
                 modifier = Modifier.weight(1f),
+            )
+            AgroIconButton(
+                icon = Icons.Outlined.Notifications,
+                contentDescription = stringResource(L10nR.string.notifications),
+                onClick = onOpenNotifications,
             )
             AgroIconButton(
                 icon = Icons.Outlined.FilterAlt,

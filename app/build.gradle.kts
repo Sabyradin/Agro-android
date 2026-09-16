@@ -86,6 +86,8 @@ dependencies {
     implementation(project(":feature:wallet"))
     implementation(project(":feature:push"))
     implementation(project(":feature:location"))
+    implementation(project(":feature:chat"))
+    implementation(project(":feature:notifications"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))
