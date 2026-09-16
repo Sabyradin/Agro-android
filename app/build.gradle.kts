@@ -95,6 +95,9 @@ dependencies {
     implementation(project(":feature:china"))
     implementation(project(":feature:services"))
     implementation(project(":feature:demand"))
+    // Фаза 18: пікірлер (MyReviews/seller/announcement) + медиа көрсеткіштері.
+    implementation(project(":feature:reviews"))
+    implementation(project(":feature:media"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))

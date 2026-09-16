@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 评论 (Phase 18): 公告/卖家/我的评论，Flutter review/ + ARB 1:1 -->
+    <string name="feedbacks">反馈</string>
+    <string name="leave_feedback">留下反馈</string>
+    <string name="rate_announcement">评价公告</string>
+    <string name="you_viewed_announcement">您最近查看了此公告</string>
+    <string name="leave_feedback_title">您可以评价并留下反馈</string>
+    <string name="no_reviews_title">暂无评论</string>
+    <string name="no_reviews_subtitle">此公告尚无反馈</string>
+    <string name="feedback_enter_hint">输入您的反馈</string>
+    <string name="max_chars_count">最多 %1$d 个字符</string>
+    <string name="all_reviews">所有评论</string>
+    <string name="seller_reviews_title">卖家评价</string>
+    <string name="seller_reviews_empty">暂无评价</string>
+    <string name="anonymous">匿名</string>
+    <string name="published_at">发布时间: %1$s</string>
+    <string name="rating">评分: %1$s</string>
+    <string name="my_reviews_title">我的评价</string>
+    <string name="my_reviews_pending_tab">待评价</string>
+    <string name="my_reviews_done_tab">已评价</string>
+    <string name="my_reviews_pending_empty">暂无待评价的公告</string>
+    <string name="my_reviews_done_empty">您还没有留下评价</string>
+    <plurals name="seller_reviews_count">
+        <item quantity="other">%1$d 条评价</item>
+    </plurals>
+
+    <!-- 媒体 + QR (Phase 18): 照片/视频/PDF 查看器，二维码扫描 -->
+    <string name="scan_qr">扫描二维码</string>
+    <string name="qr_not_recognized">无法识别二维码</string>
+    <string name="pdf_load_failed">PDF 加载失败</string>
+    <string name="document_title">文档</string>
+</resources>

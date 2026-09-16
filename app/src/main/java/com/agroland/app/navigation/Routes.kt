@@ -288,3 +288,45 @@ data class CreateEditDemandRoute(val demandId: Long = -1L)
 /** Профиль беті — Home аватары ашады (SERVICES қойындысы Сервистерге ауысты). */
 @Serializable
 data object ProfileRoute
+
+// ═══════════════ Фаза 18 — Пікірлер / Медиа / QR ═══════════════
+
+/** Жарнама пікірлері — толық тізім (деталь бетінің превьюінен ашылады). */
+@Serializable
+data class AnnouncementReviewsRoute(val announcementId: Long)
+
+/** Пікір қалдыру (жұлдыздар + мәтін ≤1000). */
+@Serializable
+data class SendReviewRoute(val announcementId: Long)
+
+/** GET /user/{id}/reviews — жарнама бойынша пікір жиынтықтары. */
+@Serializable
+data class ProfileReviewsRoute(val userId: Long)
+
+/** GET /seller/{id}/reviews — сатушы пікірлері + like. */
+@Serializable
+data class SellerReviewsRoute(val userId: Long)
+
+/** «Менің пікірлерім» — клиент жағынан агрегация, 2 қойынды (spec §10). */
+@Serializable
+data object MyReviewsRoute
+
+/** Суреттер галереясы — pinch zoom + парақтау (деталь/чат/тапсырыс). */
+@Serializable
+data class PhotoViewerRoute(val images: List<String>, val initialIndex: Int = 0)
+
+/** Бейне көрсеткі — ExoPlayer (mp4/әмбебап). */
+@Serializable
+data class VideoViewerRoute(val url: String, val title: String? = null)
+
+/** PDF көрсеткі — ішінде рендер (ISSUES #27). */
+@Serializable
+data class PdfViewerRoute(val url: String)
+
+/** YouTube IFrame көрсеткі — videoId шықпаса VideoViewer fallback. */
+@Serializable
+data class YouTubeViewerRoute(val url: String)
+
+/** QR сканер — Home іздеу жолағынан ашылады. */
+@Serializable
+data object QrScannerRoute

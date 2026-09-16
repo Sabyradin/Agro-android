@@ -6,6 +6,7 @@ import com.agroland.core.network.ApiResult
 import com.agroland.feature.marketplace.data.FullAnnouncement
 import com.agroland.feature.marketplace.data.MarketplaceRepository
 import com.agroland.feature.marketplace.domain.FavoriteSync
+import com.agroland.feature.reviews.data.ViewedAnnouncementsStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,12 +20,14 @@ import kotlinx.coroutines.launch
 
 /**
  * AnnouncementDetailViewModel — деталь экраны: толық жарнама (FIFO кешпен fallback),
- * сүйіктіге қосу/алу, ұқсас және қосымша жарнамалар.
+ * сүйіктіге қосу/алу, ұқсас және қосымша жарнамалар. Фаза 18: қаралған жарнамалар
+ * дүкеніне жазу («Менің пікірлерім» үміткерлері, spec §10).
  */
 @HiltViewModel
 class AnnouncementDetailViewModel @Inject constructor(
     private val repository: MarketplaceRepository,
     private val favoriteSync: FavoriteSync,
+    private val viewedStore: ViewedAnnouncementsStore,
 ) : ViewModel() {
 
     private val _detail = MutableStateFlow<FullAnnouncement?>(null)
@@ -55,6 +58,10 @@ class AnnouncementDetailViewModel @Inject constructor(
             when (val result = repository.getAnnouncement(id)) {
                 is ApiResult.Success -> _detail.value = result.value
                 is ApiResult.Error -> _error.value = result.failure.toMarketplaceError()
+            }
+            // Қаралған жарнама дүкеніне жазамыз («Менің пікірлерім» үміткері).
+            if (id > 0) {
+                launch { viewedStore.addViewed(id) }
             }
             _loading.value = false
         }

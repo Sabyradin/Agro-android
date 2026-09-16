@@ -8,12 +8,13 @@ plugins {
 }
 
 android {
-    namespace = "com.agroland.feature.marketplace"
+    namespace = "com.agroland.feature.reviews"
     compileSdk = 36
 
     defaultConfig {
         minSdk = 25
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -32,29 +33,25 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))
     implementation(project(":core:network"))
-    implementation(project(":feature:auth"))
-    // Жазу ағыны: профиль мекенжайлары (user_location_id) және MultipartHelper.
+    // CurrentUserProvider үлгісі (өз user_id-ді GET /user/profile-тан алады).
     implementation(project(":feature:profile"))
-    implementation(project(":feature:location"))
-    implementation(project(":feature:stories"))
-    // Фаза 18: деталь бетіндегі пікірлер бөлімі + қаралған жарнамалар дүкені.
-    implementation(project(":feature:reviews"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.activity.compose)
-    // Жаңа (жергілікті Uri) сурет таңдауларының thumbnails-ы үшін.
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.test)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    debugImplementation(libs.compose.ui.tooling)
-    implementation(libs.compose.ui.tooling.preview)
-
     testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
 }

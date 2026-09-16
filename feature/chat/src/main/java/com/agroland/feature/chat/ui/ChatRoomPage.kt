@@ -119,6 +119,12 @@ fun ChatRoomPage(
     onVoiceCall: ((peerId: Long, peerName: String?, peerAvatarUrl: String?) -> Unit)? = null,
     /** Қоңырау жүріп жатқанда шалу батырмасы disabled. */
     callActive: Boolean = false,
+    /** Фаза 18: сурет — ішкі pinch-zoom фото көрсеткіші (null — локальды диалог). */
+    onOpenPhotoViewer: ((url: String) -> Unit)? = null,
+    /** Фаза 18: бейне — ішкі ExoPlayer көрсеткіші (null — сыртқы intent). */
+    onOpenVideoViewer: ((url: String) -> Unit)? = null,
+    /** Фаза 18: PDF — ішкі PdfRenderer көрсеткіші (null — сыртқы intent). */
+    onOpenPdfViewer: ((url: String) -> Unit)? = null,
     viewModel: ChatRoomViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -415,16 +421,35 @@ fun ChatRoomPage(
                                     viewModel = viewModel,
                                     meId = meId,
                                     onLongPress = { menuMessage = row.message },
-                                    onOpenImage = { viewerUrl = it },
-                                    onPlayVideo = { url -> playVideoExternally(context, url) },
+                                    onOpenImage = { url ->
+                                        val openPhoto = onOpenPhotoViewer
+                                        if (openPhoto != null) {
+                                            openPhoto(url)
+                                        } else {
+                                            viewerUrl = url
+                                        }
+                                    },
+                                    onPlayVideo = { url ->
+                                        val openVideo = onOpenVideoViewer
+                                        if (openVideo != null) {
+                                            openVideo(url)
+                                        } else {
+                                            playVideoExternally(context, url)
+                                        }
+                                    },
                                     onOpenFile = { url, name ->
-                                        scope.launch {
-                                            snackbar.showSnackbar(
-                                                context.getString(L10nR.string.chat_file_opening),
-                                            )
-                                            val file = ChatFileOpener.downloadToCache(context, url, name)
-                                            if (file == null || !ChatFileOpener.open(context, file)) {
-                                                snackbar.showSnackbar(fileOpenErrorMsg)
+                                        val openPdf = onOpenPdfViewer
+                                        if (openPdf != null && name.endsWith(".pdf", ignoreCase = true)) {
+                                            openPdf(url)
+                                        } else {
+                                            scope.launch {
+                                                snackbar.showSnackbar(
+                                                    context.getString(L10nR.string.chat_file_opening),
+                                                )
+                                                val file = ChatFileOpener.downloadToCache(context, url, name)
+                                                if (file == null || !ChatFileOpener.open(context, file)) {
+                                                    snackbar.showSnackbar(fileOpenErrorMsg)
+                                                }
                                             }
                                         }
                                     },

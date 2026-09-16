@@ -3,6 +3,7 @@ package com.agroland.feature.marketplace.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,6 +60,7 @@ import com.agroland.core.ui.components.ErrorWithRetry
 import com.agroland.core.ui.components.LoadingWidget
 import com.agroland.core.ui.components.ShimmerBox
 import com.agroland.core.ui.theme.extendedColors
+import com.agroland.feature.reviews.ui.AnnouncementReviewsSection
 
 /**
  * AnnouncementDetailPage — толық жарнама (Фаза 5): галерея, баға, сатушы картасы,
@@ -72,6 +74,12 @@ fun AnnouncementDetailPage(
     onOpenDetail: (Long) -> Unit,
     /** Фаза 12: сатушымен чат — otherUserId (author_id) + announcement_id арқылы. */
     onOpenChat: (otherUserId: Long, username: String?, announcementId: Long) -> Unit = { _, _, _ -> },
+    /** Фаза 18: галерея суреті — pinch-zoom фото көрсеткіші. */
+    onOpenPhotoViewer: (images: List<String>, index: Int) -> Unit = { _, _ -> },
+    /** Фаза 18: Kaspi-стиль пікірлер бөлімінен — толық пікірлер беті. */
+    onOpenReviews: (Long) -> Unit = {},
+    /** Фаза 18: сатушы пікірлері (seller card). */
+    onOpenSellerReviews: (userId: Long) -> Unit = {},
     bottomBar: (@Composable () -> Unit)? = null,
     viewModel: AnnouncementDetailViewModel = hiltViewModel(),
 ) {
@@ -164,6 +172,9 @@ fun AnnouncementDetailPage(
                     onOpenDetail = onOpenDetail,
                     announcementId = announcementId,
                     onOpenChat = onOpenChat,
+                    onOpenPhotoViewer = onOpenPhotoViewer,
+                    onOpenReviews = onOpenReviews,
+                    onOpenSellerReviews = onOpenSellerReviews,
                 )
                 else -> LoadingWidget(Modifier.fillMaxSize())
             }
@@ -181,6 +192,9 @@ private fun DetailContent(
     onOpenDetail: (Long) -> Unit,
     announcementId: Long,
     onOpenChat: (otherUserId: Long, username: String?, announcementId: Long) -> Unit,
+    onOpenPhotoViewer: (images: List<String>, index: Int) -> Unit,
+    onOpenReviews: (Long) -> Unit,
+    onOpenSellerReviews: (userId: Long) -> Unit,
 ) {
     val ext = extendedColors()
     val context = LocalContext.current
@@ -205,7 +219,8 @@ private fun DetailContent(
                     contentDescription = base.title,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(240.dp),
+                        .height(240.dp)
+                        .clickable { onOpenPhotoViewer(images, 0) },
                 )
             } else {
                 val pagerState = rememberPagerState(pageCount = { images.size })
@@ -221,7 +236,8 @@ private fun DetailContent(
                             contentDescription = base.title,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(240.dp),
+                                .height(240.dp)
+                                .clickable { onOpenPhotoViewer(images, page) },
                         )
                     }
                     Row(
@@ -306,7 +322,7 @@ private fun DetailContent(
             }
         }
 
-        // Сатушы картасы.
+        // Сатушы картасы — Фаза 18: басылса сатушы пікірлері ашылады.
         item {
             detail.seller?.let { seller ->
                 Row(
@@ -315,6 +331,9 @@ private fun DetailContent(
                         .padding(horizontal = 16.dp)
                         .clip(RoundedCornerShape(14.dp))
                         .background(ext.card)
+                        .clickable(enabled = base.authorId != null && base.authorId > 0) {
+                            base.authorId?.let { onOpenSellerReviews(it) }
+                        }
                         .padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -376,6 +395,18 @@ private fun DetailContent(
                     }
                 }
             }
+        }
+
+        // Пікірлер — Kaspi-стиль превью (Фаза 18, spec §10): орташа рейтинг
+        // + 3 превью + «Барлық пікірлер»; бөлім әрдайым көрінеді (Flutter-дегі
+        // feedback бөлімінің Android паритеті).
+        item {
+            AnnouncementReviewsSection(
+                announcementId = announcementId,
+                rating = detail.seller?.rating ?: base.rating ?: 0.0,
+                reviewsCount = base.reviewsCount,
+                onOpenReviews = { onOpenReviews(announcementId) },
+            )
         }
 
         // Байланыс нөмірлері + Чат + Қоңырау шалу.

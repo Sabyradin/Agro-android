@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
@@ -88,6 +89,16 @@ import com.agroland.app.navigation.DemandListRoute
 import com.agroland.app.navigation.DemandDetailRoute
 import com.agroland.app.navigation.CreateEditDemandRoute
 import com.agroland.app.navigation.ProfileRoute
+import com.agroland.app.navigation.AnnouncementReviewsRoute
+import com.agroland.app.navigation.SendReviewRoute
+import com.agroland.app.navigation.ProfileReviewsRoute
+import com.agroland.app.navigation.SellerReviewsRoute
+import com.agroland.app.navigation.MyReviewsRoute
+import com.agroland.app.navigation.PhotoViewerRoute
+import com.agroland.app.navigation.VideoViewerRoute
+import com.agroland.app.navigation.PdfViewerRoute
+import com.agroland.app.navigation.YouTubeViewerRoute
+import com.agroland.app.navigation.QrScannerRoute
 import com.agroland.core.common.settings.ThemeMode
 import com.agroland.core.l10n.R as L10nR
 import com.agroland.core.ui.theme.AgroTheme
@@ -172,6 +183,17 @@ import com.agroland.feature.demand.ui.DemandDetailPage
 import com.agroland.feature.demand.ui.DemandListPage
 import com.agroland.feature.services.ui.EgovServicesPage
 import com.agroland.feature.services.ui.ServicesPage
+import com.agroland.feature.reviews.ui.AnnouncementReviewsPage
+import com.agroland.feature.reviews.ui.MyReviewsPage
+import com.agroland.feature.reviews.ui.MyReviewsViewModel
+import com.agroland.feature.reviews.ui.ProfileReviewsPage
+import com.agroland.feature.reviews.ui.SellerReviewsPage
+import com.agroland.feature.reviews.ui.SendReviewPage
+import com.agroland.feature.media.ui.PhotoViewerPage
+import com.agroland.feature.media.ui.PdfViewerPage
+import com.agroland.feature.media.ui.QrScannerPage
+import com.agroland.feature.media.ui.VideoViewerPage
+import com.agroland.feature.media.ui.YouTubeViewerPage
 import com.agroland.feature.stories.domain.StoryViewerStateHolder
 import com.agroland.feature.stories.ui.StoryViewerScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -372,6 +394,12 @@ private fun AppNavHost(
     // Чат қойындысының бейджі — Socket.IO totalUnread (Flutter bottom_navbar).
     val chatBadge by chatSocketService.totalUnread.collectAsState()
 
+    // Фаза 18: «Менің пікірлерім» — activity-scoped VM: чат тізімінің бейджі
+    // мен MyReviewsPage бір күйді бөліседі (spec §10 клиент агрегациясы).
+    val myReviewsViewModel: MyReviewsViewModel = hiltViewModel(
+        LocalContext.current as androidx.activity.ComponentActivity,
+    )
+
     // Push межесі (өлі күй реплейі де осыған келеді): сессия дайын болғанда
     // БІР рет навигация жасап, pending күйді тазартамыз.
     val pendingPush by pushController.pendingDestination.collectAsState()
@@ -520,6 +548,8 @@ private fun AppNavHost(
                         // Аватар → профил беті (Фаза 17: SERVICES қойындысы
                         // Сервистерге берілді, профиль осында көшті).
                         onOpenProfile = { navController.navigate(ProfileRoute) },
+                        // Фаза 18: QR сканер — іздеу жолағындағы иконка.
+                        onOpenQrScanner = { navController.navigate(QrScannerRoute) },
                         // CHINA қойындысы — MercuryX каталогы (Фаза 17).
                         chinaContent = {
                             ChinaCatalogContent(
@@ -538,6 +568,12 @@ private fun AppNavHost(
                 },
                 chatContent = {
                     if (isAuthorized) {
+                        // Чат қойындысы ашылды — pending пікірлерді жаңартамыз
+                        // (MyReviewsViewModel.refreshIfNeeded — 30с debounce).
+                        androidx.compose.runtime.LaunchedEffect(Unit) {
+                            myReviewsViewModel.refreshIfNeeded()
+                        }
+                        val myReviewsBadge by myReviewsViewModel.pendingCount.collectAsState()
                         ChatListPage(
                             onOpenRoom = { room, username, otherUserId, isSystemChat, announcementId ->
                                 navController.navigate(
@@ -552,6 +588,8 @@ private fun AppNavHost(
                                 )
                             },
                             onOpenArchived = { navController.navigate(ArchivedChatsRoute) },
+                            myReviewsBadge = myReviewsBadge,
+                            onOpenMyReviews = { navController.navigate(MyReviewsRoute) },
                         )
                     } else {
                         GuestChatTab(onLoginClick = { navController.navigate(AuthRoute) })
@@ -602,6 +640,16 @@ private fun AppNavHost(
             ChatRoomPage(
                 onBack = { navController.popBackStack() },
                 onOpenAnnouncement = { navController.navigate(AnnouncementDetailRoute(it)) },
+                // Фаза 18: сурет/бейне/PDF — ішкі көрсеткіштер (zoom/Exo/PdfRenderer).
+                onOpenPhotoViewer = { url ->
+                    navController.navigate(PhotoViewerRoute(listOf(url)))
+                },
+                onOpenVideoViewer = { url ->
+                    navController.navigate(VideoViewerRoute(url))
+                },
+                onOpenPdfViewer = { url ->
+                    navController.navigate(PdfViewerRoute(url))
+                },
                 callActive = callState.phase != CallPhase.IDLE,
                 onVoiceCall = { peerId, peerName, peerAvatarUrl ->
                     val micGranted = androidx.core.content.ContextCompat.checkSelfPermission(
@@ -783,6 +831,16 @@ private fun AppNavHost(
                     }
                 } else {
                     { _, _, _ -> navController.navigate(AuthRoute) }
+                },
+                // Фаза 18: галерея — фото көрсеткіш; пікірлер бөлімі; сатушы пікірлері.
+                onOpenPhotoViewer = { images, index ->
+                    navController.navigate(PhotoViewerRoute(images, index))
+                },
+                onOpenReviews = { id ->
+                    navController.navigate(AnnouncementReviewsRoute(id))
+                },
+                onOpenSellerReviews = { userId ->
+                    navController.navigate(SellerReviewsRoute(userId))
                 },
                 bottomBar = {
                     if (isAuthorized) {
@@ -1101,6 +1159,14 @@ private fun AppNavHost(
                         navController.navigate(AuthRoute)
                     }
                 },
+                // «Менің пікірлерім» — spec §10 (Фаза 18).
+                onOpenMyReviews = {
+                    if (isAuthorized) {
+                        navController.navigate(MyReviewsRoute)
+                    } else {
+                        navController.navigate(AuthRoute)
+                    }
+                },
                 // Фаза 12: қолдау чаты — жүйелік қолданушы 31 (kSupportUserId).
                 onOpenSupportChat = {
                     navController.navigate(
@@ -1175,6 +1241,93 @@ private fun AppNavHost(
         }
         composable<CreateEditDemandRoute> {
             CreateEditDemandPage(onBack = { navController.popBackStack() })
+        }
+
+        // ---- Пікірлер (Фаза 18) ----
+        composable<AnnouncementReviewsRoute> { entry ->
+            val route = entry.toRoute<AnnouncementReviewsRoute>()
+            AnnouncementReviewsPage(
+                announcementId = route.announcementId,
+                onBack = { navController.popBackStack() },
+                viewModel = hiltViewModel(viewModelStoreOwner = entry),
+            )
+        }
+        composable<SendReviewRoute> { entry ->
+            val route = entry.toRoute<SendReviewRoute>()
+            SendReviewPage(
+                announcementId = route.announcementId,
+                onBack = { navController.popBackStack() },
+                viewModel = hiltViewModel(viewModelStoreOwner = entry),
+            )
+        }
+        composable<ProfileReviewsRoute> { entry ->
+            val route = entry.toRoute<ProfileReviewsRoute>()
+            ProfileReviewsPage(
+                onBack = { navController.popBackStack() },
+                onOpenAnnouncementReviews = { id ->
+                    navController.navigate(AnnouncementReviewsRoute(id))
+                },
+                viewModel = hiltViewModel(viewModelStoreOwner = entry),
+            )
+        }
+        composable<SellerReviewsRoute> { entry ->
+            SellerReviewsPage(
+                onBack = { navController.popBackStack() },
+                viewModel = hiltViewModel(viewModelStoreOwner = entry),
+            )
+        }
+        composable<MyReviewsRoute> {
+            // VM — activity-scoped: чат бейджімен бір күй.
+            MyReviewsPage(
+                viewModel = myReviewsViewModel,
+                onBack = { navController.popBackStack() },
+                onOpenSendReview = { id ->
+                    navController.navigate(SendReviewRoute(id))
+                },
+            )
+        }
+
+        // ---- Медиа көрсеткіштері (Фаза 18, ISSUES #27) ----
+        composable<PhotoViewerRoute> { entry ->
+            val route = entry.toRoute<PhotoViewerRoute>()
+            PhotoViewerPage(
+                images = route.images,
+                initialIndex = route.initialIndex,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<VideoViewerRoute> { entry ->
+            val route = entry.toRoute<VideoViewerRoute>()
+            VideoViewerPage(
+                url = route.url,
+                title = route.title,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<PdfViewerRoute> { entry ->
+            val route = entry.toRoute<PdfViewerRoute>()
+            PdfViewerPage(
+                url = route.url,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable<YouTubeViewerRoute> { entry ->
+            val route = entry.toRoute<YouTubeViewerRoute>()
+            YouTubeViewerPage(
+                url = route.url,
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        // ---- QR сканер (Фаза 18) ----
+        composable<QrScannerRoute> {
+            QrScannerPage(
+                onBack = { navController.popBackStack() },
+                onAnnouncementScanned = { id ->
+                    navController.popBackStack()
+                    navController.navigate(AnnouncementDetailRoute(id))
+                },
+            )
         }
     }
 }

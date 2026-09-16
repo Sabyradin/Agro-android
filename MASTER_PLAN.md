@@ -29,7 +29,7 @@
 | 15 | Промо v2 | Catalog (activate_endpoint диспетчер, 409→PATCH), AdvertiseAd, PromoBannerForm (multipart), CurrentStatus chips, Promoted/Hot ленталары | ✅ (Hot лентасы — HotAnnouncementsRoute тіркелген; Flutter-де өлі маршрут, ISSUES #33) |
 | 16 | Дилер консолі | Products/Orders табтары, delivery-zones CRUD, қызметкертер, TeamPool claim, аналитика (timeseries, Vico) | ✅ (трекинг өлі маршруты тіркелді — ISSUES #35; promotion TODO stub → нақты деректер, ISSUES #36) |
 | 17 | Қытай + сұраныс + EGOV | MercuryX каталог/себет/тапсырыс (consent, phone 11д 77…, BIN 12д, Int64), Demand CRUD, VIN `^[A-HJ-NPR-Z0-9]{17}$` | ✅ (қытай себеті CartPage-ке біріктірілді, аралас таңдау блокталады; сұраныс CRUD Flutter-де жоқ — Profile кіру нүктесі; EGOV каталог статик 83 жазба + VIN generic көрсетілім, ISSUES #39–41) |
-| 18 | Пікірлер, медиа, QR | «Менің пікірлерім» (клиент жағынан, 2 қойынды+бейдж), seller/announcement пікірлері, Photo/Video/PDF/WebView/YouTube viewer, QR сканер | ⬜ |
+| 18 | Пікірлер, медиа, QR | «Менің пікірлерім» (клиент жағынан, 2 қойынды+бейдж), seller/announcement пікірлері, Photo/Video/PDF/WebView/YouTube viewer, QR сканер | ✅ (iOS MyReviewsStore агрегация үлгісі — ISSUES #43; in-app PDF — #27 жабылды, #44; profileReviews өлі маршрут паритеті — #45; QR parser JVM-таза — #47; пікір жауап пішіндері эмуляторлық тексеріске — #42) |
 | 19 | Аналитика | Firebase Analytics/Crashlytics, TikTok Business SDK (Android нұсқасы), мониторинг оқиғалары, search/log | ⬜ |
 | 20 | Полиш + релиз | Force-update (GET /app-version), рұқсаттар, edge-to-edge, Play Console дайындық (AAB, signing), соңғы тексеру | ⬜ |
 

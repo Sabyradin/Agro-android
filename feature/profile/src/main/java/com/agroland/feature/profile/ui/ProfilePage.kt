@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PostAdd
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.ShoppingBag
@@ -84,6 +85,8 @@ fun ProfilePage(
     onMyAnnouncements: (String) -> Unit = {},
     /** «Сұраныстарым» — feature:demand тізімі (Фаза 17, спек қосымшасы). */
     onMyDemands: () -> Unit = {},
+    /** «Менің пікірлерім» — spec §10 (Фаза 18). */
+    onOpenMyReviews: () -> Unit = {},
     onOpenSupportChat: () -> Unit = {},
     onDealerProducts: (Int) -> Unit = {},
     onDealerOrders: (Int) -> Unit = {},
@@ -154,6 +157,7 @@ fun ProfilePage(
                     onOpenTopUp = onOpenTopUp,
                     onMyAnnouncements = onMyAnnouncements,
                     onMyDemands = onMyDemands,
+                    onOpenMyReviews = onOpenMyReviews,
                     onOpenSupportChat = onOpenSupportChat,
                     onDealerProducts = onDealerProducts,
                     onDealerOrders = onDealerOrders,
@@ -201,6 +205,7 @@ private fun AuthorizedProfileContent(
     onOpenTopUp: () -> Unit,
     onMyAnnouncements: (String) -> Unit,
     onMyDemands: () -> Unit,
+    onOpenMyReviews: () -> Unit,
     onOpenSupportChat: () -> Unit,
     onDealerProducts: (Int) -> Unit,
     onDealerOrders: (Int) -> Unit,
@@ -279,6 +284,12 @@ private fun AuthorizedProfileContent(
                     title = stringResource(L10nR.string.demand_list_title),
                     leading = { SectionIcon(Icons.Outlined.PostAdd) },
                     onClick = onMyDemands,
+                )
+                // «Менің пікірлерім» — қалдырылмаған/қалдырылған (Фаза 18, spec §10).
+                AgroListTile(
+                    title = stringResource(L10nR.string.my_reviews_title),
+                    leading = { SectionIcon(Icons.Outlined.StarBorder) },
+                    onClick = onOpenMyReviews,
                 )
                 if (isDealer) {
                     AgroListTile(

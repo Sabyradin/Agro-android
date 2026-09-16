@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Пікірлер (Phase 18): жарнама/сатушы/менің пікірлерім, Flutter review/ + ARB 1:1 -->
+    <string name="feedbacks">Пікірлер</string>
+    <string name="leave_feedback">Пікір қалдыру</string>
+    <string name="rate_announcement">Жарнаманы бағалау</string>
+    <string name="you_viewed_announcement">Сіз бұл жарнаманы соңғы уақытта көрдіңіз</string>
+    <string name="leave_feedback_title">Сіз бағалау және пікір қалдыра аласыз</string>
+    <string name="no_reviews_title">Пікірлер жоқ</string>
+    <string name="no_reviews_subtitle">Бұл жарнамада пікір жоқ</string>
+    <string name="feedback_enter_hint">Пікіріңізді енгізіңіз</string>
+    <string name="max_chars_count">Көп дегенде %1$d таңба</string>
+    <string name="all_reviews">Барлық пікірлер</string>
+    <string name="seller_reviews_title">Сатушы пікірлері</string>
+    <string name="seller_reviews_empty">Пікірлер әлі жоқ</string>
+    <string name="anonymous">Аноним</string>
+    <string name="published_at">Жарияланған уақыты: %1$s</string>
+    <string name="rating">Рейтинг: %1$s</string>
+    <string name="my_reviews_title">Менің пікірлерім</string>
+    <string name="my_reviews_pending_tab">Қалдырылмаған</string>
+    <string name="my_reviews_done_tab">Қалдырылған</string>
+    <string name="my_reviews_pending_empty">Пікір қалдырылмаған жарнама жоқ</string>
+    <string name="my_reviews_done_empty">Әлі пікір қалдырылмады</string>
+    <plurals name="seller_reviews_count">
+        <item quantity="one">%1$d пікір</item>
+        <item quantity="other">%1$d пікір</item>
+    </plurals>
+
+    <!-- Медиа + QR (Phase 18): фото/бейне/PDF көрсеткіштері, QR сканер -->
+    <string name="scan_qr">QR кодын сканерлеу</string>
+    <string name="qr_not_recognized">QR-код танылмады</string>
+    <string name="pdf_load_failed">PDF жүктелмеді</string>
+    <string name="document_title">Құжат</string>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Пікірлер (Phase 18): жарнама/сатушы/менің пікірлерім, Flutter review/ + ARB 1:1 -->
+    <string name="feedbacks">Отзывы</string>
+    <string name="leave_feedback">Оставить отзыв</string>
+    <string name="rate_announcement">Оценить объявление</string>
+    <string name="you_viewed_announcement">Вам было интересно данное объявление</string>
+    <string name="leave_feedback_title">Вы можете оставить отзыв и дать оценку объявлению</string>
+    <string name="no_reviews_title">Пока нет отзывов</string>
+    <string name="no_reviews_subtitle">У данного объявления нет отзывов</string>
+    <string name="feedback_enter_hint">Введите ваш отзыв</string>
+    <string name="max_chars_count">Не более %1$d символов</string>
+    <string name="all_reviews">Все отзывы</string>
+    <string name="seller_reviews_title">Отзывы о продавце</string>
+    <string name="seller_reviews_empty">Отзывов пока нет</string>
+    <string name="anonymous">Аноним</string>
+    <string name="published_at">Опубликовано: %1$s</string>
+    <string name="rating">Рейтинг: %1$s</string>
+    <string name="my_reviews_title">Мои отзывы</string>
+    <string name="my_reviews_pending_tab">Не оставлены</string>
+    <string name="my_reviews_done_tab">Оставленные</string>
+    <string name="my_reviews_pending_empty">Нет объявлений, ожидающих отзыва</string>
+    <string name="my_reviews_done_empty">Вы ещё не оставили отзывов</string>
+    <plurals name="seller_reviews_count">
+        <item quantity="one">%1$d отзыв</item>
+        <item quantity="few">%1$d отзыва</item>
+        <item quantity="many">%1$d отзывов</item>
+        <item quantity="other">%1$d отзыва</item>
+    </plurals>
+
+    <!-- Медиа + QR (Phase 18): фото/бейне/PDF көрсеткіштері, QR сканер -->
+    <string name="scan_qr">Сканировать QR-код</string>
+    <string name="qr_not_recognized">QR-код не распознан</string>
+    <string name="pdf_load_failed">Не удалось загрузить PDF</string>
+    <string name="document_title">Документ</string>
+</resources>

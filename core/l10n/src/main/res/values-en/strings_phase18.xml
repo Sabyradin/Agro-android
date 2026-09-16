@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Reviews (Phase 18): announcement/seller/my reviews, Flutter review/ + ARB 1:1 -->
+    <string name="feedbacks">Feedback</string>
+    <string name="leave_feedback">Leave feedback</string>
+    <string name="rate_announcement">Rate announcement</string>
+    <string name="you_viewed_announcement">You have recently viewed this announcement</string>
+    <string name="leave_feedback_title">You can rate and leave feedback</string>
+    <string name="no_reviews_title">No reviews yet</string>
+    <string name="no_reviews_subtitle">There is no feedback on this announcement yet</string>
+    <string name="feedback_enter_hint">Enter your feedback</string>
+    <string name="max_chars_count">Up to %1$d characters</string>
+    <string name="all_reviews">All reviews</string>
+    <string name="seller_reviews_title">Seller reviews</string>
+    <string name="seller_reviews_empty">No reviews yet</string>
+    <string name="anonymous">Anonymous</string>
+    <string name="published_at">Published on: %1$s</string>
+    <string name="rating">Rating: %1$s</string>
+    <string name="my_reviews_title">My reviews</string>
+    <string name="my_reviews_pending_tab">Pending</string>
+    <string name="my_reviews_done_tab">Left</string>
+    <string name="my_reviews_pending_empty">No announcements awaiting your review</string>
+    <string name="my_reviews_done_empty">You have not left any reviews yet</string>
+    <plurals name="seller_reviews_count">
+        <item quantity="one">%1$d review</item>
+        <item quantity="other">%1$d reviews</item>
+    </plurals>
+
+    <!-- Media + QR (Phase 18): photo/video/PDF viewers, QR scanner -->
+    <string name="scan_qr">Scan QR code</string>
+    <string name="qr_not_recognized">QR code not recognized</string>
+    <string name="pdf_load_failed">Could not load the PDF</string>
+    <string name="document_title">Document</string>
+</resources>

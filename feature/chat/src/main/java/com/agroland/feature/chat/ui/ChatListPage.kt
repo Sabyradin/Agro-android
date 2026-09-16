@@ -38,6 +38,7 @@ import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material.icons.outlined.VolumeOff
 import androidx.compose.material.icons.outlined.VolumeUp
@@ -86,6 +87,10 @@ fun ChatListPage(
     onOpenRoom: (room: ChatRoom, username: String, otherUserId: Long?, isSystemChat: Boolean, announcementId: String?) -> Unit,
     onOpenArchived: (count: Int) -> Unit,
     viewModel: ChatListViewModel = hiltViewModel(),
+    /** «Менің пікірлерім» — pending пікірлер саны (бейдж, spec §10). */
+    myReviewsBadge: Int = 0,
+    /** Жоқ болса — жол мүлдем көрсетілмейді (гость режимі). */
+    onOpenMyReviews: (() -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsState()
     val searchInput by viewModel.searchInput.collectAsState()
@@ -127,6 +132,15 @@ fun ChatListPage(
             onClose = viewModel::clearSearch,
             onOpenSearch = { viewModel.onSearchChange("") },
         )
+
+        // «Менің пікірлерім» жолы (spec §10, iOS паритеті): чат тізімінің
+        // басында — pending пікірлер бейджімен.
+        if (onOpenMyReviews != null) {
+            MyReviewsEntryRow(
+                badge = myReviewsBadge,
+                onClick = onOpenMyReviews,
+            )
+        }
 
         Box(modifier = Modifier.fillMaxSize()) {
             when {
@@ -630,5 +644,65 @@ fun GuestChatTab(onLoginClick: () -> Unit) {
                     .fillMaxWidth(),
             )
         }
+    }
+}
+
+/** «Менің пікірлерім» кіру жолы (spec §10) — жұлдыз + бейдж + шеврон. */
+@Composable
+private fun MyReviewsEntryRow(
+    badge: Int,
+    onClick: () -> Unit,
+) {
+    val ext = extendedColors()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.StarBorder,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+        Text(
+            text = stringResource(L10nR.string.my_reviews_title),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = ext.primaryText,
+            modifier = Modifier.weight(1f),
+        )
+        if (badge > 0) {
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = badge.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ext.white,
+                )
+            }
+        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            contentDescription = null,
+            tint = ext.secondaryText,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }

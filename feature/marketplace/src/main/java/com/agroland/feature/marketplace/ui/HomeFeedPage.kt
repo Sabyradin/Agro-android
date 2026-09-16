@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
@@ -82,6 +83,8 @@ fun HomeFeedPage(
     onOpenPromoted: () -> Unit = {},
     /** Аватар → профил беті (Flutter main_page app bar avatar). */
     onOpenProfile: () -> Unit = {},
+    /** Фаза 18: QR сканер (Flutter main_page іздеу жолағындағы qr-иконка). */
+    onOpenQrScanner: () -> Unit = {},
     /** CHINA қойындысының мазмұны — ChinaCatalogContent (feature:china). */
     chinaContent: @Composable () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
@@ -122,6 +125,11 @@ fun HomeFeedPage(
                 },
                 hint = stringResource(L10nR.string.home_search_hint),
                 modifier = Modifier.weight(1f),
+            )
+            AgroIconButton(
+                icon = Icons.Outlined.QrCodeScanner,
+                contentDescription = stringResource(L10nR.string.scan_qr),
+                onClick = onOpenQrScanner,
             )
             AgroIconButton(
                 icon = Icons.Outlined.Notifications,
