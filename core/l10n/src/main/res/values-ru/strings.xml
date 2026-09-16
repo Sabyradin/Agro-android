@@ -793,4 +793,100 @@
     <string name="dealer_vat_description">Если у вас Свидетельство плательщика НДС РК — включите. Иначе НДС в счетах не будет начисляться.</string>
     <string name="dealer_balance_title">Баланс и вывод</string>
     <string name="dealer_data_updated">Данные успешно обновлены</string>
+
+    <!-- ═══ Фаза 17: Каталог товаров из Китая (MercuryX) ═══ -->
+    <string name="china_catalog_subtitle">Товары напрямую из Китая (MercuryX)</string>
+    <string name="china_categories_title">Категории</string>
+    <string name="china_more_categories">Ещё</string>
+    <string name="china_popular_products">Популярные товары</string>
+    <string name="china_min_qty_label">мин. %1$s</string>
+    <string name="china_add_to_cart">В корзину</string>
+    <string name="china_added_to_cart">Добавлено в корзину</string>
+    <string name="china_choose_offer">Выберите оффер</string>
+    <string name="china_in_stock">На складе: %1$s шт</string>
+    <string name="china_under_order">Под заказ</string>
+    <string name="china_information">Информация</string>
+    <string name="china_bulk_pricing">Оптовые цены</string>
+    <string name="china_attributes">Характеристики</string>
+    <string name="china_quantity">Количество</string>
+    <string name="china_qty_below_min">Минимальное количество: %1$s</string>
+    <string name="china_checkout">Заказ (MercuryX)</string>
+    <string name="china_checkout_consent">Я согласен отправить заказ через MercuryX и на обработку моих данных (телефон, БИН)</string>
+    <string name="china_min_order_total">Минимальная сумма заказа — 500 000 ₸</string>
+    <string name="china_min_order_remaining">До минимальной суммы осталось %1$s</string>
+    <string name="china_invalid_phone">Телефон: 11 цифр, начинается с 77</string>
+    <string name="china_invalid_bin">БИН должен состоять из 12 цифр</string>
+    <string name="china_bin_label">БИН (юрлицо)</string>
+    <string name="china_phone_label">Телефон</string>
+    <string name="china_order_forwarded">Заказ отправлен поставщику</string>
+    <string name="china_status_forwarded">Отправлен</string>
+    <string name="china_status_failed">Ошибка</string>
+    <string name="china_status_cancelled">Отменён</string>
+    <string name="china_status_unknown">Неизвестно</string>
+    <string name="china_select_one_type">Выбирайте только один тип: товары из Китая или Agroland</string>
+    <string name="china_from_mercuryx">из MercuryX</string>
+    <string name="china_cart_section">Товары из Китая (MercuryX)</string>
+    <string name="china_order_number">Заказ №%1$s</string>
+
+    <!-- ═══ Фаза 17: Страница сервисов (партнёры) ═══ -->
+    <string name="services_page_title">Сервисы</string>
+    <string name="services_view_all">Смотреть все</string>
+    <string name="service_tile_accounting">Бухгалтерия</string>
+    <string name="service_tile_accounting_desc">Бухгалтерский учёт и отчётность</string>
+    <string name="service_tile_legal">Юридические услуги</string>
+    <string name="service_tile_legal_desc">Юридическая консультация и документация</string>
+    <string name="service_tile_egov">Egov</string>
+    <string name="service_tile_egov_desc">Сервисы Egov</string>
+    <string name="service_tile_it">ИТ-услуги</string>
+    <string name="service_tile_it_desc">Разработка программного обеспечения</string>
+    <string name="service_tile_china_import">Товар из Китая</string>
+    <string name="service_tile_china_import_desc">Импортные услуги</string>
+    <string name="service_tile_marketing">Маркетинг</string>
+    <string name="service_tile_marketing_desc">Маркетинговые исследования</string>
+    <string name="service_tile_agro_consulting">Агро-консалтинг</string>
+    <string name="service_tile_agro_consulting_desc">Консультация агропромышленности</string>
+    <string name="service_tile_engineering">Инженерные услуги</string>
+    <string name="service_tile_engineering_desc">Инженерные услуги</string>
+    <string name="service_tile_plant_protection">Защита растений</string>
+    <string name="service_tile_plant_protection_desc">Фитосанитарные услуги</string>
+    <string name="service_tile_agro_market">Agro Market</string>
+    <string name="service_tile_agro_market_desc">Сервисы Agro Market</string>
+    <string name="service_tile_agro_education">AgroEducation</string>
+    <string name="service_tile_agro_education_desc">Образовательные услуги</string>
+    <string name="service_partners_title">Сервисы-партнёры</string>
+    <string name="service_partner_egov_desc">Государственные услуги онлайн</string>
+    <string name="service_partner_halyk_desc">Банковские услуги и платежи</string>
+    <string name="service_partner_mercury_desc">Обмен валют и переводы</string>
+
+    <!-- ═══ Фаза 17: Госуслуги (EGOV) + VIN ═══ -->
+    <string name="egov_services_title">Сервисы Egov</string>
+    <string name="egov_no_service">Сервис не найден</string>
+    <string name="egov_vin_title">Проверка техники по VIN</string>
+    <string name="egov_vin_hint">Введите VIN</string>
+    <string name="egov_vin_invalid">Неверный формат VIN (17 символов)</string>
+    <string name="egov_vin_lookup">Проверить</string>
+    <string name="egov_vin_not_found">Не найдено</string>
+    <string name="egov_result_title">Результат</string>
+
+    <!-- ═══ Фаза 17: Запросы (спрос, CRUD) ═══ -->
+    <string name="demand_list_title">Мои запросы</string>
+    <string name="demand_create_title">Новый запрос</string>
+    <string name="demand_edit_title">Редактирование запроса</string>
+    <string name="demand_field_title">Тема запроса</string>
+    <string name="demand_field_description_hint">Описание</string>
+    <string name="demand_field_max_price">Максимальная цена</string>
+    <string name="demand_field_measurement">Единица измерения</string>
+    <string name="demand_field_quantity">Количество</string>
+    <string name="demand_field_currency">Валюта</string>
+    <string name="demand_create">Опубликовать запрос</string>
+    <string name="demand_created">Запрос опубликован</string>
+    <string name="demand_updated">Запрос обновлён</string>
+    <string name="demand_deleted_toast">Запрос удалён</string>
+    <string name="demand_delete_confirm">Удалить этот запрос?</string>
+    <string name="demand_status_active">Активен</string>
+    <string name="demand_status_inactive">Неактивен</string>
+    <string name="demand_activated">Запрос активирован</string>
+    <string name="demand_deactivated">Запрос остановлен</string>
+    <string name="demand_validation_title">Введите тему</string>
+    <string name="demand_created_at">Опубликовано</string>
 </resources>

@@ -38,6 +38,8 @@ dependencies {
     implementation(project(":feature:marketplace"))
     // Төлем парағы (Halyk ePay + баланспен төлеу) — чекауттан кейін ашылады.
     implementation(project(":feature:payment"))
+    // Қытай себеті/тапсырыстары (MercuryX) — себет бөлімі мен тарихқа қосылады (Фаза 17).
+    implementation(project(":feature:china"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)

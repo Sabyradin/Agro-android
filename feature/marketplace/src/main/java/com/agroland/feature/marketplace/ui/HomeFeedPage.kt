@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -51,6 +52,7 @@ import com.agroland.core.ui.components.ErrorWithRetry
 import com.agroland.core.ui.components.LoadingWidget
 import com.agroland.core.ui.components.ShimmerCard
 import com.agroland.core.ui.theme.extendedColors
+import com.agroland.feature.marketplace.data.AnnouncementFilter
 import com.agroland.feature.marketplace.data.Suggestion
 import com.agroland.feature.stories.ui.MainBannerCarousel
 import com.agroland.feature.stories.ui.StoriesRow
@@ -78,6 +80,10 @@ fun HomeFeedPage(
     onOpenAdvertise: () -> Unit = {},
     onOpenChinaCatalog: () -> Unit = {},
     onOpenPromoted: () -> Unit = {},
+    /** Аватар → профил беті (Flutter main_page app bar avatar). */
+    onOpenProfile: () -> Unit = {},
+    /** CHINA қойындысының мазмұны — ChinaCatalogContent (feature:china). */
+    chinaContent: @Composable () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val ext = extendedColors()
@@ -99,7 +105,7 @@ fun HomeFeedPage(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // Жоғарғы жолақ: іздеу + фильтр + таңдаулылар.
+        // Жоғарғы жолақ: аватар (профиль) + іздеу + фильтр + таңдаулылар.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -107,6 +113,7 @@ fun HomeFeedPage(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+            ProfileAvatarButton(onClick = onOpenProfile)
             AgroSearchField(
                 value = query,
                 onValueChange = {
@@ -175,7 +182,7 @@ fun HomeFeedPage(
             }
         }
 
-        when (HomeFeedTab.entries.getOrNull(tab)) {
+        when (HomeFeedTab.entries.getOrNull(tab) ?: HomeFeedTab.ANNOUNCEMENTS) {
             HomeFeedTab.ANNOUNCEMENTS -> {
                 // Stories: баннер-карусель (96×96) + admin сторилер жолы (80×80).
                 MainBannerCarousel(
@@ -239,8 +246,103 @@ fun HomeFeedPage(
                     }
                 }
             }
-            else -> ComingSoonTab()
+            // «Agro market» — дилерлік жарнамалар лентасы (type_ad=dealer,
+            // Flutter _DealerAnnouncementsTab).
+            HomeFeedTab.AGRO -> DealerFeedTab(onOpenDetail = onOpenDetail)
+            // «Қытай тауарлары» — ChinaCatalogContent (feature:china, Фаза 17).
+            HomeFeedTab.CHINA -> chinaContent()
         }
+    }
+}
+
+/**
+ * Аватар түймесі — дөңгелек фондегі профиль иконкасы → профил беті.
+ */
+@Composable
+private fun ProfileAvatarButton(onClick: () -> Unit) {
+    val ext = extendedColors()
+    Box(
+        modifier = Modifier
+            .padding(end = 4.dp)
+            .size(38.dp)
+            .clip(CircleShape)
+            .background(ext.primaryLight)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Person,
+            contentDescription = stringResource(L10nR.string.profile_title),
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(22.dp),
+        )
+    }
+}
+
+/**
+ * «Agro market» қойындысы — type_ad=dealer лентасы. FeedViewModel-нің
+ * жеке экземпляры (key) — ұсынылатын лентамен күй араласпайды.
+ */
+@Composable
+private fun DealerFeedTab(onOpenDetail: (Long) -> Unit) {
+    val dealerViewModel: FeedViewModel = hiltViewModel(key = "home-agro-feed")
+    LaunchedEffect(Unit) {
+        dealerViewModel.initialize(AnnouncementFilter(typeAd = "dealer"))
+    }
+    val items by dealerViewModel.items.collectAsState()
+    val loading by dealerViewModel.loading.collectAsState()
+    val loadingMore by dealerViewModel.loadingMore.collectAsState()
+    val exhausted by dealerViewModel.exhausted.collectAsState()
+    val error by dealerViewModel.error.collectAsState()
+    val snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() }
+    // displayText — composable емес нұсқа: жолдар алдын ала дайындалады.
+    val networkMessage = stringResource(L10nR.string.error_no_internet)
+    val genericMessage = stringResource(L10nR.string.error_generic_message)
+
+    LaunchedEffect(Unit) {
+        dealerViewModel.events.collect { event ->
+            val showError = event as? MarketplaceEvent.ShowError ?: return@collect
+            snackbarHostState.showSnackbar(showError.error.displayText(networkMessage, genericMessage))
+        }
+    }
+
+    val listState = rememberLazyListState()
+    PaginateEffect(listState, items.size, exhausted, loadingMore, dealerViewModel::loadMore)
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        when {
+            loading -> FeedSkeleton()
+            error != null -> CenteredContent {
+                ErrorWithRetry(
+                    onRetry = dealerViewModel::refresh,
+                    message = error!!.displayText(),
+                )
+            }
+            items.isEmpty() -> EmptyView(
+                title = stringResource(L10nR.string.feed_empty_title),
+                message = stringResource(L10nR.string.feed_empty_message),
+            )
+            else -> LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(items, key = { it.id }) { item ->
+                    AnnouncementCard(
+                        item = item,
+                        onClick = { onOpenDetail(item.id) },
+                        onToggleFavorite = { dealerViewModel.toggleFavorite(item.id) },
+                    )
+                }
+                if (loadingMore) {
+                    item { LoadingWidget(Modifier.fillMaxWidth().padding(16.dp)) }
+                }
+            }
+        }
+        androidx.compose.material3.SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }
 
@@ -334,29 +436,6 @@ private fun ShortcutTile(
 private fun FeedSkeleton() {
     Column {
         repeat(6) { ShimmerCard() }
-    }
-}
-
-/** AGRO / CHINA қойындылары — Фаза 16/17 толық экрандарын күтеді. */
-@Composable
-private fun ComingSoonTab() {
-    CenteredContent {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.GridView,
-                contentDescription = null,
-                tint = extendedColors().divider,
-                modifier = Modifier.size(64.dp),
-            )
-            Text(
-                text = stringResource(L10nR.string.coming_soon_title),
-                style = MaterialTheme.typography.bodyMedium,
-                color = extendedColors().secondaryText,
-            )
-        }
     }
 }
 

@@ -791,4 +791,100 @@
     <string name="dealer_vat_description">If you have an RK VAT payer certificate — enable it. Otherwise VAT will not be charged in invoices.</string>
     <string name="dealer_balance_title">Balance and withdraw</string>
     <string name="dealer_data_updated">Data successfully updated</string>
+
+    <!-- ═══ Phase 17: China catalog (MercuryX) ═══ -->
+    <string name="china_catalog_subtitle">Goods directly from China (MercuryX)</string>
+    <string name="china_categories_title">Categories</string>
+    <string name="china_more_categories">More</string>
+    <string name="china_popular_products">Popular products</string>
+    <string name="china_min_qty_label">min. %1$s</string>
+    <string name="china_add_to_cart">Add to cart</string>
+    <string name="china_added_to_cart">Added to cart</string>
+    <string name="china_choose_offer">Choose an offer</string>
+    <string name="china_in_stock">In stock: %1$s pcs</string>
+    <string name="china_under_order">Made to order</string>
+    <string name="china_information">Information</string>
+    <string name="china_bulk_pricing">Bulk pricing</string>
+    <string name="china_attributes">Attributes</string>
+    <string name="china_quantity">Quantity</string>
+    <string name="china_qty_below_min">Minimum quantity: %1$s</string>
+    <string name="china_checkout">Order (MercuryX)</string>
+    <string name="china_checkout_consent">I agree to send the order via MercuryX and to the processing of my data (phone, BIN)</string>
+    <string name="china_min_order_total">Minimum order total — 500 000 ₸</string>
+    <string name="china_min_order_remaining">%1$s left to the minimum order total</string>
+    <string name="china_invalid_phone">Phone: 11 digits, starts with 77</string>
+    <string name="china_invalid_bin">BIN must consist of 12 digits</string>
+    <string name="china_bin_label">BIN (legal entity)</string>
+    <string name="china_phone_label">Phone</string>
+    <string name="china_order_forwarded">Order forwarded to the supplier</string>
+    <string name="china_status_forwarded">Forwarded</string>
+    <string name="china_status_failed">Failed</string>
+    <string name="china_status_cancelled">Cancelled</string>
+    <string name="china_status_unknown">Unknown</string>
+    <string name="china_select_one_type">Select only one type: goods from China or Agroland</string>
+    <string name="china_from_mercuryx">from MercuryX</string>
+    <string name="china_cart_section">Goods from China (MercuryX)</string>
+    <string name="china_order_number">Order №%1$s</string>
+
+    <!-- ═══ Phase 17: Services page (partners) ═══ -->
+    <string name="services_page_title">Services</string>
+    <string name="services_view_all">View all</string>
+    <string name="service_tile_accounting">Accounting</string>
+    <string name="service_tile_accounting_desc">Accounting and reporting</string>
+    <string name="service_tile_legal">Legal Services</string>
+    <string name="service_tile_legal_desc">Legal advice and documentation</string>
+    <string name="service_tile_egov">Egov</string>
+    <string name="service_tile_egov_desc">Egov Services</string>
+    <string name="service_tile_it">IT Services</string>
+    <string name="service_tile_it_desc">Software development</string>
+    <string name="service_tile_china_import">Import from China</string>
+    <string name="service_tile_china_import_desc">Import services</string>
+    <string name="service_tile_marketing">Marketing</string>
+    <string name="service_tile_marketing_desc">Marketing research</string>
+    <string name="service_tile_agro_consulting">Agro Consulting</string>
+    <string name="service_tile_agro_consulting_desc">Agro-industry consulting</string>
+    <string name="service_tile_engineering">Engineering</string>
+    <string name="service_tile_engineering_desc">Engineering services</string>
+    <string name="service_tile_plant_protection">Plant Protection</string>
+    <string name="service_tile_plant_protection_desc">Phytosanitary services</string>
+    <string name="service_tile_agro_market">Agro Market</string>
+    <string name="service_tile_agro_market_desc">Agro Market Services</string>
+    <string name="service_tile_agro_education">AgroEducation</string>
+    <string name="service_tile_agro_education_desc">Educational services</string>
+    <string name="service_partners_title">Partner services</string>
+    <string name="service_partner_egov_desc">Government services online</string>
+    <string name="service_partner_halyk_desc">Banking and payments</string>
+    <string name="service_partner_mercury_desc">Currency exchange and transfers</string>
+
+    <!-- ═══ Phase 17: e-Gov services + VIN ═══ -->
+    <string name="egov_services_title">Egov Services</string>
+    <string name="egov_no_service">No service found</string>
+    <string name="egov_vin_title">Machinery check by VIN</string>
+    <string name="egov_vin_hint">Enter VIN</string>
+    <string name="egov_vin_invalid">Invalid VIN format (17 characters)</string>
+    <string name="egov_vin_lookup">Check</string>
+    <string name="egov_vin_not_found">Not found</string>
+    <string name="egov_result_title">Result</string>
+
+    <!-- ═══ Phase 17: Demands (CRUD) ═══ -->
+    <string name="demand_list_title">My demands</string>
+    <string name="demand_create_title">New demand</string>
+    <string name="demand_edit_title">Edit demand</string>
+    <string name="demand_field_title">Demand title</string>
+    <string name="demand_field_description_hint">Description</string>
+    <string name="demand_field_max_price">Max price</string>
+    <string name="demand_field_measurement">Measurement unit</string>
+    <string name="demand_field_quantity">Quantity</string>
+    <string name="demand_field_currency">Currency</string>
+    <string name="demand_create">Publish a demand</string>
+    <string name="demand_created">Demand published</string>
+    <string name="demand_updated">Demand updated</string>
+    <string name="demand_deleted_toast">Demand deleted</string>
+    <string name="demand_delete_confirm">Delete this demand?</string>
+    <string name="demand_status_active">Active</string>
+    <string name="demand_status_inactive">Inactive</string>
+    <string name="demand_activated">Demand activated</string>
+    <string name="demand_deactivated">Demand deactivated</string>
+    <string name="demand_validation_title">Enter a title</string>
+    <string name="demand_created_at">Published</string>
 </resources>

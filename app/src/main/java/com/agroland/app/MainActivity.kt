@@ -80,6 +80,14 @@ import com.agroland.app.navigation.DealerEmployeesRoute
 import com.agroland.app.navigation.OrderTrackingRoute
 import com.agroland.app.navigation.AddEditDeliveryZoneRoute
 import com.agroland.app.navigation.DealerSettingsRoute
+import com.agroland.app.navigation.ChinaSubcategoriesRoute
+import com.agroland.app.navigation.ChinaProductsRoute
+import com.agroland.app.navigation.ChinaProductDetailRoute
+import com.agroland.app.navigation.EgovServicesRoute
+import com.agroland.app.navigation.DemandListRoute
+import com.agroland.app.navigation.DemandDetailRoute
+import com.agroland.app.navigation.CreateEditDemandRoute
+import com.agroland.app.navigation.ProfileRoute
 import com.agroland.core.common.settings.ThemeMode
 import com.agroland.core.l10n.R as L10nR
 import com.agroland.core.ui.theme.AgroTheme
@@ -155,6 +163,15 @@ import com.agroland.feature.shell.language.LanguagePage
 import com.agroland.feature.shell.main.MainShellPage
 import com.agroland.feature.shell.splash.SplashPage
 import com.agroland.feature.shell.splash.SplashTarget
+import com.agroland.feature.china.ui.ChinaCatalogContent
+import com.agroland.feature.china.ui.ChinaProductDetailPage
+import com.agroland.feature.china.ui.ChinaProductsPage
+import com.agroland.feature.china.ui.ChinaSubcategoriesPage
+import com.agroland.feature.demand.ui.CreateEditDemandPage
+import com.agroland.feature.demand.ui.DemandDetailPage
+import com.agroland.feature.demand.ui.DemandListPage
+import com.agroland.feature.services.ui.EgovServicesPage
+import com.agroland.feature.services.ui.ServicesPage
 import com.agroland.feature.stories.domain.StoryViewerStateHolder
 import com.agroland.feature.stories.ui.StoryViewerScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -500,6 +517,23 @@ private fun AppNavHost(
                                 navController.navigate(AuthRoute)
                             }
                         },
+                        // Аватар → профил беті (Фаза 17: SERVICES қойындысы
+                        // Сервистерге берілді, профиль осында көшті).
+                        onOpenProfile = { navController.navigate(ProfileRoute) },
+                        // CHINA қойындысы — MercuryX каталогы (Фаза 17).
+                        chinaContent = {
+                            ChinaCatalogContent(
+                                onOpenSubcategories = { parentId, title ->
+                                    navController.navigate(ChinaSubcategoriesRoute(parentId, title))
+                                },
+                                onOpenProducts = { categoryId, title ->
+                                    navController.navigate(ChinaProductsRoute(categoryId, title))
+                                },
+                                onOpenProduct = { productId ->
+                                    navController.navigate(ChinaProductDetailRoute(productId))
+                                },
+                            )
+                        },
                     )
                 },
                 chatContent = {
@@ -534,35 +568,10 @@ private fun AppNavHost(
                     }
                 },
                 servicesContent = {
-                    ProfilePage(
-                        isAuthorized = isAuthorized,
-                        themeMode = themeMode,
-                        onThemeChange = onThemeChange,
-                        onLoginClick = { navController.navigate(AuthRoute) },
-                        onEditProfile = { navController.navigate(EditProfileRoute) },
-                        onAddresses = { navController.navigate(ProfileAddressesRoute) },
-                        onCompanySettings = { navController.navigate(CompanySettingsRoute) },
-                        onVerification = { navController.navigate(VerificationRoute) },
-                        onOpenWallet = { navController.navigate(BalanceRoute) },
-                        onOpenTransactions = { navController.navigate(TransactionHistoryRoute) },
-                        onOpenTopUp = { navController.navigate(TopUpRoute) },
-                        onMyAnnouncements = { status ->
-                            navController.navigate(MyAnnouncementsRoute(status))
-                        },
-                        // Фаза 12: қолдау чаты — жүйелік қолданушы 31 (kSupportUserId).
-                        onOpenSupportChat = {
-                            navController.navigate(
-                                ChatRoomRoute(otherUserId = 31L, isSystemChat = true),
-                            )
-                        },
-                        // Фаза 16: дилер консолі — профильден кіру.
-                        onDealerProducts = { tab ->
-                            navController.navigate(DealerProductsRoute(tab))
-                        },
-                        onDealerOrders = { tab ->
-                            navController.navigate(DealerOrdersRoute(tab))
-                        },
-                        onDealerSettings = { navController.navigate(DealerSettingsRoute) },
+                    // Фаза 17: SERVICES = Сервистер (11 тақта + әріптестер);
+                    // профиль — ProfileRoute (Home аватары ашады).
+                    ServicesPage(
+                        onOpenEgov = { navController.navigate(EgovServicesRoute) },
                     )
                 },
             )
@@ -1065,6 +1074,107 @@ private fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 onOpenWallet = { navController.navigate(BalanceRoute) },
             )
+        }
+
+        // ---- Профиль (Фаза 17: Home аватары ашатын дербес маршрут) ----
+        composable<ProfileRoute> {
+            ProfilePage(
+                isAuthorized = isAuthorized,
+                themeMode = themeMode,
+                onThemeChange = onThemeChange,
+                onLoginClick = { navController.navigate(AuthRoute) },
+                onEditProfile = { navController.navigate(EditProfileRoute) },
+                onAddresses = { navController.navigate(ProfileAddressesRoute) },
+                onCompanySettings = { navController.navigate(CompanySettingsRoute) },
+                onVerification = { navController.navigate(VerificationRoute) },
+                onOpenWallet = { navController.navigate(BalanceRoute) },
+                onOpenTransactions = { navController.navigate(TransactionHistoryRoute) },
+                onOpenTopUp = { navController.navigate(TopUpRoute) },
+                onMyAnnouncements = { status ->
+                    navController.navigate(MyAnnouncementsRoute(status))
+                },
+                // «Сұраныстарым» — feature:demand тізімі (Фаза 17).
+                onMyDemands = {
+                    if (isAuthorized) {
+                        navController.navigate(DemandListRoute)
+                    } else {
+                        navController.navigate(AuthRoute)
+                    }
+                },
+                // Фаза 12: қолдау чаты — жүйелік қолданушы 31 (kSupportUserId).
+                onOpenSupportChat = {
+                    navController.navigate(
+                        ChatRoomRoute(otherUserId = 31L, isSystemChat = true),
+                    )
+                },
+                // Фаза 16: дилер консолі — профильден кіру.
+                onDealerProducts = { tab ->
+                    navController.navigate(DealerProductsRoute(tab))
+                },
+                onDealerOrders = { tab ->
+                    navController.navigate(DealerOrdersRoute(tab))
+                },
+                onDealerSettings = { navController.navigate(DealerSettingsRoute) },
+            )
+        }
+
+        // ---- Қытай (MercuryX) — Фаза 17 ----
+        composable<ChinaSubcategoriesRoute> { entry ->
+            val route = entry.toRoute<ChinaSubcategoriesRoute>()
+            ChinaSubcategoriesPage(
+                title = route.title,
+                onBack = { navController.popBackStack() },
+                onOpenSubcategories = { parentId, title ->
+                    navController.navigate(ChinaSubcategoriesRoute(parentId, title))
+                },
+                onOpenProducts = { categoryId, title ->
+                    navController.navigate(ChinaProductsRoute(categoryId, title))
+                },
+            )
+        }
+        composable<ChinaProductsRoute> { entry ->
+            val route = entry.toRoute<ChinaProductsRoute>()
+            ChinaProductsPage(
+                title = route.title,
+                onBack = { navController.popBackStack() },
+                onOpenProduct = { productId ->
+                    navController.navigate(ChinaProductDetailRoute(productId))
+                },
+            )
+        }
+        composable<ChinaProductDetailRoute> { entry ->
+            ChinaProductDetailPage(
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        // ---- EGOV — Фаза 17 ----
+        composable<EgovServicesRoute> {
+            EgovServicesPage(onBack = { navController.popBackStack() })
+        }
+
+        // ---- Сұраныстар — Фаза 17 (спек қосымшасы) ----
+        composable<DemandListRoute> {
+            DemandListPage(
+                onBack = { navController.popBackStack() },
+                onOpenDetail = { id ->
+                    navController.navigate(DemandDetailRoute(id))
+                },
+                onOpenCreate = {
+                    navController.navigate(CreateEditDemandRoute())
+                },
+            )
+        }
+        composable<DemandDetailRoute> { entry ->
+            DemandDetailPage(
+                onBack = { navController.popBackStack() },
+                onOpenEdit = { id ->
+                    navController.navigate(CreateEditDemandRoute(id))
+                },
+            )
+        }
+        composable<CreateEditDemandRoute> {
+            CreateEditDemandPage(onBack = { navController.popBackStack() })
         }
     }
 }

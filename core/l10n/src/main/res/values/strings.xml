@@ -801,4 +801,100 @@
     <string name="dealer_vat_description">Егер сізде ҚҚС төлеуші куәлігі ҚР болса — қосыңыз. Болмаса есеп-фактурада ҚҚС есептелмейді.</string>
     <string name="dealer_balance_title">Баланс және шығару</string>
     <string name="dealer_data_updated">Деректер сәтті жаңартылды</string>
+
+    <!-- ═══ Фаза 17: Қытай каталогы (MercuryX) ═══ -->
+    <string name="china_catalog_subtitle">Тауарлар тікелей Қытайдан (MercuryX)</string>
+    <string name="china_categories_title">Категориялар</string>
+    <string name="china_more_categories">Барлығы</string>
+    <string name="china_popular_products">Танымал тауарлар</string>
+    <string name="china_min_qty_label">мин. %1$s</string>
+    <string name="china_add_to_cart">Корзинаға қосу</string>
+    <string name="china_added_to_cart">Корзинаға қосылды</string>
+    <string name="china_choose_offer">Офферді таңдаңыз</string>
+    <string name="china_in_stock">Қоймада: %1$s дана</string>
+    <string name="china_under_order">Тапсырыс бойынша</string>
+    <string name="china_information">Ақпарат</string>
+    <string name="china_bulk_pricing">Көтерме бағалар</string>
+    <string name="china_attributes">Сипаттамалар</string>
+    <string name="china_quantity">Саны</string>
+    <string name="china_qty_below_min">Ең аз саны: %1$s</string>
+    <string name="china_checkout">Тапсырыс (MercuryX)</string>
+    <string name="china_checkout_consent">Мен тапсырысты MercuryX арқылы жіберуге және деректерімді (телефон, БСН) өңдеуге келісемін</string>
+    <string name="china_min_order_total">Тапсырыстың ең аз сомасы — 500 000 ₸</string>
+    <string name="china_min_order_remaining">Ең аз сомаға %1$s қалды</string>
+    <string name="china_invalid_phone">Телефон: 11 цифр, 77-мен басталады</string>
+    <string name="china_invalid_bin">БСН 12 цифрдан тұруы керек</string>
+    <string name="china_bin_label">БСН (заңды тұлға)</string>
+    <string name="china_phone_label">Телефон</string>
+    <string name="china_order_forwarded">Тапсырыс жеткізушіге жіберілді</string>
+    <string name="china_status_forwarded">Жіберілді</string>
+    <string name="china_status_failed">Қате</string>
+    <string name="china_status_cancelled">Болдырылмады</string>
+    <string name="china_status_unknown">Белгісіз</string>
+    <string name="china_select_one_type">Тек бір түрін таңдаңыз: Қытай не Agroland тауарлары</string>
+    <string name="china_from_mercuryx">MercuryX-тен</string>
+    <string name="china_cart_section">Қытай тауарлары (MercuryX)</string>
+    <string name="china_order_number">Тапсырыс №%1$s</string>
+
+    <!-- ═══ Фаза 17: Сервистер беті (серіктестер) ═══ -->
+    <string name="services_page_title">Сервистер</string>
+    <string name="services_view_all">Барлығын көру</string>
+    <string name="service_tile_accounting">Бухгалтерия</string>
+    <string name="service_tile_accounting_desc">Бухгалтерлік есеп және есептілік</string>
+    <string name="service_tile_legal">Заң қызметтері</string>
+    <string name="service_tile_legal_desc">Заңды кеңес беру және құжаттама</string>
+    <string name="service_tile_egov">Egov</string>
+    <string name="service_tile_egov_desc">Egov сервистері</string>
+    <string name="service_tile_it">ИТ қызметтері</string>
+    <string name="service_tile_it_desc">Бағдарламалық қамтамасыз ету</string>
+    <string name="service_tile_china_import">Қытайдан тауар</string>
+    <string name="service_tile_china_import_desc">Импорттық қызметтер</string>
+    <string name="service_tile_marketing">Маркетинг</string>
+    <string name="service_tile_marketing_desc">Маркетингтік зерттеулер</string>
+    <string name="service_tile_agro_consulting">Агро-консалтинг</string>
+    <string name="service_tile_agro_consulting_desc">Агроөнеркәсіп кеңесі</string>
+    <string name="service_tile_engineering">Инженерлік</string>
+    <string name="service_tile_engineering_desc">Инженерлік қызметтер</string>
+    <string name="service_tile_plant_protection">Өсімдік қорғау</string>
+    <string name="service_tile_plant_protection_desc">Фитосанитарлық қызметтер</string>
+    <string name="service_tile_agro_market">Agro Market</string>
+    <string name="service_tile_agro_market_desc">Agro Market қызметтері</string>
+    <string name="service_tile_agro_education">AgroEducation</string>
+    <string name="service_tile_agro_education_desc">Білім беру қызметтері</string>
+    <string name="service_partners_title">Серіктес сервистер</string>
+    <string name="service_partner_egov_desc">Мемлекеттік қызметтер онлайн</string>
+    <string name="service_partner_halyk_desc">Банк қызметтері мен төлемдер</string>
+    <string name="service_partner_mercury_desc">Валюталық алмасу және аударым</string>
+
+    <!-- ═══ Фаза 17: EGOV қызметтері + VIN ═══ -->
+    <string name="egov_services_title">Egov сервистері</string>
+    <string name="egov_no_service">Сервис табылмады</string>
+    <string name="egov_vin_title">Техниканы VIN бойынша тексеру</string>
+    <string name="egov_vin_hint">VIN нөмірін енгізіңіз</string>
+    <string name="egov_vin_invalid">VIN форматы дұрыс емес (17 таңба)</string>
+    <string name="egov_vin_lookup">Тексеру</string>
+    <string name="egov_vin_not_found">Мәлімет табылмады</string>
+    <string name="egov_result_title">Нәтиже</string>
+
+    <!-- ═══ Фаза 17: Сұраныстар (CRUD) ═══ -->
+    <string name="demand_list_title">Сұраныстарым</string>
+    <string name="demand_create_title">Жаңа сұраныс</string>
+    <string name="demand_edit_title">Сұранысты өзгерту</string>
+    <string name="demand_field_title">Сұраныс тақырыбы</string>
+    <string name="demand_field_description_hint">Сипаттама</string>
+    <string name="demand_field_max_price">Шекті баға</string>
+    <string name="demand_field_measurement">Өлшем бірлігі</string>
+    <string name="demand_field_quantity">Мөлшері</string>
+    <string name="demand_field_currency">Валюта</string>
+    <string name="demand_create">Сұраныс жариялау</string>
+    <string name="demand_created">Сұраныс жарияланды</string>
+    <string name="demand_updated">Сұраныс жаңартылды</string>
+    <string name="demand_deleted_toast">Сұраныс өшірілді</string>
+    <string name="demand_delete_confirm">Сұранысты өшіруді қалайсыз ба?</string>
+    <string name="demand_status_active">Белсенді</string>
+    <string name="demand_status_inactive">Белсенді емес</string>
+    <string name="demand_activated">Сұраныс белсендірілді</string>
+    <string name="demand_deactivated">Сұраныс тоқтатылды</string>
+    <string name="demand_validation_title">Тақырыпты енгізіңіз</string>
+    <string name="demand_created_at">Жарияланған</string>
 </resources>

@@ -40,6 +40,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,8 +66,17 @@ import com.agroland.feature.cart.data.CartItem
 import com.agroland.feature.cart.data.CartSection
 import com.agroland.feature.cart.data.Order
 import com.agroland.feature.cart.data.canConfirmReceipt
+import com.agroland.feature.china.data.ChinaOrder
+import com.agroland.feature.china.ui.ChinaCartItemTile
+import com.agroland.feature.china.ui.ChinaCheckoutSheet
+import com.agroland.feature.china.ui.ChinaEvent
+import com.agroland.feature.china.ui.ChinaOrderTile
+import com.agroland.feature.china.ui.ChinaCartViewModel
+import com.agroland.feature.china.ui.ChinaOrdersViewModel
+import com.agroland.feature.china.ui.displayText as chinaErrorDisplayText
 import com.agroland.feature.payment.ui.HalykLaunch
 import com.agroland.feature.payment.ui.PaymentMethodSheet
+import kotlinx.coroutines.launch
 
 /** Чекауттан кейінгі төлем парағының жүктемесі. */
 private data class PaymentLaunch(
@@ -85,6 +95,8 @@ fun CartPage(
     onOpenAnnouncement: (Long) -> Unit = {},
     onOpenHalyk: (HalykLaunch) -> Unit = {},
     viewModel: CartViewModel = hiltViewModel(),
+    chinaCartViewModel: ChinaCartViewModel = hiltViewModel(),
+    chinaOrdersViewModel: ChinaOrdersViewModel = hiltViewModel(),
 ) {
     val items by viewModel.items.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -97,7 +109,17 @@ fun CartPage(
     val supplierPickerVisible by viewModel.supplierPickerVisible.collectAsState()
     val supplierGroups by viewModel.supplierGroups.collectAsState()
 
+    // ── Қытай себеті (MercuryX) — Фаза 17: бөлек таңдау жиыны, аралас
+    // таңдау блокталады (china_select_one_type). ──
+    val chinaItems by chinaCartViewModel.items.collectAsState()
+    val chinaCartLoading by chinaCartViewModel.loading.collectAsState()
+    val chinaOrders by chinaOrdersViewModel.orders.collectAsState()
+    val chinaOrdersLoading by chinaOrdersViewModel.loading.collectAsState()
+    var selectedChinaIds by remember { mutableStateOf(setOf<Long>()) }
+    var chinaCheckoutVisible by remember { mutableStateOf(false) }
+
     val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val shareHeader = stringResource(L10nR.string.cart_share_header)
     val noInternetText = stringResource(L10nR.string.error_no_internet)
@@ -105,6 +127,7 @@ fun CartPage(
     val addedToast = stringResource(L10nR.string.cart_added_to_cart_toast)
     val reorderToast = stringResource(L10nR.string.cart_reorder_success)
     val receiptToast = stringResource(L10nR.string.cart_receipt_confirmed)
+    val mixedSelectionText = stringResource(L10nR.string.china_select_one_type)
     val balance by viewModel.balance.collectAsState()
     // Чекауттан кейін төлем парағы (Flutter PaymentMethodSheet.show).
     var paymentLaunch by remember { mutableStateOf<PaymentLaunch?>(null) }
@@ -124,12 +147,21 @@ fun CartPage(
             }
         }
     }
+    LaunchedEffect(Unit) {
+        chinaCartViewModel.events.collect { event ->
+            if (event is ChinaEvent.ShowError) {
+                snackbar.showSnackbar(
+                    event.error.chinaErrorDisplayText(noInternetText, genericErrorText),
+                )
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             SectionSelector(
                 section = section,
-                basketCount = items.size,
+                basketCount = items.size + chinaItems.size,
                 sectionOrders = sectionOrders,
                 onSelect = viewModel::setSection,
             )
@@ -143,11 +175,31 @@ fun CartPage(
                         CartSection.BASKET_ITEMS -> BasketContent(
                             items = items,
                             selectedIds = selectedIds,
+                            chinaItems = chinaItems,
+                            chinaCartLoading = chinaCartLoading,
+                            selectedChinaIds = selectedChinaIds,
                             onToggle = viewModel::toggleSelected,
                             onToggleSelectAll = viewModel::toggleSelectAll,
                             onQuantity = viewModel::changeQuantity,
                             onDelete = viewModel::deleteItem,
                             onCheckout = viewModel::startCheckout,
+                            onToggleChina = { id ->
+                                selectedChinaIds = if (id in selectedChinaIds) {
+                                    selectedChinaIds - id
+                                } else {
+                                    selectedChinaIds + id
+                                }
+                            },
+                            onToggleSelectAllChina = {
+                                val all = selectedChinaIds == chinaItems.map { it.id }.toSet()
+                                selectedChinaIds = if (all) emptySet() else chinaItems.map { it.id }.toSet()
+                            },
+                            onChinaQuantity = { item, newQuantity ->
+                                if (newQuantity != item.quantity) {
+                                    chinaCartViewModel.updateQuantity(item.id, newQuantity)
+                                }
+                            },
+                            onDeleteChina = { item -> chinaCartViewModel.deleteItem(item.id) },
                             onShare = {
                                 val text = viewModel.buildShareText(shareHeader)
                                 if (text.isNotBlank()) {
@@ -158,11 +210,24 @@ fun CartPage(
                                     context.startActivity(Intent.createChooser(intent, shareHeader))
                                 }
                             },
+                            // Аралас таңдау мүмкін емес — тек бір түр таңдалады.
+                            onProceed = {
+                                val localSelected = selectedIds.isNotEmpty()
+                                val chinaSelected = selectedChinaIds.isNotEmpty()
+                                when {
+                                    localSelected && chinaSelected ->
+                                        scope.launch { snackbar.showSnackbar(mixedSelectionText) }
+                                    chinaSelected -> chinaCheckoutVisible = true
+                                    localSelected -> viewModel.startCheckout()
+                                }
+                            },
                         )
                         else -> OrdersSectionContent(
                             section = section,
                             orders = sectionOrders[section].orEmpty(),
                             loading = ordersLoading,
+                            chinaOrders = if (section == CartSection.ORDER_HISTORY) chinaOrders else emptyList(),
+                            chinaOrdersLoading = chinaOrdersLoading,
                             onOpenOrder = onOpenOrder,
                             onConfirmReceipt = viewModel::confirmReceipt,
                         )
@@ -185,6 +250,20 @@ fun CartPage(
             onSetZone = viewModel::setItemZone,
             onSelectAddress = viewModel::selectAddress,
             onSubmit = viewModel::submitCheckout,
+        )
+    }
+    if (chinaCheckoutVisible) {
+        ChinaCheckoutSheet(
+            items = chinaItems,
+            selectedIds = selectedChinaIds,
+            onDismiss = {
+                chinaCheckoutVisible = false
+                // Парақ жабылғанда Қытай себеті мен тапсырыстары жаңартылады.
+                selectedChinaIds = emptySet()
+                chinaCartViewModel.refresh()
+                chinaOrdersViewModel.load()
+            },
+            viewModel = chinaOrdersViewModel,
         )
     }
     if (supplierPickerVisible) {
@@ -292,19 +371,27 @@ private fun SectionChip(label: String, count: Int, selected: Boolean, onClick: (
     }
 }
 
-/** Себет бөлімі: тақталар + төменгі төлем жолағы. */
+/** Себет бөлімі: жергілікті тақталар + Қытай бөлімі + төлем жолағы. */
 @Composable
 private fun BasketContent(
     items: List<CartItem>,
     selectedIds: Set<Long>,
+    chinaItems: List<com.agroland.feature.china.data.ChinaCartItem>,
+    chinaCartLoading: Boolean,
+    selectedChinaIds: Set<Long>,
     onToggle: (Long) -> Unit,
     onToggleSelectAll: () -> Unit,
     onQuantity: (CartItem, Double) -> Unit,
     onDelete: (CartItem) -> Unit,
     onCheckout: () -> Unit,
+    onToggleChina: (Long) -> Unit,
+    onToggleSelectAllChina: () -> Unit,
+    onChinaQuantity: (com.agroland.feature.china.data.ChinaCartItem, Int) -> Unit,
+    onDeleteChina: (com.agroland.feature.china.data.ChinaCartItem) -> Unit,
     onShare: () -> Unit,
+    onProceed: () -> Unit,
 ) {
-    if (items.isEmpty()) {
+    if (items.isEmpty() && chinaItems.isEmpty()) {
         CenteredContent {
             EmptyView(
                 icon = Icons.Outlined.ShoppingCart,
@@ -352,22 +439,81 @@ private fun BasketContent(
                     onDelete = { onDelete(item) },
                 )
             }
+            if (items.isNotEmpty()) {
+                item { Spacer(Modifier.height(8.dp)) }
+            }
+            if (chinaItems.isNotEmpty()) {
+                // ── Қытай бөлімі (MercuryX) — өз таңдау жиынымен. ──
+                item(key = "china_header") {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = stringResource(L10nR.string.china_cart_section),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Text(
+                            text = stringResource(L10nR.string.cart_select_all),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = extendedColors().secondaryText,
+                            modifier = Modifier
+                                .clickable(onClick = onToggleSelectAllChina)
+                                .padding(vertical = 8.dp),
+                        )
+                    }
+                }
+                items(chinaItems, key = { "china_${it.id}" }) { chinaItem ->
+                    Row(
+                        // Tile өзіне horizontal 16dp қосады — тек сол жақ шеті қажет.
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, top = 4.dp, bottom = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        AgroCheckbox(
+                            checked = chinaItem.id in selectedChinaIds,
+                            onCheckedChange = { onToggleChina(chinaItem.id) },
+                        )
+                        ChinaCartItemTile(
+                            item = chinaItem,
+                            onQuantityChange = { newQuantity -> onChinaQuantity(chinaItem, newQuantity) },
+                            onDelete = { onDeleteChina(chinaItem) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+            }
             item { Spacer(Modifier.height(80.dp)) }
         }
         Surface(color = extendedColors().card) {
             Column(modifier = Modifier.padding(16.dp)) {
-                if (selectedIds.isNotEmpty()) {
+                if (selectedIds.isNotEmpty() || selectedChinaIds.isNotEmpty()) {
                     Text(
-                        text = stringResource(L10nR.string.cart_items_selected, selectedIds.size),
+                        text = stringResource(
+                            L10nR.string.cart_items_selected,
+                            selectedIds.size + selectedChinaIds.size,
+                        ),
                         style = MaterialTheme.typography.labelMedium,
                         color = extendedColors().secondaryText,
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                 }
                 AgroButton(
-                    text = stringResource(L10nR.string.cart_proceed_to_payment),
-                    onClick = onCheckout,
-                    enabled = selectedIds.isNotEmpty(),
+                    // Қытай таңдалса — «Тапсырыс (MercuryX)», әйтпесе төлем парағы.
+                    text = stringResource(
+                        if (selectedIds.isEmpty() && selectedChinaIds.isNotEmpty()) {
+                            L10nR.string.china_checkout
+                        } else {
+                            L10nR.string.cart_proceed_to_payment
+                        },
+                    ),
+                    onClick = onProceed,
+                    enabled = selectedIds.isNotEmpty() || selectedChinaIds.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -480,20 +626,22 @@ private fun QuantityStepper(
 internal fun formatQuantity(value: Double): String =
     if (value == value.toLong().toDouble()) value.toLong().toString() else value.toString()
 
-/** Тапсырыс бөлімі: тапсырыс тақталары + «Тауарды қабылдау». */
+/** Тапсырыс бөлімі: тапсырыс тақталары + «Тауарды қабылдау» (тарих — Қытаймен бірге). */
 @Composable
 private fun OrdersSectionContent(
     section: CartSection,
     orders: List<Order>,
     loading: Boolean,
+    chinaOrders: List<ChinaOrder>,
+    chinaOrdersLoading: Boolean,
     onOpenOrder: (Long) -> Unit,
     onConfirmReceipt: (Order) -> Unit,
 ) {
-    if (loading && orders.isEmpty()) {
+    if (loading && orders.isEmpty() && chinaOrdersLoading && chinaOrders.isEmpty()) {
         Column { repeat(4) { ShimmerCard() } }
         return
     }
-    if (orders.isEmpty()) {
+    if (orders.isEmpty() && chinaOrders.isEmpty()) {
         CenteredContent {
             EmptyView(
                 icon = Icons.Outlined.Inbox,
@@ -502,18 +650,60 @@ private fun OrdersSectionContent(
         }
         return
     }
+    // Тарих бөлімі — жергілікті және Қытай (MercuryX) тапсырыстары бір уақыт
+    // бойынша DESC реттеліп көрсетіледі (спек §3.4).
+    val historyRows = if (section == CartSection.ORDER_HISTORY) {
+        val local = orders.map { HistoryRow.Local(it) }
+        val china = chinaOrders.map { HistoryRow.China(it) }
+        (local + china).sortedByDescending { row ->
+            DateFormatter.parseOrNull(row.createdAt)
+        }
+    } else {
+        orders.map { HistoryRow.Local(it) }
+    }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        items(orders, key = { it.id }) { order ->
-            OrderTile(
-                order = order,
-                onClick = { onOpenOrder(order.id) },
-                onConfirmReceipt = { onConfirmReceipt(order) },
-            )
+        items(historyRows, key = { it.key }) { row ->
+            when (row) {
+                is HistoryRow.Local -> OrderTile(
+                    order = row.order,
+                    onClick = { onOpenOrder(row.order.id) },
+                    onConfirmReceipt = { onConfirmReceipt(row.order) },
+                )
+                is HistoryRow.China -> ChinaOrderTile(order = row.order)
+            }
+        }
+        if (chinaOrdersLoading && chinaOrders.isNotEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator(strokeWidth = 3.dp)
+                }
+            }
         }
         item { Spacer(Modifier.height(16.dp)) }
+    }
+}
+
+/** Тарихтағы біріктірілген жол — жергілікті немесе Қытай тапсырысы. */
+private sealed interface HistoryRow {
+    val createdAt: String?
+    val key: String
+
+    data class Local(val order: Order) : HistoryRow {
+        override val createdAt: String? get() = order.createdAt
+        override val key: String get() = "local_${order.id}"
+    }
+
+    data class China(val order: ChinaOrder) : HistoryRow {
+        override val createdAt: String? get() = order.createdAt
+        override val key: String get() = "china_${order.id}"
     }
 }
 

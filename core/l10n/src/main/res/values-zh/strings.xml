@@ -790,4 +790,100 @@
     <string name="dealer_vat_description">如果您持有哈萨克斯坦增值税纳税人证书，请启用。否则发票中不计增值税。</string>
     <string name="dealer_balance_title">余额与提现</string>
     <string name="dealer_data_updated">数据更新成功</string>
+
+    <!-- ═══ 阶段 17：中国商品目录 (MercuryX) ═══ -->
+    <string name="china_catalog_subtitle">直接来自中国的商品 (MercuryX)</string>
+    <string name="china_categories_title">分类</string>
+    <string name="china_more_categories">更多</string>
+    <string name="china_popular_products">热门商品</string>
+    <string name="china_min_qty_label">最少 %1$s</string>
+    <string name="china_add_to_cart">加入购物车</string>
+    <string name="china_added_to_cart">已加入购物车</string>
+    <string name="china_choose_offer">选择报价</string>
+    <string name="china_in_stock">库存：%1$s 件</string>
+    <string name="china_under_order">按订单生产</string>
+    <string name="china_information">信息</string>
+    <string name="china_bulk_pricing">批发价格</string>
+    <string name="china_attributes">属性</string>
+    <string name="china_quantity">数量</string>
+    <string name="china_qty_below_min">最低数量：%1$s</string>
+    <string name="china_checkout">订单 (MercuryX)</string>
+    <string name="china_checkout_consent">我同意通过 MercuryX 发送订单，并处理我的数据（电话、BIN）</string>
+    <string name="china_min_order_total">最低订单金额 — 500 000 ₸</string>
+    <string name="china_min_order_remaining">距最低订单金额还差 %1$s</string>
+    <string name="china_invalid_phone">电话：11位数字，以77开头</string>
+    <string name="china_invalid_bin">BIN 必须为12位数字</string>
+    <string name="china_bin_label">BIN（法人）</string>
+    <string name="china_phone_label">电话</string>
+    <string name="china_order_forwarded">订单已发送给供应商</string>
+    <string name="china_status_forwarded">已发送</string>
+    <string name="china_status_failed">失败</string>
+    <string name="china_status_cancelled">已取消</string>
+    <string name="china_status_unknown">未知</string>
+    <string name="china_select_one_type">只能选择一种类型：中国商品或 Agroland 商品</string>
+    <string name="china_from_mercuryx">来自 MercuryX</string>
+    <string name="china_cart_section">中国商品 (MercuryX)</string>
+    <string name="china_order_number">订单 №%1$s</string>
+
+    <!-- ═══ 阶段 17：服务页面（合作伙伴） ═══ -->
+    <string name="services_page_title">服务</string>
+    <string name="services_view_all">查看全部</string>
+    <string name="service_tile_accounting">会计</string>
+    <string name="service_tile_accounting_desc">会计和报告</string>
+    <string name="service_tile_legal">法律服务</string>
+    <string name="service_tile_legal_desc">法律咨询和文件</string>
+    <string name="service_tile_egov">Egov</string>
+    <string name="service_tile_egov_desc">Egov服务</string>
+    <string name="service_tile_it">IT服务</string>
+    <string name="service_tile_it_desc">软件开发</string>
+    <string name="service_tile_china_import">从中国进口</string>
+    <string name="service_tile_china_import_desc">进口服务</string>
+    <string name="service_tile_marketing">营销</string>
+    <string name="service_tile_marketing_desc">市场调研</string>
+    <string name="service_tile_agro_consulting">农业咨询</string>
+    <string name="service_tile_agro_consulting_desc">农业产业咨询</string>
+    <string name="service_tile_engineering">工程服务</string>
+    <string name="service_tile_engineering_desc">工程服务</string>
+    <string name="service_tile_plant_protection">植物保护</string>
+    <string name="service_tile_plant_protection_desc">植物检疫服务</string>
+    <string name="service_tile_agro_market">Agro Market</string>
+    <string name="service_tile_agro_market_desc">Agro Market 服务</string>
+    <string name="service_tile_agro_education">AgroEducation</string>
+    <string name="service_tile_agro_education_desc">教育服务</string>
+    <string name="service_partners_title">合作服务</string>
+    <string name="service_partner_egov_desc">在线政务服务</string>
+    <string name="service_partner_halyk_desc">银行服务与支付</string>
+    <string name="service_partner_mercury_desc">货币兑换与转账</string>
+
+    <!-- ═══ 阶段 17：Egov 服务 + VIN ═══ -->
+    <string name="egov_services_title">Egov服务</string>
+    <string name="egov_no_service">未找到服务</string>
+    <string name="egov_vin_title">按 VIN 查询机械</string>
+    <string name="egov_vin_hint">输入 VIN</string>
+    <string name="egov_vin_invalid">VIN 格式错误（17位）</string>
+    <string name="egov_vin_lookup">查询</string>
+    <string name="egov_vin_not_found">未找到</string>
+    <string name="egov_result_title">结果</string>
+
+    <!-- ═══ 阶段 17：需求（增删改查） ═══ -->
+    <string name="demand_list_title">我的需求</string>
+    <string name="demand_create_title">新需求</string>
+    <string name="demand_edit_title">编辑需求</string>
+    <string name="demand_field_title">需求标题</string>
+    <string name="demand_field_description_hint">描述</string>
+    <string name="demand_field_max_price">最高价格</string>
+    <string name="demand_field_measurement">计量单位</string>
+    <string name="demand_field_quantity">数量</string>
+    <string name="demand_field_currency">货币</string>
+    <string name="demand_create">发布需求</string>
+    <string name="demand_created">需求已发布</string>
+    <string name="demand_updated">需求已更新</string>
+    <string name="demand_deleted_toast">需求已删除</string>
+    <string name="demand_delete_confirm">删除此需求？</string>
+    <string name="demand_status_active">活跃</string>
+    <string name="demand_status_inactive">未激活</string>
+    <string name="demand_activated">需求已激活</string>
+    <string name="demand_deactivated">需求已停用</string>
+    <string name="demand_validation_title">请输入标题</string>
+    <string name="demand_created_at">发布日期</string>
 </resources>

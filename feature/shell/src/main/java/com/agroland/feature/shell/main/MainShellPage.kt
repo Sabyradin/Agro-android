@@ -16,13 +16,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.ChatBubble
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -60,7 +60,8 @@ private val TAB_SPECS = listOf(
     TabSpec(Icons.Outlined.Home, Icons.Filled.Home),
     TabSpec(Icons.Outlined.ChatBubble, Icons.Filled.ChatBubble),
     TabSpec(Icons.Outlined.ShoppingCart, Icons.Filled.ShoppingCart),
-    TabSpec(Icons.Outlined.Person, Icons.Filled.Person),
+    // Фаза 17: SERVICES қойындысы — Сервистер беті (профиль Home аватарына көшті).
+    TabSpec(Icons.Outlined.Apps, Icons.Filled.Apps),
 )
 
 /** Басты shell — 5-slot төменгі жолақ, ортасындағы жасыл "+" батырмасымен. */

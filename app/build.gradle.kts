@@ -92,6 +92,9 @@ dependencies {
     implementation(project(":feature:promo"))
     implementation(project(":feature:dealer"))
     implementation(project(":feature:notifications"))
+    implementation(project(":feature:china"))
+    implementation(project(":feature:services"))
+    implementation(project(":feature:demand"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))
@@ -115,6 +118,11 @@ dependencies {
     // Push (Фаза 11): FCM токендері плейсхолдер конфигте де қауіпсіз ыдырайды.
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+
+    // Фаза 17: MercuryX категория суреттері (SVG) — Coil-дің SVG декодері.
+    implementation(libs.coil.svg)
+    // SingletonImageLoader.Factory (Application) — coil3 bundle артефактында.
+    implementation(libs.coil)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 

@@ -254,3 +254,37 @@ data class AddEditDeliveryZoneRoute(val zoneId: Long = -1)
 /** Бизнес баптаулары — баланс + ҚҚС төлеуші тумблері. */
 @Serializable
 data object DealerSettingsRoute
+
+// ═══════════════ Фаза 17 — Қытай (MercuryX) / EGOV / Сұраныстар ═══════════════
+
+/** Қытай категориясының сабкатегориялары (parentId — savedStateHandle кілті). */
+@Serializable
+data class ChinaSubcategoriesRoute(val parentId: Long, val title: String = "")
+
+/** Қытай категория тауарлары — парақталған тор (categoryId). */
+@Serializable
+data class ChinaProductsRoute(val categoryId: Long, val title: String = "")
+
+/** Қытай тауарының деталы (productId — MercuryX int64 id). */
+@Serializable
+data class ChinaProductDetailRoute(val productId: Long)
+
+/** Egov сервистері — статикалық каталог + VIN іздестіру. */
+@Serializable
+data object EgovServicesRoute
+
+/** «Сұраныстарым» — пайдаланушының сұраныстары (спек қосымшасы, Flutter-де жоқ). */
+@Serializable
+data object DemandListRoute
+
+/** Сұраныс деталы (demandId). */
+@Serializable
+data class DemandDetailRoute(val demandId: Long)
+
+/** Сұраныс құру/өңдеу (demandId = -1 → жаңа). */
+@Serializable
+data class CreateEditDemandRoute(val demandId: Long = -1L)
+
+/** Профиль беті — Home аватары ашады (SERVICES қойындысы Сервистерге ауысты). */
+@Serializable
+data object ProfileRoute
