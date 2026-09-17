@@ -572,6 +572,9 @@
     <string name="location_error">Location error</string>
     <string name="send_location">Send location</string>
     <string name="shared_location">Shared location</string>
+    <string name="chat_preview_photo">Photo</string>
+    <string name="chat_preview_voice">Voice message</string>
+    <string name="chat_preview_file">File</string>
     <string name="open_in2gis">Open in 2GIS</string>
     <string name="location_label">Location</string>
     <string name="delivery_request_card_title">Delivery request</string>
@@ -876,6 +879,9 @@
     <string name="service_partner_egov_desc">Government services online</string>
     <string name="service_partner_halyk_desc">Banking and payments</string>
     <string name="service_partner_mercury_desc">Currency exchange and transfers</string>
+    <string name="services_agro_git_desc">AI assistant for choosing goods, orders and delivery</string>
+    <string name="services_demand_title">Request</string>
+    <string name="services_demand_desc">Make an offer</string>
 
     <!-- ═══ Phase 17: e-Gov services + VIN ═══ -->
     <string name="egov_services_title">Egov Services</string>

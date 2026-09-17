@@ -23,7 +23,21 @@ enum class InferredMessageType { IMAGE, AUDIO, VIDEO, FILE, LOCATION, TEXT, OTHE
 object InferMessageType {
 
     fun infer(msg: ChatMessage, text: String): InferredMessageType {
-        // 1. Backend нақты тип берген — соны сыйлау (text-тен басқасы).
+        // 1a. Сайт суретті/бейнені/аудионы «file» типімен жібереді (мыс. скриншот .png) —
+        //     URL кеңейтімі медиа болса, «Файл» емес, сол медиа ретінде көрсетеміз.
+        if (msg.messageType == "file") {
+            for (candidate in listOf(msg.fileUrl, msg.message)) {
+                if (candidate.isNullOrBlank()) continue
+                when (inferFromUrl(candidate)) {
+                    InferredMessageType.IMAGE -> return InferredMessageType.IMAGE
+                    InferredMessageType.VIDEO -> return InferredMessageType.VIDEO
+                    InferredMessageType.AUDIO -> return InferredMessageType.AUDIO
+                    else -> Unit
+                }
+            }
+        }
+
+        // 1b. Backend нақты тип берген — соны сыйлау (text-тен басқасы).
         if (msg.messageType != "text") {
             return when (msg.messageType) {
                 "image" -> InferredMessageType.IMAGE
@@ -95,6 +109,37 @@ object InferMessageType {
         return null
     }
 
+    /**
+     * Локация координаттары: latitude/longitude өрістері, болмаса `message` ішіндегі
+     * «lat, lng» мәтіні (сайт локацияны тек мәтін ретінде жібереді).
+     */
+    fun coordinatesFor(msg: ChatMessage): Pair<Double, Double>? {
+        val lat = msg.latitude
+        val lng = msg.longitude
+        if (lat != null && lng != null) return lat to lng
+        val match = COORDS_CAPTURE_REGEX.matchEntire(msg.message.trim()) ?: return null
+        val parsedLat = match.groupValues[1].toDoubleOrNull() ?: return null
+        val parsedLng = match.groupValues[2].toDoubleOrNull() ?: return null
+        return parsedLat to parsedLng
+    }
+
+    /**
+     * Файлдың көрсетілетін аты: `file_name`, болмаса URL-дің соңғы сегменті —
+     * %-декодталып, backend қосатын UUID префиксі («1b2c…-») алынып тасталады.
+     */
+    fun displayFileName(msg: ChatMessage): String? {
+        msg.fileName?.takeIf { it.isNotBlank() }?.let { return it }
+        val url = mediaUrlFor(msg) ?: return null
+        val segment = url.substringBefore('?').substringBefore('#').substringAfterLast('/')
+        if (segment.isBlank()) return null
+        val decoded = try {
+            java.net.URLDecoder.decode(segment.replace("+", "%2B"), "UTF-8")
+        } catch (_: Exception) {
+            segment
+        }
+        return decoded.replace(UUID_PREFIX_REGEX, "").ifBlank { decoded }
+    }
+
     fun pathExtension(lower: String): String? {
         val path = lower.substringBefore('?').substringBefore('#')
         // Соңғы path сегментін ғана қараймыз — әйтпесе хост ішіндегі нүкте
@@ -109,6 +154,8 @@ object InferMessageType {
     val VIDEO_PATH_EXTS = setOf("mp4", "mov", "avi", "mkv")
 
     private val COORDS_REGEX = Regex("^-?\\d+\\.\\d+,\\s*-?\\d+\\.\\d+$")
+    private val COORDS_CAPTURE_REGEX = Regex("^(-?\\d+\\.\\d+),\\s*(-?\\d+\\.\\d+)$")
+    private val UUID_PREFIX_REGEX = Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}-")
 
     private val IMAGE_EXT = setOf(
         "jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "avif", "tiff", "tif",

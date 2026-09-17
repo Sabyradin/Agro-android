@@ -14,10 +14,16 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,6 +36,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
@@ -50,6 +57,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -66,6 +74,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -78,8 +87,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.agroland.core.common.formatters.DateFormatter
 import com.agroland.core.common.formatters.PriceFormatter
 import com.agroland.core.l10n.R as L10nR
-import com.agroland.core.ui.components.AgroAppBar
-import com.agroland.core.ui.components.AgroIconButton
 import com.agroland.core.ui.components.AgroScaffold
 import com.agroland.core.ui.components.CachedImage
 import com.agroland.core.ui.components.CenteredContent
@@ -92,16 +99,13 @@ import com.agroland.feature.marketplace.data.FullAnnouncement
 import com.agroland.feature.reviews.ui.AnnouncementReviewsSection
 import kotlinx.coroutines.launch
 
-/** iOS «ҚҚС қоса» чипінің көк түсі. */
-private val VatBlue = Color(0xFF2F7CF6)
-
 /** iOS VIP чипінің алтын түсі. */
 private val VipGold = Color(0xFFE9A800)
 
 /**
  * AnnouncementDetailPage — толық жарнама, iOS макетіне сай:
  * галерея (нүкте-индикатор) → негізгі ақпарат карточкасы (күні, атауы, баға,
- * VIP/ҚҚС чиптері, орны, қаралым/сүйікті/ID) → «Ақпарат | Сипаттама»
+ * VIP/келісім чиптері, орны, қаралым/сүйікті/ID) → «Ақпарат | Сипаттама»
  * ауыстырғышы → «Жеткізу / Өзі алу» → пікірлер → сатушы → сатушының барлық
  * жарнамалары мен ұқсас жарнамалар (көлденең тізім).
  *
@@ -156,55 +160,22 @@ fun AnnouncementDetailPage(
     LaunchedEffect(announcementId) {
         viewModel.load(announcementId)
     }
-    // Сүйікті өзгерісі — toast (алғашқы жүктеуді есепке алмайды).
-    var lastFavorite by remember { mutableStateOf<Boolean?>(null) }
+    // Сүйікті өзгерісі — toast тек пайдаланушы жүректі басқанда. (Бұрын жүктеу
+    // кезіндегі false → true ауысуы да «Таңдаулыларға қосылды» деп көрсетілетін.)
+    var favoriteTapped by remember { mutableStateOf(false) }
     LaunchedEffect(favorite) {
-        when {
-            lastFavorite == null -> lastFavorite = favorite
-            lastFavorite != favorite -> {
-                snackbar.showSnackbar(if (favorite) favoriteAdded else favoriteRemoved)
-                lastFavorite = favorite
-            }
+        if (favoriteTapped) {
+            favoriteTapped = false
+            snackbar.showSnackbar(if (favorite) favoriteAdded else favoriteRemoved)
         }
     }
 
     var contactSheetOpen by remember { mutableStateOf(false) }
 
     AgroScaffold(
-        topBar = {
-            AgroAppBar(
-                title = detail?.base?.title ?: stringResource(L10nR.string.detail_title),
-                onBack = onBack,
-                actions = {
-                    val item = detail
-                    AgroIconButton(
-                        icon = Icons.Outlined.Share,
-                        contentDescription = stringResource(L10nR.string.common_share),
-                        tint = MaterialTheme.colorScheme.primary,
-                        onClick = {
-                            item?.let { d ->
-                                val share = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(
-                                        Intent.EXTRA_TEXT,
-                                        "${d.base.title} — ${displayPrice(d.base)}\n" +
-                                            "https://agroland.kz/announcement/${d.base.id}",
-                                    )
-                                }
-                                context.startActivity(Intent.createChooser(share, null))
-                            }
-                        },
-                    )
-                    AgroIconButton(
-                        icon = if (favorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = stringResource(L10nR.string.favorites_title),
-                        onClick = { viewModel.toggleFavorite() },
-                        tint = if (favorite) MaterialTheme.colorScheme.error
-                        else MaterialTheme.colorScheme.primary,
-                    )
-                },
-            )
-        },
+        // Галерея статус-бардың астына дейін созылады — жоғарғы inset контентке берілмейді.
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets
+            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
         bottomBar = {
             val current = detail
             when {
@@ -228,7 +199,7 @@ fun AnnouncementDetailPage(
         Box(modifier = inner.fillMaxSize()) {
             when {
                 loading && detail == null -> DetailSkeleton()
-                error != null && detail == null -> CenteredContent {
+                error != null && detail == null -> CenteredContent(Modifier.statusBarsPadding()) {
                     ErrorWithRetry(
                         onRetry = { viewModel.load(announcementId) },
                         message = error!!.displayText(),
@@ -244,6 +215,49 @@ fun AnnouncementDetailPage(
                     onOpenSellerReviews = onOpenSellerReviews,
                 )
                 else -> LoadingWidget(Modifier.fillMaxSize())
+            }
+            // Артқа / бөлісу / сүйікті — суреттің үстінде қалқып тұрады (iOS).
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                FloatingCircleButton(
+                    icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                    contentDescription = null,
+                    onClick = onBack,
+                )
+                Spacer(Modifier.weight(1f))
+                val item = detail
+                if (item != null) {
+                    FloatingCircleButton(
+                        icon = Icons.Outlined.Share,
+                        contentDescription = stringResource(L10nR.string.common_share),
+                        onClick = {
+                            val share = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(
+                                    Intent.EXTRA_TEXT,
+                                    "${item.base.title} — ${displayPrice(item.base)}\n" +
+                                        "https://agroland.kz/announcement/${item.base.id}",
+                                )
+                            }
+                            context.startActivity(Intent.createChooser(share, null))
+                        },
+                    )
+                    FloatingCircleButton(
+                        icon = if (favorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = stringResource(L10nR.string.favorites_title),
+                        onClick = {
+                            favoriteTapped = true
+                            viewModel.toggleFavorite()
+                        },
+                        tint = if (favorite) FavoriteRed else Color.White,
+                    )
+                }
             }
             SnackbarHost(
                 hostState = snackbar,
@@ -263,6 +277,29 @@ fun AnnouncementDetailPage(
                 }
             },
         )
+    }
+}
+
+/** Сүйікті жүректің түсі — жартылай мөлдір қара фонда анық көрінеді. */
+private val FavoriteRed = Color(0xFFFF3B30)
+
+/** Сурет үстіндегі дөңгелек батырма: жартылай мөлдір қара фон + ақ иконка. */
+@Composable
+private fun FloatingCircleButton(
+    icon: ImageVector,
+    contentDescription: String?,
+    onClick: () -> Unit,
+    tint: Color = Color.White,
+) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.38f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = contentDescription, tint = tint, modifier = Modifier.size(22.dp))
     }
 }
 
@@ -362,6 +399,9 @@ private fun DetailContent(
     }
 }
 
+/** Галерея биіктігі (статус-бар inset-інсіз). */
+private val GalleryHeight = 340.dp
+
 /** Галерея: толық енді pager + астында «таблеткадағы» нүктелер (iOS). */
 @Composable
 private fun Gallery(
@@ -370,11 +410,13 @@ private fun Gallery(
     onOpenPhotoViewer: (images: List<String>, index: Int) -> Unit,
 ) {
     val ext = extendedColors()
+    // Статус-бар биіктігі қосылады — сурет экранның ең жоғарғы шетінен басталады.
+    val galleryHeight = GalleryHeight + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     if (images.isEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
+                .height(galleryHeight)
                 .background(ext.grey),
             contentAlignment = Alignment.Center,
         ) {
@@ -384,20 +426,29 @@ private fun Gallery(
     }
     val pagerState = rememberPagerState(pageCount = { images.size })
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(320.dp)
-                .background(ext.card),
-        ) { page ->
-            CachedImage(
-                url = images[page],
-                contentDescription = title,
-                contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+        Box {
+            HorizontalPager(
+                state = pagerState,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clickable { onOpenPhotoViewer(images, page) },
+                    .fillMaxWidth()
+                    .height(galleryHeight)
+                    .background(ext.card),
+            ) { page ->
+                CachedImage(
+                    url = images[page],
+                    contentDescription = title,
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { onOpenPhotoViewer(images, page) },
+                )
+            }
+            // Жоғарғы күңгірт градиент — статус-бар мен батырмалар ашық суретте де оқылады.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+                    .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent))),
             )
         }
         if (images.size > 1) {
@@ -493,7 +544,7 @@ private fun MainInfoCard(detail: FullAnnouncement, favoritesCount: Int) {
             }
         }
 
-        val showChips = base.isVip || detail.priceIncludesVat || base.negotiable
+        val showChips = base.isVip || base.negotiable
         if (showChips) {
             Spacer(Modifier.height(10.dp))
             FlowRow(
@@ -502,9 +553,6 @@ private fun MainInfoCard(detail: FullAnnouncement, favoritesCount: Int) {
             ) {
                 if (base.isVip) {
                     InfoChip(text = "VIP", color = VipGold, icon = Icons.Filled.WorkspacePremium)
-                }
-                if (detail.priceIncludesVat) {
-                    InfoChip(text = stringResource(L10nR.string.detail_vat_chip), color = VatBlue)
                 }
                 if (base.negotiable) {
                     InfoChip(
@@ -643,7 +691,6 @@ private fun InfoTabsCard(detail: FullAnnouncement) {
             val base = detail.base
             SpecRow(stringResource(L10nR.string.detail_delivery), if (base.deliveryAvailable) yes else no)
             SpecRow(stringResource(L10nR.string.detail_pickup), if (base.pickupAvailable) yes else no)
-            SpecRow(stringResource(L10nR.string.cart_vat_label), if (detail.priceIncludesVat) yes else no)
             detail.sku?.takeIf { it.isNotBlank() }?.let { SpecRow(stringResource(L10nR.string.detail_sku), it) }
             detail.stockQuantity?.let { SpecRow(stringResource(L10nR.string.detail_stock), it.toString()) }
         }
@@ -1044,7 +1091,8 @@ private fun DetailSkeleton() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .statusBarsPadding()
+            .padding(start = 16.dp, end = 16.dp, top = 56.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ShimmerBox(

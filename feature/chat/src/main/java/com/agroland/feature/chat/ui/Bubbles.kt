@@ -804,8 +804,10 @@ fun LocationBubble(
     val palette = chatPalette()
     val openInLabel = stringResource(L10nR.string.open_in2gis)
     val sharedLabel = stringResource(L10nR.string.shared_location)
-    val lat = message.latitude
-    val lng = message.longitude
+    // Сайт координатты тек мәтін ретінде жібереді — өрістер бос болса мәтіннен аламыз.
+    val coords = com.agroland.feature.chat.domain.InferMessageType.coordinatesFor(message)
+    val lat = coords?.first
+    val lng = coords?.second
     BubbleSurface(isMine = isMine, modifier = modifier.width(260.dp), padding = 3.dp) {
         Box(
             modifier = Modifier

@@ -660,11 +660,11 @@ class ChatRoomViewModel @Inject constructor(
             return
         }
 
-        // «Сатушыдан нақтылаңыз» — бірінші хабарламаға тег.
+        // «Сатушыдан нақтылаңыз» — бұрын бірінші хабарламаға [announcement_id:N] тегі
+        // қосылатын. Сайт тегті танымай, мәтінде «Salem [announcement_id:1820]» деп
+        // көрсететін. Жарнама карточкасы бәрібір бөлек announcement_link хабарламасымен
+        // (agroland.kz/announcement/N) келеді — тег жіберілмейді.
         val isClarifyFirst = initialAnnouncementId != null && !announcementCardSent
-        if (isClarifyFirst) {
-            msg = "$msg [announcement_id:$initialAnnouncementId]"
-        }
 
         val replyTo = _state.value.replyTo
         val localId = "temp_${localIdCounter++}"
@@ -721,10 +721,9 @@ class ChatRoomViewModel @Inject constructor(
     ) {
         val localId = "temp_${localIdCounter++}"
         queuedLocalIds.add(localId)
-        var tagged = msg
-        val isClarifyFirst = initialAnnouncementId != null && !announcementCardSent
-        if (isClarifyFirst) {
-            tagged = "$msg [announcement_id:$initialAnnouncementId]"
+        val tagged = msg
+        // Тег жіберілмейді (сайтта мәтін болып көрінетін) — sendMessage-тегі түсініктемені қара.
+        if (initialAnnouncementId != null && !announcementCardSent) {
             announcementCardSent = true
         }
         val replyTo = _state.value.replyTo
@@ -921,6 +920,15 @@ class ChatRoomViewModel @Inject constructor(
             put("message_type", messageType)
             put("file_url", fileUrl)
             fileName?.let { put("file_name", it) }
+            // Аудио: Flutter/сайт паритеті — audio_url + ұзақтық (екі кілтпен де),
+            // әйтпесе қабылдаушыда ұзақтық 0:00 көрінеді.
+            if (messageType == "audio") {
+                put("audio_url", fileUrl)
+                audioDurationSec?.let {
+                    put("audio_duration", it)
+                    put("duration", it)
+                }
+            }
         })
     }
 

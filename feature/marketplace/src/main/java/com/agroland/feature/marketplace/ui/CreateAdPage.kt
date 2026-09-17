@@ -306,7 +306,7 @@ fun CreateAdPage(
                                 onClick = { categoryPickerVisible = true },
                             )
 
-                            // Баға + валюта + келісу + ҚҚС.
+                            // Баға + валюта + келісу.
                             AgroTextField(
                                 value = draft.price,
                                 onValueChange = { value ->
@@ -324,11 +324,6 @@ fun CreateAdPage(
                                 title = stringResource(L10nR.string.mp_negotiable_short),
                                 checked = draft.negotiable,
                                 onToggle = { checked -> viewModel.updateDraft { it.copy(negotiable = checked) } },
-                            )
-                            ToggleRow(
-                                title = stringResource(L10nR.string.create_field_vat),
-                                checked = draft.priceIncludesVat,
-                                onToggle = { checked -> viewModel.updateDraft { it.copy(priceIncludesVat = checked) } },
                             )
 
                             // Өлшем бірлігі.

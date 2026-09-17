@@ -574,6 +574,9 @@
     <string name="location_error">Ошибка геолокации</string>
     <string name="send_location">Отправить геолокацию</string>
     <string name="shared_location">Местоположение</string>
+    <string name="chat_preview_photo">Фото</string>
+    <string name="chat_preview_voice">Голосовое сообщение</string>
+    <string name="chat_preview_file">Файл</string>
     <string name="open_in2gis">Открыть в 2GIS</string>
     <string name="location_label">Место</string>
     <string name="delivery_request_card_title">Запрос доставки</string>
@@ -878,6 +881,9 @@
     <string name="service_partner_egov_desc">Государственные услуги онлайн</string>
     <string name="service_partner_halyk_desc">Банковские услуги и платежи</string>
     <string name="service_partner_mercury_desc">Обмен валют и переводы</string>
+    <string name="services_agro_git_desc">ИИ-помощник по выбору товаров, заказам и доставке</string>
+    <string name="services_demand_title">Запрос</string>
+    <string name="services_demand_desc">Сделать предложение</string>
 
     <!-- ═══ Фаза 17: Госуслуги (EGOV) + VIN ═══ -->
     <string name="egov_services_title">Сервисы Egov</string>

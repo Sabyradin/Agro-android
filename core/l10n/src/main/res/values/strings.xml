@@ -582,6 +582,9 @@
     <string name="location_error">Геолокация қатесі</string>
     <string name="send_location">Локация жіберу</string>
     <string name="shared_location">Ортақ локация</string>
+    <string name="chat_preview_photo">Фото</string>
+    <string name="chat_preview_voice">Дауыстық хабарлама</string>
+    <string name="chat_preview_file">Файл</string>
     <string name="open_in2gis">2GIS-те ашу</string>
     <string name="location_label">Орын</string>
     <string name="delivery_request_card_title">Жеткізуді сұрау</string>
@@ -886,6 +889,10 @@
     <string name="service_partner_egov_desc">Мемлекеттік қызметтер онлайн</string>
     <string name="service_partner_halyk_desc">Банк қызметтері мен төлемдер</string>
     <string name="service_partner_mercury_desc">Валюталық алмасу және аударым</string>
+    <string name="services_agro_git_desc">Тауар таңдау, тапсырыс және жеткізу бойынша ЖИ-көмекші</string>
+    <string name="services_demand_title">Сұраныс</string>
+    <string name="services_demand_desc">Ұсыныс жасау</string>
+    <string name="services_agro_git_title" translatable="false">Agro Git</string>
 
     <!-- ═══ Фаза 17: EGOV қызметтері + VIN ═══ -->
     <string name="egov_services_title">Egov сервистері</string>

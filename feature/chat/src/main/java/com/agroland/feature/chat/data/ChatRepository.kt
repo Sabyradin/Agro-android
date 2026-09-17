@@ -104,8 +104,14 @@ class ChatRepository @Inject constructor(
         if (bytes.isEmpty() || bytes.size > MAX_FILE_BYTES) {
             return@withContext ApiResult.Error(Failure.Unknown(FileTooLargeException()))
         }
-        val fileName = queryDisplayName(uri) ?: "upload"
-        val mime = context.contentResolver.getType(uri) ?: guessMime(fileName)
+        // Дауыс жазбасы file:// URI — ContentResolver оның атын/типін бермейді. Бұрын
+        // «upload» + application/octet-stream болып жүктеліп, сайт аудионы ойната алмайтын.
+        val fileName = queryDisplayName(uri)
+            ?: uri.lastPathSegment?.takeIf { it.isNotBlank() }
+            ?: "upload"
+        val mime = context.contentResolver.getType(uri)
+            ?.takeIf { it != "application/octet-stream" }
+            ?: guessMime(fileName)
         val body = ProgressRequestBody(bytes.toRequestBody(mime.toMediaType()), onProgress)
         val part = MultipartBody.Part.createFormData("file", fileName, body)
         safeCall {
@@ -118,7 +124,7 @@ class ChatRepository @Inject constructor(
     }
 
     private fun queryDisplayName(uri: Uri): String? =
-        context.contentResolver.query(
+        if (uri.scheme == "file") null else context.contentResolver.query(
             uri,
             arrayOf(android.provider.OpenableColumns.DISPLAY_NAME),
             null, null, null,
@@ -135,6 +141,7 @@ class ChatRepository @Inject constructor(
         "mov" -> "video/quicktime"
         "m4a" -> "audio/mp4"
         "mp3" -> "audio/mpeg"
+        "webm" -> "audio/webm"
         "wav" -> "audio/wav"
         "ogg" -> "audio/ogg"
         "aac" -> "audio/aac"

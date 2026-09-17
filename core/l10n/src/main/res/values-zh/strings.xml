@@ -571,6 +571,9 @@
     <string name="location_error">位置错误</string>
     <string name="send_location">发送位置</string>
     <string name="shared_location">共享位置</string>
+    <string name="chat_preview_photo">照片</string>
+    <string name="chat_preview_voice">语音消息</string>
+    <string name="chat_preview_file">文件</string>
     <string name="open_in2gis">在 2GIS 中打开</string>
     <string name="location_label">位置</string>
     <string name="delivery_request_card_title">配送请求</string>
@@ -875,6 +878,9 @@
     <string name="service_partner_egov_desc">在线政务服务</string>
     <string name="service_partner_halyk_desc">银行服务与支付</string>
     <string name="service_partner_mercury_desc">货币兑换与转账</string>
+    <string name="services_agro_git_desc">选品、下单和配送的 AI 助手</string>
+    <string name="services_demand_title">需求</string>
+    <string name="services_demand_desc">发布需求</string>
 
     <!-- ═══ 阶段 17：Egov 服务 + VIN ═══ -->
     <string name="egov_services_title">Egov服务</string>

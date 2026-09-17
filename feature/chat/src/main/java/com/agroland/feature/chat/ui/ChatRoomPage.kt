@@ -471,7 +471,8 @@ fun ChatRoomPage(
             onBack = onBack,
         )
 
-        Box(modifier = Modifier.weight(1f)) {
+        // fillMaxWidth — спиннер мен «Қосылуда…» банері экран ортасында тұруы үшін.
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             when {
                 // Graceful timeout + хабарлама жоқ → қайта жүктеу.
                 state.loadTimedOut && state.messages.isEmpty() -> {
@@ -920,13 +921,13 @@ private fun ChatRoomAppBar(
 private fun ConnectionBanner(connecting: Boolean, onRetry: () -> Unit) {
     val palette = chatPalette()
     Surface(
-        modifier = Modifier.padding(8.dp),
+        modifier = Modifier.padding(top = 12.dp),
         shape = RoundedCornerShape(50),
         color = palette.dayChip,
-        shadowElevation = 2.dp,
+        shadowElevation = 3.dp,
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (connecting) {
@@ -1177,22 +1178,21 @@ private fun MessageContent(
                 onError = onAudioError,
             )
             InferredMessageType.FILE -> FileBubble(
-                fileName = message.fileName ?: "Файл",
+                // file_name жоқ болса (сайт) — атын URL-ден аламыз.
+                fileName = InferMessageType.displayFileName(message),
                 url = InferMessageType.mediaUrlFor(message),
                 isMine = isMine,
                 message = message,
                 onOpen = {
                     val url = InferMessageType.mediaUrlFor(message)
-                    if (url != null) onOpenFile(url, message.fileName ?: "file")
+                    if (url != null) onOpenFile(url, InferMessageType.displayFileName(message) ?: "file")
                 },
             )
             InferredMessageType.LOCATION -> LocationBubble(
                 message = message,
                 isMine = isMine,
                 onOpenMap = {
-                    val lat = message.latitude
-                    val lng = message.longitude
-                    if (lat != null && lng != null) onOpenMap(lat, lng)
+                    InferMessageType.coordinatesFor(message)?.let { (lat, lng) -> onOpenMap(lat, lng) }
                 },
             )
             else -> {

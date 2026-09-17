@@ -21,6 +21,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.Agriculture
 import androidx.compose.material.icons.outlined.Calculate
 import androidx.compose.material.icons.outlined.Computer
@@ -43,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -77,12 +80,17 @@ private data class PartnerItem(
 )
 
 /**
- * «Сервистер» — shell 5-табы (Flutter ServicesPage, 1:1): іздеу өрісі,
- * 4-бақаналы сервистер grid-і, PROD-та тек eGov серіктесі көрінеді.
+ * «Сервистер» — shell 5-табы (iOS макеті): іздеу өрісі, «Agro Git» ЖИ-көмекші
+ * баннері, 4-бағаналы сервистер grid-і, серіктестер және «Сұраныс» карточкасы.
+ * PROD-та серіктестерден тек eGov көрінеді.
  */
 @Composable
 fun ServicesPage(
     onOpenEgov: () -> Unit,
+    /** «Agro Git» — ЖИ-гид чаты (жүйелік пайдаланушы 1003). */
+    onOpenAgroGit: () -> Unit = {},
+    /** «Сұраныс» — жаңа сұраныс құру. */
+    onOpenDemand: () -> Unit = {},
 ) {
     val ext = extendedColors()
     // dev flavor applicationId «com.agroland.app.dev» — PROD-та тек eGov серіктесі.
@@ -147,6 +155,14 @@ fun ServicesPage(
         }
         Spacer(Modifier.height(AgroSpacing.screen))
 
+        if (query.isEmpty()) {
+            AgroGitBanner(
+                onClick = onOpenAgroGit,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+            Spacer(Modifier.height(AgroSpacing.screen))
+        }
+
         if (filtered.isEmpty()) {
             Text(
                 text = stringResource(L10nR.string.egov_no_service),
@@ -158,8 +174,7 @@ fun ServicesPage(
                 textAlign = TextAlign.Center,
             )
         } else {
-            // 3-бақаналы grid: 4 бақанада плитка ені ~80dp болып, ұзын
-            // атаулар («Агро-консалтинг») сөздің ортасынан үзілетін.
+            // 4-бағаналы grid (iOS): атаулар 2 жолға дейін, сөз ортасынан үзілмейді.
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -222,15 +237,26 @@ fun ServicesPage(
                 .forEach { partner ->
                     PartnerCard(partner = partner, onClick = { if (partner.isEgov) onOpenEgov() })
                 }
+            Spacer(Modifier.height(6.dp))
+            PartnerCard(
+                partner = PartnerItem(
+                    name = stringResource(L10nR.string.services_demand_title),
+                    descriptionRes = L10nR.string.services_demand_desc,
+                    color = DemandOrange,
+                    initial = "",
+                ),
+                icon = Icons.Outlined.Campaign,
+                onClick = onOpenDemand,
+            )
         }
     }
 }
 
 /** Grid бақандарының саны. */
-private const val ServiceGridColumns = 3
+private const val ServiceGridColumns = 4
 
 /** Барлық плитка бірдей биіктікте — жолдар «сатылап» кетпейді. */
-private val ServiceTileHeight = 108.dp
+private val ServiceTileHeight = 104.dp
 
 /** Сервис плиткасы — дөңгелек иконка + атау. */
 @Composable
@@ -249,7 +275,7 @@ private fun ServiceTile(
     ) {
         AgroIconCircle(
             icon = service.icon,
-            size = 52.dp,
+            size = 56.dp,
             iconSize = 26.dp,
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
         )
@@ -257,9 +283,10 @@ private fun ServiceTile(
         // Тек атау: 4 бақанада сипаттама бәрібір «...» болып қиылатын,
         // ал биіктік жетпей мәтіннің асты кесілетін.
         Text(
-            text = stringResource(service.titleRes),
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
+            // Дефистен кейін жол бөлінсін («Агро-» / «консалтинг»), сөз ортасынан емес.
+            text = stringResource(service.titleRes).replace("-", "-​"),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
             color = ext.primaryText,
             textAlign = TextAlign.Center,
             maxLines = 2,
@@ -274,6 +301,8 @@ private fun ServiceTile(
 private fun PartnerCard(
     partner: PartnerItem,
     onClick: () -> Unit,
+    /** Инициал орнына иконка (мысалы, «Сұраныс»). */
+    icon: ImageVector? = null,
 ) {
     val ext = extendedColors()
     Row(
@@ -293,12 +322,16 @@ private fun PartnerCard(
                 .background(partner.color),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = partner.initial,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-            )
+            if (icon != null) {
+                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(28.dp))
+            } else {
+                Text(
+                    text = partner.initial,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                )
+            }
         }
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -323,6 +356,65 @@ private fun PartnerCard(
             imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
             contentDescription = null,
             tint = ext.secondaryText,
+        )
+    }
+}
+
+/** «Сұраныс» карточкасының қызғылт сары түсі (iOS). */
+private val DemandOrange = Color(0xFFF7931E)
+
+/** «Agro Git» баннері — жасыл градиент, жұлдызша иконка, атау + сипаттама + chevron. */
+@Composable
+private fun AgroGitBanner(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(20.dp)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(Brush.horizontalGradient(listOf(Color(0xFF3F9A3A), Color(0xFF8CC63F))))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 18.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color.White.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.AutoAwesome,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(28.dp),
+            )
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(L10nR.string.services_agro_git_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = stringResource(L10nR.string.services_agro_git_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.9f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            contentDescription = null,
+            tint = Color.White,
         )
     }
 }

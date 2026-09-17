@@ -154,4 +154,39 @@ class InferMessageTypeTest {
         assertNull(InferMessageType.pathExtension("https://a.kz/b/c"))
         assertNull(InferMessageType.pathExtension("https://a.kz/b/c."))
     }
+
+    @Test
+    fun `сайт суретті file типімен жіберсе — сурет ретінде танимыз`() {
+        val url = "https://storage.googleapis.com/b/d96bf877-fd58-4e4c-be20-3db1b8efcedd-Screenshot%202026.png"
+        assertEquals(
+            InferredMessageType.IMAGE,
+            InferMessageType.infer(message(messageType = "file", text = url, fileUrl = url), url),
+        )
+        val zip = "https://storage.googleapis.com/b/x-report.zip"
+        assertEquals(
+            InferredMessageType.FILE,
+            InferMessageType.infer(message(messageType = "file", text = zip, fileUrl = zip), zip),
+        )
+    }
+
+    @Test
+    fun `локация координаттары мәтіннен де алынады`() {
+        assertEquals(
+            43.19540584823177 to 76.88127676901787,
+            InferMessageType.coordinatesFor(
+                message(messageType = "location", text = "43.19540584823177,76.88127676901787"),
+            ),
+        )
+        assertEquals(1.5 to 2.5, InferMessageType.coordinatesFor(message(latitude = 1.5, longitude = 2.5)))
+        assertNull(InferMessageType.coordinatesFor(message(messageType = "location", text = "Алматы")))
+    }
+
+    @Test
+    fun `файл аты URL-ден UUID префиксінсіз декодталып шығады`() {
+        val url = "https://storage.googleapis.com/b/e33af2b9-a03a-4f1c-bf69-62892e8d9a07-pravovoy%20konsulting.zip"
+        assertEquals(
+            "pravovoy konsulting.zip",
+            InferMessageType.displayFileName(message(messageType = "file", text = url, fileUrl = url)),
+        )
+    }
 }

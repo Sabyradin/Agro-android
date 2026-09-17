@@ -749,6 +749,23 @@ private fun AppNavHost(
                     // профиль — ProfileRoute (Home аватары ашады).
                     ServicesPage(
                         onOpenEgov = { navController.navigate(EgovServicesRoute) },
+                        // Agro Git — ЖИ-гид жүйелік чаты (Flutter: system user 1003).
+                        onOpenAgroGit = {
+                            if (isAuthorized) {
+                                navController.navigate(
+                                    ChatRoomRoute(otherUserId = 1003L, username = "Agro Git", isSystemChat = true),
+                                )
+                            } else {
+                                navController.navigate(AuthRoute)
+                            }
+                        },
+                        onOpenDemand = {
+                            if (isAuthorized) {
+                                navController.navigate(CreateEditDemandRoute())
+                            } else {
+                                navController.navigate(AuthRoute)
+                            }
+                        },
                     )
                 },
             )

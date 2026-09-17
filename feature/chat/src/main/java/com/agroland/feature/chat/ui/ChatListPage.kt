@@ -1,7 +1,6 @@
 package com.agroland.feature.chat.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Help
@@ -61,7 +63,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -141,13 +147,30 @@ fun ChatListPage(
             onOpenSearch = { viewModel.onSearchChange("") },
         )
 
-        // «Менің пікірлерім» жолы (spec §10, iOS паритеті): чат тізімінің
-        // басында — pending пікірлер бейджімен.
-        if (onOpenMyReviews != null) {
-            MyReviewsEntryRow(
-                badge = myReviewsBadge,
-                onClick = onOpenMyReviews,
+        // «Менің пікірлерім» мен «Мұрағат» — бірінің астында бірі, бірдей құрылымда:
+        // иконкалар мен мәтіндер бір сызықта (іздеу кезінде жасырылады).
+        if (searchInput.isEmpty()) {
+            if (onOpenMyReviews != null) {
+                ShortcutRow(
+                    icon = Icons.Outlined.StarBorder,
+                    text = stringResource(L10nR.string.my_reviews_title),
+                    badge = myReviewsBadge,
+                    onClick = onOpenMyReviews,
+                )
+                HorizontalDivider(
+                    color = extendedColors().divider,
+                    thickness = 0.5.dp,
+                    modifier = Modifier.padding(start = ShortcutTextStart, end = 16.dp),
+                )
+            }
+            ShortcutRow(
+                icon = Icons.Outlined.Archive,
+                text = stringResource(L10nR.string.archived_chats),
+                badge = state.archivedCount,
+                badgeMuted = true,
+                onClick = { onOpenArchived(state.archivedCount) },
             )
+            HorizontalDivider(color = extendedColors().divider, thickness = 0.5.dp)
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -156,7 +179,7 @@ fun ChatListPage(
                 state.loadFailed -> Box(Modifier.align(Alignment.Center).padding(horizontal = 32.dp)) {
                     ErrorWithRetry(onRetry = viewModel::retry)
                 }
-                state.rows.isEmpty() && state.archivedCount == 0 -> Box(Modifier.align(Alignment.Center)) {
+                state.rows.isEmpty() -> Box(Modifier.align(Alignment.Center)) {
                     EmptyView(
                         icon = Icons.Outlined.ChatBubble,
                         title = stringResource(L10nR.string.nothing_found),
@@ -166,16 +189,6 @@ fun ChatListPage(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp),
                 ) {
-                    // Мұрағат жолы — Telegram стилінде, іздеу кезінде жасырылады.
-                    if (state.archivedCount > 0 && state.searchQuery.isEmpty()) {
-                        item("archived") {
-                            ArchivedSectionHeader(
-                                count = state.archivedCount,
-                                preview = state.archivedPreview,
-                                onClick = { onOpenArchived(state.archivedCount) },
-                            )
-                        }
-                    }
                     itemsIndexed(state.rows, key = { _, row -> row.room.roomId }) { index, row ->
                         val isLast = index == state.rows.lastIndex
                         SwipeActionRow(
@@ -255,7 +268,10 @@ fun ChatListPage(
     }
 }
 
-/** ІздеуAppBar — атау ↔ TextField (Flutter _ChatSearchAppBar 350мс анимациясы). */
+/**
+ * Жоғарғы жолақ: «Чат» атауы + оң шетте іздеу батырмасы. Іздеу ашылғанда —
+ * ықшам (40dp) өріс және «Бас тарту» батырмасы: мәтінді тазалап, пернетақтаны жабады.
+ */
 @Composable
 private fun ChatSearchAppBar(
     query: String,
@@ -263,149 +279,189 @@ private fun ChatSearchAppBar(
     onClose: () -> Unit,
     onOpenSearch: () -> Unit,
 ) {
+    val ext = extendedColors()
     var searchOpen by remember { mutableStateOf(query.isNotEmpty()) }
-    // Егер query босатылса — режим жабылады.
-    LaunchedEffect(query) { if (query.isEmpty()) searchOpen = false }
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+    val close = {
+        focusManager.clearFocus()
+        onClose()
+        searchOpen = false
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(extendedColors().card)
+            .background(ext.card)
             .statusBarsPadding()
-            .padding(horizontal = 8.dp, vertical = 10.dp),
+            .height(56.dp)
+            .padding(start = 16.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AnimatedContent(
             targetState = searchOpen,
             transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(180)) },
             label = "chatSearchBar",
+            modifier = Modifier.weight(1f),
         ) { open ->
             if (open) {
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 8.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(extendedColors().grey)
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Search,
-                        contentDescription = null,
-                        tint = extendedColors().secondaryText,
-                        modifier = Modifier.size(20.dp),
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    androidx.compose.material3.OutlinedTextField(
-                        value = query,
-                        onValueChange = onQueryChange,
-                        modifier = Modifier.weight(1f),
-                        placeholder = {
-                            Text(
-                                stringResource(L10nR.string.search_hint),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = extendedColors().secondaryText,
-                            )
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        textStyle = MaterialTheme.typography.bodyMedium,
-                        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Transparent,
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                        ),
-                    )
-                    if (query.isNotEmpty()) {
-                        IconButton(onClick = onClose) {
-                            Icon(
-                                imageVector = Icons.Outlined.Close,
-                                contentDescription = null,
-                                tint = extendedColors().secondaryText,
-                                modifier = Modifier.size(18.dp),
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(ext.grey)
+                            .padding(start = 10.dp, end = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Search,
+                            contentDescription = null,
+                            tint = ext.secondaryText,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                            if (query.isEmpty()) {
+                                Text(
+                                    text = stringResource(L10nR.string.search_hint),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = ext.secondaryText,
+                                    maxLines = 1,
+                                )
+                            }
+                            BasicTextField(
+                                value = query,
+                                onValueChange = onQueryChange,
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = ext.primaryText),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester),
                             )
                         }
+                        if (query.isNotEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .clickable { onQueryChange("") },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Close,
+                                    contentDescription = null,
+                                    tint = ext.secondaryText,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                            }
+                        }
+                    }
+                    TextButton(onClick = close) {
+                        Text(
+                            text = stringResource(L10nR.string.cancel),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
                     }
                 }
+                LaunchedEffect(Unit) { focusRequester.requestFocus() }
             } else {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = stringResource(L10nR.string.chat),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = extendedColors().primaryText,
-                        modifier = Modifier.padding(start = 12.dp),
+                        color = ext.primaryText,
+                        modifier = Modifier.weight(1f),
                     )
+                    IconButton(onClick = {
+                        onOpenSearch()
+                        searchOpen = true
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Search,
+                            contentDescription = stringResource(L10nR.string.search),
+                            tint = ext.primaryText,
+                        )
+                    }
                 }
             }
         }
-        if (!searchOpen) {
-            IconButton(onClick = {
-                onOpenSearch()
-                searchOpen = true
-            }) {
-                Icon(
-                    imageVector = Icons.Outlined.Search,
-                    contentDescription = stringResource(L10nR.string.search),
-                    tint = extendedColors().primaryText,
-                )
-            }
-        }
     }
+    // Жүйелік «артқа» — алдымен іздеуді жабады.
+    androidx.activity.compose.BackHandler(enabled = searchOpen) { close() }
 }
 
-/** Мұрағат секциясының бас жолы (Telegram стилі — мөлдір, свайп жоқ). */
+/** Иконка шеңберінің сол шеті (16) + шеңбер (40) + аралық (12) — мәтін басталатын сызық. */
+private val ShortcutTextStart = 68.dp
+
+/** Чат тізімінің үстіндегі жол: дөңгелек иконка + атау + санауыш + шеврон. */
 @Composable
-private fun ArchivedSectionHeader(
-    count: Int,
-    preview: String,
+private fun ShortcutRow(
+    icon: ImageVector,
+    text: String,
+    badge: Int,
     onClick: () -> Unit,
+    badgeMuted: Boolean = false,
 ) {
     val ext = extendedColors()
-    val chevronSize by animateDpAsState(18.dp, label = "chevron")
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = Icons.Outlined.Archive,
-            contentDescription = null,
-            tint = ext.secondaryText,
-            modifier = Modifier.size(24.dp),
-        )
-        Spacer(Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "${stringResource(L10nR.string.archived_chats)} ($count)",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = ext.primaryText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp),
             )
-            if (preview.isNotBlank()) {
+        }
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = ext.primaryText,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        if (badge > 0) {
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(if (badgeMuted) ext.secondaryText.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primary)
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                contentAlignment = Alignment.Center,
+            ) {
                 Text(
-                    text = preview,
+                    text = badge.toString(),
                     style = MaterialTheme.typography.labelMedium,
-                    color = ext.secondaryText,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    color = if (badgeMuted) ext.primaryText else ext.white,
                 )
             }
+            Spacer(Modifier.width(6.dp))
         }
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
             contentDescription = null,
             tint = ext.secondaryText,
-            modifier = Modifier.size(chevronSize),
+            modifier = Modifier.size(20.dp),
         )
     }
 }
@@ -493,6 +549,10 @@ internal fun chatPreviewText(room: ChatRoom, meId: Long?): String {
     val callMissed = stringResource(L10nR.string.call_msg_missed)
     val callDeclined = stringResource(L10nR.string.call_msg_declined)
     val callNoAnswer = stringResource(L10nR.string.call_msg_no_answer)
+    val photoLabel = stringResource(L10nR.string.chat_preview_photo)
+    val videoLabel = stringResource(L10nR.string.video_message)
+    val voiceLabel = stringResource(L10nR.string.chat_preview_voice)
+    val fileLabel = stringResource(L10nR.string.chat_preview_file)
 
     val callStatus = CallMessage.parse(room.message)?.first
     if (callStatus != null) {
@@ -507,7 +567,15 @@ internal fun chatPreviewText(room: ChatRoom, meId: Long?): String {
     if (coordsMatch.matches(display)) {
         display = "📍 $sharedLocation"
     } else if (display.startsWith("http://") || display.startsWith("https://")) {
-        display = sanitizeUrl(display) ?: display
+        val url = sanitizeUrl(display) ?: display
+        // Медиа сілтемесінің орнына түсінікті белгі (сайт/мобильден келген файлдар).
+        display = when (com.agroland.feature.chat.domain.InferMessageType.inferFromUrl(url)) {
+            com.agroland.feature.chat.domain.InferredMessageType.IMAGE -> "📷 $photoLabel"
+            com.agroland.feature.chat.domain.InferredMessageType.VIDEO -> "🎬 $videoLabel"
+            com.agroland.feature.chat.domain.InferredMessageType.AUDIO -> "🎤 $voiceLabel"
+            com.agroland.feature.chat.domain.InferredMessageType.FILE -> "📎 $fileLabel"
+            else -> if (url.contains("storage.googleapis.com")) "📎 $fileLabel" else url
+        }
     }
     return if (meId != null && room.senderId == meId) "$youPrefix: $display" else display
 }
@@ -631,64 +699,4 @@ fun GuestChatTab(onLoginClick: () -> Unit) {
         loginText = stringResource(L10nR.string.auth_login_title),
         onLoginClick = onLoginClick,
     )
-}
-
-/** «Менің пікірлерім» кіру жолы (spec §10) — жұлдыз + бейдж + шеврон. */
-@Composable
-private fun MyReviewsEntryRow(
-    badge: Int,
-    onClick: () -> Unit,
-) {
-    val ext = extendedColors()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.StarBorder,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(22.dp),
-            )
-        }
-        Text(
-            text = stringResource(L10nR.string.my_reviews_title),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium,
-            color = ext.primaryText,
-            modifier = Modifier.weight(1f),
-        )
-        if (badge > 0) {
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = badge.toString(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = ext.white,
-                )
-            }
-        }
-        Icon(
-            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-            contentDescription = null,
-            tint = ext.secondaryText,
-            modifier = Modifier.size(20.dp),
-        )
-    }
 }
