@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +37,6 @@ import com.agroland.core.ui.theme.extendedColors
 @Composable
 fun OtpPage(
     viewModel: AuthViewModel,
-    onAuthorized: () -> Unit,
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
@@ -50,10 +48,6 @@ fun OtpPage(
     var codeError by remember { mutableStateOf(false) }
 
     val otp = state as? AuthUiState.OtpEntry
-
-    LaunchedEffect(state) {
-        if (state is AuthUiState.Done) onAuthorized()
-    }
 
     Column(
         modifier = Modifier

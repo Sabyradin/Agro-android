@@ -3,6 +3,7 @@ package com.agroland.feature.auth.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -21,6 +22,14 @@ fun AuthFlowPage(
 ) {
     val state by viewModel.state.collectAsState()
 
+    // Кіру аяқталды (OTP/MFA немесе биометрия) → навигация осы деңгейде.
+    // Бұрын OtpPage ішіндегі LaunchedEffect шақыратын: бірақ Done күйінде
+    // OtpPage композициядан бірден шығып, effect іске қоспай қалатын —
+    // кіру сәтті болса да экран ақ болып тұрып қалатын.
+    LaunchedEffect(state) {
+        if (state is AuthUiState.Done) onAuthorized(!viewModel.pinManager.isPinSet)
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         when (val s = state) {
             is AuthUiState.PhoneEntry -> LoginPhonePage(
@@ -31,7 +40,6 @@ fun AuthFlowPage(
             )
             is AuthUiState.OtpEntry -> OtpPage(
                 viewModel = viewModel,
-                onAuthorized = { onAuthorized(!viewModel.pinManager.isPinSet) },
                 onBack = onClosed,
             )
             is AuthUiState.Register -> RegisterPage(
