@@ -15,8 +15,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.Cancel
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -476,7 +476,7 @@ private fun PickerRow(
         if (clearable) {
             androidx.compose.material3.IconButton(onClick = onClear) {
                 Icon(
-                    imageVector = Icons.Outlined.Cancel,
+                    imageVector = Icons.Rounded.Cancel,
                     contentDescription = stringResource(L10nR.string.common_delete),
                     tint = ext.secondaryText,
                     modifier = Modifier.size(20.dp),
@@ -484,7 +484,7 @@ private fun PickerRow(
             }
         } else {
             Icon(
-                imageVector = Icons.Outlined.KeyboardArrowDown,
+                imageVector = Icons.Rounded.KeyboardArrowDown,
                 contentDescription = null,
                 tint = ext.secondaryText,
                 modifier = Modifier.size(20.dp),

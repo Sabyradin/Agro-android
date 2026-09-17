@@ -17,7 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -91,7 +91,7 @@ fun NotificationsByTypePage(
                 }
                 state.items.isEmpty() -> Box(Modifier.fillMaxSize()) {
                     EmptyView(
-                        icon = Icons.Outlined.NotificationsNone,
+                        icon = Icons.Rounded.NotificationsNone,
                         title = stringResource(L10nR.string.no_notifications_yet),
                         modifier = Modifier.align(Alignment.Center),
                     )

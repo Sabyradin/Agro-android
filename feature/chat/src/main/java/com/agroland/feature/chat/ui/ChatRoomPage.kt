@@ -33,18 +33,18 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.Reply
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.outlined.Archive
-import androidx.compose.material.icons.outlined.ClearAll
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.Reply
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.Phone
+import androidx.compose.material.icons.rounded.Archive
+import androidx.compose.material.icons.rounded.ClearAll
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -78,8 +78,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.material.icons.outlined.Call
-import androidx.compose.material.icons.automirrored.outlined.ArrowBackIos
+import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.automirrored.rounded.ArrowBackIos
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -563,7 +563,7 @@ fun ChatRoomPage(
                             color = colors.card,
                         ) {
                             Icon(
-                                Icons.Filled.KeyboardArrowDown,
+                                Icons.Rounded.KeyboardArrowDown,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
@@ -748,7 +748,7 @@ fun ChatRoomPage(
                     modifier = Modifier.fillMaxSize(),
                 )
                 Icon(
-                    Icons.Outlined.Close,
+                    Icons.Rounded.Close,
                     contentDescription = cancelLabel,
                     tint = Color.White,
                     modifier = Modifier
@@ -835,7 +835,7 @@ private fun ChatRoomAppBar(
         ) {
             IconButton(onClick = onBack) {
                 Icon(
-                    Icons.AutoMirrored.Outlined.ArrowBackIos,
+                    Icons.AutoMirrored.Rounded.ArrowBackIos,
                     contentDescription = stringResource(L10nR.string.common_cancel),
                     tint = palette.accent,
                     modifier = Modifier.size(22.dp),
@@ -875,7 +875,7 @@ private fun ChatRoomAppBar(
                     enabled = !callActive,
                 ) {
                     Icon(
-                        Icons.Outlined.Call,
+                        Icons.Rounded.Call,
                         contentDescription = stringResource(L10nR.string.call_incoming_title),
                         tint = if (callActive) palette.meta.copy(alpha = 0.45f) else palette.accent,
                         modifier = Modifier.size(25.dp),
@@ -885,7 +885,7 @@ private fun ChatRoomAppBar(
             Box {
                 IconButton(onClick = { onMenuOpenChange(true) }) {
                     Icon(
-                        Icons.Outlined.MoreVert,
+                        Icons.Rounded.MoreVert,
                         contentDescription = null,
                         tint = palette.accent,
                     )
@@ -896,7 +896,7 @@ private fun ChatRoomAppBar(
                 ) {
                     DropdownMenuItem(
                         text = { Text(stringResource(L10nR.string.clear_chat_history)) },
-                        leadingIcon = { Icon(Icons.Outlined.ClearAll, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Rounded.ClearAll, contentDescription = null) },
                         onClick = {
                             onMenuOpenChange(false)
                             onClearHistory()
@@ -904,7 +904,7 @@ private fun ChatRoomAppBar(
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(L10nR.string.archive_chat)) },
-                        leadingIcon = { Icon(Icons.Outlined.Archive, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Rounded.Archive, contentDescription = null) },
                         onClick = {
                             onMenuOpenChange(false)
                             onArchive()
@@ -944,7 +944,7 @@ private fun ConnectionBanner(connecting: Boolean, onRetry: () -> Unit) {
                 )
             } else {
                 Icon(
-                    Icons.Outlined.Wifi,
+                    Icons.Rounded.Wifi,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(16.dp),
@@ -1069,7 +1069,7 @@ private fun MessageRow(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    Icons.AutoMirrored.Outlined.Reply,
+                    Icons.AutoMirrored.Rounded.Reply,
                     contentDescription = null,
                     tint = palette.meta,
                     modifier = Modifier.size(20.dp),
@@ -1242,31 +1242,31 @@ private fun MessageActionSheet(
     val canEdit = isMine && message.messageType == "text" && message.id != null
     ModalBottomSheet(onDismissRequest = onDismiss) {
         ActionSheetOption(
-            icon = Icons.AutoMirrored.Outlined.Reply,
+            icon = Icons.AutoMirrored.Rounded.Reply,
             label = stringResource(L10nR.string.reply),
             onClick = onReply,
         )
         if (canEdit) {
             ActionSheetOption(
-                icon = Icons.Outlined.Edit,
+                icon = Icons.Rounded.Edit,
                 label = stringResource(L10nR.string.edit),
                 onClick = onEdit,
             )
         }
         ActionSheetOption(
-            icon = Icons.Outlined.ContentCopy,
+            icon = Icons.Rounded.ContentCopy,
             label = stringResource(L10nR.string.copy),
             onClick = onCopy,
         )
         ActionSheetOption(
-            icon = Icons.Outlined.Delete,
+            icon = Icons.Rounded.Delete,
             label = stringResource(L10nR.string.delete_for_me),
             onClick = onDeleteForMe,
             destructive = true,
         )
         if (isMine && message.id != null) {
             ActionSheetOption(
-                icon = Icons.Outlined.Delete,
+                icon = Icons.Rounded.Delete,
                 label = stringResource(L10nR.string.delete_for_everyone),
                 onClick = onDeleteForEveryone,
                 destructive = true,

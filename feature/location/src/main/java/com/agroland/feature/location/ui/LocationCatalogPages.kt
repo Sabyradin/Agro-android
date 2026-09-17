@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -137,14 +137,14 @@ fun CountryListPage(
                             onClick = { onPickCountry(country) },
                             leading = {
                                 Icon(
-                                    imageVector = Icons.Outlined.Public,
+                                    imageVector = Icons.Rounded.Public,
                                     contentDescription = null,
                                     tint = extendedColors().secondaryText,
                                 )
                             },
                             trailing = {
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                                     contentDescription = null,
                                     tint = extendedColors().secondaryText,
                                 )
@@ -201,7 +201,7 @@ fun RegionListPage(
                                 // Облыстар үшін — орын белгісі (глобус бір елдің
                                 // ішінде әр жолда қайталанып, шуыл жасайтын).
                                 Icon(
-                                    imageVector = Icons.Outlined.LocationOn,
+                                    imageVector = Icons.Rounded.LocationOn,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                 )

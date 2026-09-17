@@ -16,9 +16,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -135,7 +135,7 @@ private fun SellerSummaryCard(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
-            imageVector = Icons.Filled.Star,
+            imageVector = Icons.Rounded.Star,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.size(40.dp),
@@ -207,7 +207,7 @@ private fun SellerReviewTile(
                     )
                     IconButton(onClick = onToggleLike, modifier = Modifier.size(32.dp)) {
                         Icon(
-                            imageVector = if (review.isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            imageVector = if (review.isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                             contentDescription = null,
                             tint = if (review.isLiked) {
                                 MaterialTheme.colorScheme.error

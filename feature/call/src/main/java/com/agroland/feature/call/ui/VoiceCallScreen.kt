@@ -35,13 +35,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CallEnd
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.PhoneDisabled
-import androidx.compose.material.icons.filled.VolumeOff
-import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.rounded.CallEnd
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.MicOff
+import androidx.compose.material.icons.rounded.Phone
+import androidx.compose.material.icons.rounded.PhoneDisabled
+import androidx.compose.material.icons.rounded.VolumeOff
+import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -418,13 +418,13 @@ private fun IncomingControls(onAccept: () -> Unit, onDecline: () -> Unit) {
     ) {
         CallCircleButton(
             label = stringResource(L10nR.string.call_decline),
-            icon = Icons.Filled.PhoneDisabled,
+            icon = Icons.Rounded.PhoneDisabled,
             container = Color(0xFFE23B3B),
             onClick = onDecline,
         )
         CallCircleButton(
             label = stringResource(L10nR.string.call_accept),
-            icon = Icons.Filled.Phone,
+            icon = Icons.Rounded.Phone,
             container = Color(0xFF147F26),
             onClick = onAccept,
             pulsing = true,
@@ -436,7 +436,7 @@ private fun IncomingControls(onAccept: () -> Unit, onDecline: () -> Unit) {
 private fun ConnectingControls(onHangup: () -> Unit) {
     CallCircleButton(
         label = stringResource(L10nR.string.call_hangup),
-        icon = Icons.Filled.CallEnd,
+        icon = Icons.Rounded.CallEnd,
         container = Color(0xFFE23B3B),
         onClick = onHangup,
     )
@@ -458,20 +458,20 @@ private fun ActiveControls(
             label = stringResource(
                 if (state.muted) L10nR.string.call_unmute else L10nR.string.call_mute,
             ),
-            icon = if (state.muted) Icons.Filled.MicOff else Icons.Filled.Mic,
+            icon = if (state.muted) Icons.Rounded.MicOff else Icons.Rounded.Mic,
             container = if (state.muted) Color.White else Color.White.copy(alpha = 0.14f),
             content = if (state.muted) Color(0xFF0E2417) else Color.White,
             onClick = onToggleMute,
         )
         CallCircleButton(
             label = stringResource(L10nR.string.call_hangup),
-            icon = Icons.Filled.CallEnd,
+            icon = Icons.Rounded.CallEnd,
             container = Color(0xFFE23B3B),
             onClick = onHangup,
         )
         CallCircleButton(
             label = stringResource(L10nR.string.call_speaker),
-            icon = if (state.speakerOn) Icons.Filled.VolumeUp else Icons.Filled.VolumeOff,
+            icon = if (state.speakerOn) Icons.Rounded.VolumeUp else Icons.Rounded.VolumeOff,
             container = if (state.speakerOn) Color(0xFFFFCC00) else Color.White.copy(alpha = 0.14f),
             content = if (state.speakerOn) Color(0xFF1C1C1E) else Color.White,
             onClick = onToggleSpeaker,

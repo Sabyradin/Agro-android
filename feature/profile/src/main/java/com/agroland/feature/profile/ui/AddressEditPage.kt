@@ -13,8 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -297,7 +297,7 @@ private fun CatalogFieldRow(label: String, filled: Boolean, onClick: () -> Unit)
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Icon(
-            imageVector = if (filled) Icons.Outlined.LocationOn else Icons.Outlined.Map,
+            imageVector = if (filled) Icons.Rounded.LocationOn else Icons.Rounded.Map,
             contentDescription = null,
             tint = if (filled) MaterialTheme.colorScheme.primary else extendedColors().secondaryText,
         )

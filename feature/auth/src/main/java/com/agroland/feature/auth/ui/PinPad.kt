@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Backspace
+import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -111,7 +111,7 @@ fun PinPad(
                             "" -> Box(modifier = Modifier.size(68.dp))
                             "DEL" -> PinKey(
                                 display = null,
-                                icon = Icons.AutoMirrored.Outlined.Backspace,
+                                icon = Icons.AutoMirrored.Rounded.Backspace,
                                 onClick = { pin = pin.dropLast(1) },
                             )
                             else -> PinKey(

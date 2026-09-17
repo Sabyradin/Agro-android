@@ -19,9 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -327,7 +327,7 @@ fun AddEditDeliveryZonePage(
                             shape = RoundedCornerShape(10.dp),
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Close,
+                                imageVector = Icons.Rounded.Close,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp),
@@ -538,7 +538,7 @@ private fun DropdownField(hint: String, value: String, onClick: () -> Unit) {
             modifier = Modifier.weight(1f),
         )
         Icon(
-            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
             contentDescription = null,
             tint = ext.secondaryText,
         )
@@ -571,7 +571,7 @@ private fun TimeField(label: String, value: String, onClick: () -> Unit, modifie
         )
         Spacer(Modifier.width(6.dp))
         Icon(
-            imageVector = Icons.Outlined.Schedule,
+            imageVector = Icons.Rounded.Schedule,
             contentDescription = null,
             tint = ext.secondaryText,
             modifier = Modifier.size(20.dp),
@@ -653,7 +653,7 @@ private fun ZonePriceRow(item: ZonePriceItem, onRemove: () -> Unit) {
         )
         TextButton(onClick = onRemove) {
             Icon(
-                imageVector = Icons.Outlined.Close,
+                imageVector = Icons.Rounded.Close,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier.size(18.dp),

@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material.icons.outlined.Receipt
+import androidx.compose.material.icons.rounded.AccountBalanceWallet
+import androidx.compose.material.icons.rounded.Receipt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -115,7 +115,7 @@ fun DealerSettingsPage(
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.AccountBalanceWallet,
+                                imageVector = Icons.Rounded.AccountBalanceWallet,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(22.dp),
@@ -135,7 +135,7 @@ fun DealerSettingsPage(
                             )
                         }
                         Icon(
-                            imageVector = Icons.Outlined.Receipt,
+                            imageVector = Icons.Rounded.Receipt,
                             contentDescription = null,
                             tint = ext.secondaryText,
                             modifier = Modifier.size(20.dp),

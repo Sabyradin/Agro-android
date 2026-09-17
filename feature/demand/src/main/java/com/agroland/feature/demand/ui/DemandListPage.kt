@@ -16,7 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -102,7 +102,7 @@ fun DemandListPage(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp),
             ) {
-                Icon(Icons.Outlined.Add, contentDescription = null)
+                Icon(Icons.Rounded.Add, contentDescription = null)
                 Spacer(Modifier.padding(start = 6.dp))
                 Text(
                     text = stringResource(L10nR.string.demand_create),

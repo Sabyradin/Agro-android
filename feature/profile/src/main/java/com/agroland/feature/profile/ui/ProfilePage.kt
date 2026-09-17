@@ -14,22 +14,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material.icons.outlined.Badge
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Campaign
-import androidx.compose.material.icons.outlined.Headset
-import androidx.compose.material.icons.outlined.Inventory2
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.PostAdd
-import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material.icons.outlined.ReceiptLong
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.ShoppingBag
-import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material.icons.outlined.Verified
+import androidx.compose.material.icons.automirrored.rounded.Logout
+import androidx.compose.material.icons.rounded.AccountBalanceWallet
+import androidx.compose.material.icons.rounded.Badge
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.Campaign
+import androidx.compose.material.icons.rounded.Headset
+import androidx.compose.material.icons.rounded.Inventory2
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PostAdd
+import androidx.compose.material.icons.rounded.StarBorder
+import androidx.compose.material.icons.rounded.ReceiptLong
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.ShoppingBag
+import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.Verified
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -131,7 +131,7 @@ fun ProfilePage(
                 actions = {
                     if (isAuthorized) {
                         AgroIconButton(
-                            icon = Icons.Outlined.Refresh,
+                            icon = Icons.Rounded.Refresh,
                             contentDescription = null,
                             onClick = { viewModel.refresh() },
                         )
@@ -178,7 +178,7 @@ fun ProfilePage(
 @Composable
 private fun GuestProfile(onLoginClick: () -> Unit) {
     GuestGate(
-        icon = Icons.Outlined.Person,
+        icon = Icons.Rounded.Person,
         message = stringResource(L10nR.string.profile_login_prompt),
         loginText = stringResource(L10nR.string.auth_login_title),
         onLoginClick = onLoginClick,
@@ -241,17 +241,17 @@ private fun AuthorizedProfileContent(
                 ProfileSectionCard(title = null) {
                     AgroListTile(
                         title = stringResource(L10nR.string.dealer_my_products),
-                        leading = { SectionIcon(Icons.Outlined.Inventory2) },
+                        leading = { SectionIcon(Icons.Rounded.Inventory2) },
                         onClick = { onDealerProducts(0) },
                     )
                     AgroListTile(
                         title = stringResource(L10nR.string.dealer_my_orders),
-                        leading = { SectionIcon(Icons.Outlined.ShoppingBag) },
+                        leading = { SectionIcon(Icons.Rounded.ShoppingBag) },
                         onClick = { onDealerOrders(0) },
                     )
                     AgroListTile(
                         title = stringResource(L10nR.string.dealer_settings),
-                        leading = { SectionIcon(Icons.Outlined.Tune) },
+                        leading = { SectionIcon(Icons.Rounded.Tune) },
                         onClick = onDealerSettings,
                     )
                 }
@@ -261,54 +261,54 @@ private fun AuthorizedProfileContent(
             ProfileSectionCard(title = null) {
                 AgroListTile(
                     title = stringResource(L10nR.string.profile_edit),
-                    leading = { SectionIcon(Icons.Outlined.Person) },
+                    leading = { SectionIcon(Icons.Rounded.Person) },
                     onClick = onEditProfile,
                 )
                 AgroListTile(
                     title = stringResource(L10nR.string.profile_addresses),
                     subtitle = profile.locations.firstOrNull()?.fullAddress?.takeIf { it.isNotBlank() },
-                    leading = { SectionIcon(Icons.Outlined.LocationOn) },
+                    leading = { SectionIcon(Icons.Rounded.LocationOn) },
                     onClick = onAddresses,
                 )
                 AgroListTile(
                     title = stringResource(L10nR.string.profile_verification),
-                    leading = { SectionIcon(Icons.Outlined.Verified) },
+                    leading = { SectionIcon(Icons.Rounded.Verified) },
                     onClick = onVerification,
                 )
                 // «Таңдаулылар» — Flutter-дегідей профильден ашылады.
                 AgroListTile(
                     title = stringResource(L10nR.string.favorites_title),
-                    leading = { SectionIcon(Icons.Outlined.FavoriteBorder) },
+                    leading = { SectionIcon(Icons.Rounded.FavoriteBorder) },
                     onClick = onOpenFavorites,
                 )
                 // «Сұраныстарым» — өз сұраныстарын басқару (Фаза 17).
                 AgroListTile(
                     title = stringResource(L10nR.string.demand_list_title),
-                    leading = { SectionIcon(Icons.Outlined.PostAdd) },
+                    leading = { SectionIcon(Icons.Rounded.PostAdd) },
                     onClick = onMyDemands,
                 )
                 // «Менің пікірлерім» — қалдырылмаған/қалдырылған (Фаза 18, spec §10).
                 AgroListTile(
                     title = stringResource(L10nR.string.my_reviews_title),
-                    leading = { SectionIcon(Icons.Outlined.StarBorder) },
+                    leading = { SectionIcon(Icons.Rounded.StarBorder) },
                     onClick = onOpenMyReviews,
                 )
                 if (isDealer) {
                     AgroListTile(
                         title = stringResource(L10nR.string.profile_company_settings),
                         subtitle = profile.company?.name,
-                        leading = { SectionIcon(Icons.Outlined.Badge) },
+                        leading = { SectionIcon(Icons.Rounded.Badge) },
                         onClick = onCompanySettings,
                     )
                     AgroListTile(
                         title = stringResource(L10nR.string.wallet_title),
-                        leading = { SectionIcon(Icons.Outlined.AccountBalanceWallet) },
+                        leading = { SectionIcon(Icons.Rounded.AccountBalanceWallet) },
                         onClick = onOpenWallet,
                     )
                 }
                 AgroListTile(
                     title = stringResource(L10nR.string.wallet_transaction_history),
-                    leading = { SectionIcon(Icons.Outlined.ReceiptLong) },
+                    leading = { SectionIcon(Icons.Rounded.ReceiptLong) },
                     onClick = onOpenTransactions,
                 )
             }
@@ -318,7 +318,7 @@ private fun AuthorizedProfileContent(
                 ProfileSectionCard(title = null) {
                     AgroListTile(
                         title = stringResource(L10nR.string.profile_biometric_lock),
-                        leading = { SectionIcon(Icons.Outlined.Verified) },
+                        leading = { SectionIcon(Icons.Rounded.Verified) },
                         trailing = {
                             AgroSwitch(
                                 checked = bioLockEnabled,
@@ -339,7 +339,7 @@ private fun AuthorizedProfileContent(
             ProfileSectionCard(title = null) {
                 AgroListTile(
                     title = stringResource(L10nR.string.support),
-                    leading = { SectionIcon(Icons.Outlined.Headset) },
+                    leading = { SectionIcon(Icons.Rounded.Headset) },
                     onClick = onOpenSupportChat,
                 )
             }
@@ -350,7 +350,7 @@ private fun AuthorizedProfileContent(
                     title = stringResource(L10nR.string.auth_logout),
                     leading = {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.Logout,
+                            imageVector = Icons.AutoMirrored.Rounded.Logout,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(24.dp),
@@ -423,7 +423,7 @@ private fun ProfileInfoCard(profile: UserProfile) {
                 )
                 if (profile.avatarUrl == null) {
                     Icon(
-                        imageVector = Icons.Outlined.Person,
+                        imageVector = Icons.Rounded.Person,
                         contentDescription = null,
                         tint = ext.secondaryText,
                         modifier = Modifier.size(30.dp),
@@ -472,18 +472,18 @@ private fun ProfileAdsCard(profile: UserProfile, onOpenStatus: (String) -> Unit)
     ) {
         AgroListTile(
             title = stringResource(L10nR.string.my_ads_title),
-            leading = { SectionIcon(Icons.Outlined.Campaign) },
+            leading = { SectionIcon(Icons.Rounded.Campaign) },
             onClick = { onOpenStatus("active") },
         )
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             AdCountTile(
-                icon = Icons.Outlined.Campaign,
+                icon = Icons.Rounded.Campaign,
                 label = stringResource(L10nR.string.profile_ads_active),
                 value = counts.active,
                 modifier = Modifier.weight(1f).clickable { onOpenStatus("active") },
             )
             AdCountTile(
-                icon = Icons.Outlined.Refresh,
+                icon = Icons.Rounded.Refresh,
                 label = stringResource(L10nR.string.profile_ads_pending),
                 value = counts.pending,
                 modifier = Modifier.weight(1f).clickable { onOpenStatus("pending") },

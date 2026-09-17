@@ -29,9 +29,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Storefront
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -286,7 +286,7 @@ private fun StoryHeader(onClose: () -> Unit) {
         Spacer(Modifier.weight(1f))
         IconButton(onClick = onClose) {
             Icon(
-                imageVector = Icons.Filled.Close,
+                imageVector = Icons.Rounded.Close,
                 contentDescription = null,
                 tint = ViewerWhite,
             )
@@ -317,7 +317,7 @@ private fun StoryPage(
             StoryImage(imageUrl = story.imageUrl, title = story.title)
         } else {
             StaticStoryContent(
-                icon = story.staticIcon ?: Icons.Filled.Storefront,
+                icon = story.staticIcon ?: Icons.Rounded.Storefront,
                 title = story.title,
             )
         }
@@ -479,7 +479,7 @@ private fun CtaPill(label: String, onClick: () -> Unit) {
             fontFamily = OpenSansFamily,
         )
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
             contentDescription = null,
             tint = AgroColors.primary,
             modifier = Modifier.size(16.dp),

@@ -18,15 +18,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.GridView
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Chat
+import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.ShoppingCart
+import androidx.compose.material.icons.rounded.ChatBubbleOutline
+import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -70,11 +70,11 @@ private data class TabSpec(
 )
 
 private val TAB_SPECS = listOf(
-    TabSpec(Icons.Outlined.Home, Icons.Filled.Home),
-    TabSpec(Icons.Outlined.ChatBubbleOutline, Icons.Filled.Chat),
-    TabSpec(Icons.Outlined.ShoppingCart, Icons.Filled.ShoppingCart),
+    TabSpec(Icons.Rounded.Home, Icons.Rounded.Home),
+    TabSpec(Icons.Rounded.ChatBubbleOutline, Icons.Rounded.Chat),
+    TabSpec(Icons.Rounded.ShoppingCart, Icons.Rounded.ShoppingCart),
     // Фаза 17: SERVICES қойындысы — Сервистер беті (профиль Home аватарына көшті).
-    TabSpec(Icons.Outlined.GridView, Icons.Filled.GridView),
+    TabSpec(Icons.Rounded.GridView, Icons.Rounded.GridView),
 )
 
 private val NavBarHeight = 58.dp
@@ -193,7 +193,7 @@ private fun CreateSlot(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = Icons.Filled.Add,
+                imageVector = Icons.Rounded.Add,
                 contentDescription = null,
                 tint = extendedColors().white,
                 modifier = Modifier.size(22.dp),

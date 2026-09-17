@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.LocalFireDepartment
-import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.LocalFireDepartment
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -154,7 +154,7 @@ fun AnnouncementCard(
             ) {
                 if (item.isHot) {
                     MarkerChip(
-                        icon = Icons.Outlined.LocalFireDepartment,
+                        icon = Icons.Rounded.LocalFireDepartment,
                         text = stringResource(L10nR.string.mp_hot_badge),
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -165,7 +165,7 @@ fun AnnouncementCard(
                 item.placeLabel.takeIf { it.isNotBlank() }
                     ?.let { place ->
                         Icon(
-                            imageVector = Icons.Outlined.LocationOn,
+                            imageVector = Icons.Rounded.LocationOn,
                             contentDescription = null,
                             tint = ext.secondaryText,
                             modifier = Modifier.size(13.dp),
@@ -207,7 +207,7 @@ private fun FavoriteButton(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+            imageVector = if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
             contentDescription = stringResource(L10nR.string.favorites_title),
             tint = if (isFavorite) MaterialTheme.colorScheme.error else extendedColors().secondaryText,
             modifier = Modifier.size(16.dp),

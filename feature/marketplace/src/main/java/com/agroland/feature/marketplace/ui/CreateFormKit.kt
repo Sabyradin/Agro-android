@@ -22,8 +22,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.UnfoldMore
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.UnfoldMore
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -223,7 +223,7 @@ internal fun FormSelectRow(
         )
         Spacer(Modifier.width(6.dp))
         Icon(
-            imageVector = if (updown) Icons.Outlined.UnfoldMore else Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            imageVector = if (updown) Icons.Rounded.UnfoldMore else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
             contentDescription = null,
             tint = if (updown) primary else ext.secondaryText.copy(alpha = 0.6f),
             modifier = Modifier.size(if (updown) 18.dp else 20.dp),

@@ -22,12 +22,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.KeyboardArrowUp
-import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.Inbox
-import androidx.compose.material.icons.outlined.LocalShipping
-import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.Inbox
+import androidx.compose.material.icons.rounded.LocalShipping
+import androidx.compose.material.icons.rounded.ShoppingBag
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -141,7 +141,7 @@ fun DealerOrdersPage(
                 actions = {
                     if (profile?.canAccessTeamPool == true) {
                         AgroIconButton(
-                            icon = Icons.Outlined.Groups,
+                            icon = Icons.Rounded.Groups,
                             contentDescription = stringResource(L10nR.string.dealer_team_pool),
                             onClick = onOpenTeamPool,
                         )
@@ -193,7 +193,7 @@ fun DealerOrdersPage(
                         )
                     }
                     state.items.isEmpty() -> EmptyView(
-                        icon = Icons.Outlined.Inbox,
+                        icon = Icons.Rounded.Inbox,
                         title = stringResource(L10nR.string.nothing_found),
                     )
                     else -> {
@@ -317,7 +317,7 @@ private fun DealerOrderCard(
                     )
                 } else {
                     Icon(
-                        imageVector = Icons.Outlined.ShoppingBag,
+                        imageVector = Icons.Rounded.ShoppingBag,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp),
@@ -389,9 +389,9 @@ private fun DealerOrderCard(
             }
             Icon(
                 imageVector = if (expanded) {
-                    Icons.Outlined.KeyboardArrowUp
+                    Icons.Rounded.KeyboardArrowUp
                 } else {
-                    Icons.Outlined.KeyboardArrowDown
+                    Icons.Rounded.KeyboardArrowDown
                 },
                 contentDescription = null,
                 tint = ext.secondaryText,
@@ -487,7 +487,7 @@ private fun DealerOrderCard(
                             )
                         } else {
                             Icon(
-                                imageVector = Icons.Outlined.LocalShipping,
+                                imageVector = Icons.Rounded.LocalShipping,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
                             )

@@ -23,14 +23,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.PauseCircle
-import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.RemoveRedEye
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.PauseCircle
+import androidx.compose.material.icons.rounded.Phone
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.RemoveRedEye
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -134,7 +134,7 @@ fun DealerProductsTab(
                     ErrorWithRetry(onRetry = viewModel::refresh, message = error!!.displayText(networkError, genericError))
                 }
                 items.isEmpty() -> EmptyView(
-                    icon = Icons.Outlined.RemoveRedEye,
+                    icon = Icons.Rounded.RemoveRedEye,
                     title = stringResource(L10nR.string.nothing_found),
                 )
                 else -> {
@@ -289,11 +289,11 @@ private fun DealerProductCard(
                 }
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Stat(icon = Icons.Outlined.RemoveRedEye, count = product.viewsCount)
+                    Stat(icon = Icons.Rounded.RemoveRedEye, count = product.viewsCount)
                     Spacer(Modifier.width(10.dp))
-                    Stat(icon = Icons.Outlined.Phone, count = product.callsCount)
+                    Stat(icon = Icons.Rounded.Phone, count = product.callsCount)
                     Spacer(Modifier.width(10.dp))
-                    Stat(icon = Icons.Outlined.FavoriteBorder, count = product.favoritesCount)
+                    Stat(icon = Icons.Rounded.FavoriteBorder, count = product.favoritesCount)
                     Spacer(Modifier.weight(1f))
                     product.createdAt?.let {
                         Text(
@@ -322,21 +322,21 @@ private fun DealerProductCard(
         Row(modifier = Modifier.fillMaxWidth()) {
             when (product.status) {
                 "active" -> ActionButton(
-                    icon = Icons.Outlined.PauseCircle,
+                    icon = Icons.Rounded.PauseCircle,
                     label = stringResource(L10nR.string.ad_action_deactivate),
                     color = Color(0xFFFF9800),
                     loading = actionInProgress,
                     onClick = onDeactivate,
                 )
                 "inactive" -> ActionButton(
-                    icon = Icons.Outlined.PlayArrow,
+                    icon = Icons.Rounded.PlayArrow,
                     label = stringResource(L10nR.string.ad_action_activate),
                     color = MaterialTheme.colorScheme.primary,
                     loading = actionInProgress,
                     onClick = onActivate,
                 )
                 "rejected" -> ActionButton(
-                    icon = Icons.Outlined.Info,
+                    icon = Icons.Rounded.Info,
                     label = stringResource(L10nR.string.dealer_cause_reject),
                     color = Color(0xFFFF9800),
                     loading = actionInProgress,
@@ -352,7 +352,7 @@ private fun DealerProductCard(
             Spacer(Modifier.weight(1f))
             if (product.status != "rejected") {
                 ActionButton(
-                    icon = Icons.Outlined.Edit,
+                    icon = Icons.Rounded.Edit,
                     label = stringResource(L10nR.string.common_edit),
                     color = ext.secondaryText,
                     loading = actionInProgress,
@@ -361,7 +361,7 @@ private fun DealerProductCard(
             }
             if (product.status == "inactive" || product.status == "rejected") {
                 ActionButton(
-                    icon = Icons.Outlined.Delete,
+                    icon = Icons.Rounded.Delete,
                     label = stringResource(L10nR.string.common_delete),
                     color = MaterialTheme.colorScheme.error,
                     loading = actionInProgress,
@@ -389,7 +389,7 @@ private fun ProductImage(product: DealerProduct) {
             )
         } else {
             Icon(
-                imageVector = Icons.Outlined.RemoveRedEye,
+                imageVector = Icons.Rounded.RemoveRedEye,
                 contentDescription = null,
                 tint = extendedColors().secondaryText,
                 modifier = Modifier.size(28.dp),

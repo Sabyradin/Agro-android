@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -200,7 +200,7 @@ private fun IconPlaceholder(backgroundColor: Color, spinner: Boolean = false) {
             )
         } else {
             Icon(
-                imageVector = Icons.Filled.PhotoCamera,
+                imageVector = Icons.Rounded.PhotoCamera,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.size(30.dp),

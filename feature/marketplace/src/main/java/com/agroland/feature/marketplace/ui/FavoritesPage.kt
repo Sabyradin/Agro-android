@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -88,7 +88,7 @@ fun FavoritesPage(
                 }
                 items.isEmpty() -> CenteredContent {
                     EmptyView(
-                        icon = Icons.Outlined.FavoriteBorder,
+                        icon = Icons.Rounded.FavoriteBorder,
                         title = stringResource(L10nR.string.favorites_empty_title),
                         message = stringResource(L10nR.string.favorites_empty_message),
                     )

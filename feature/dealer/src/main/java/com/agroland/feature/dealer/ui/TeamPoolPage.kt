@@ -18,9 +18,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.WorkHistory
+import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.WorkHistory
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -97,7 +97,7 @@ fun TeamPoolPage(
                 actions = {
                     if (profile?.canManageEmployees == true) {
                         AgroIconButton(
-                            icon = Icons.Outlined.Person,
+                            icon = Icons.Rounded.Person,
                             contentDescription = stringResource(L10nR.string.dealer_employees),
                             onClick = onOpenEmployees,
                         )
@@ -116,7 +116,7 @@ fun TeamPoolPage(
                     )
                 }
                 orders.isEmpty() -> EmptyView(
-                    icon = Icons.Outlined.WorkHistory,
+                    icon = Icons.Rounded.WorkHistory,
                     title = stringResource(L10nR.string.dealer_team_pool_empty),
                     message = stringResource(L10nR.string.dealer_team_pool_empty_hint),
                 )
@@ -218,7 +218,7 @@ private fun TeamPoolCard(
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Outlined.Groups,
+                    imageVector = Icons.Rounded.Groups,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
                 )

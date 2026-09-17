@@ -15,10 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,7 +60,7 @@ fun ChinaThumb(imageUrl: String?, modifier: Modifier = Modifier) {
     } else {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
             Icon(
-                imageVector = Icons.Outlined.Image,
+                imageVector = Icons.Rounded.Image,
                 contentDescription = null,
                 tint = extendedColors().secondaryText,
                 modifier = Modifier.size(32.dp),
@@ -90,7 +90,7 @@ fun ChinaQuantityStepper(
             modifier = Modifier.size(34.dp),
         ) {
             Icon(
-                imageVector = Icons.Outlined.Remove,
+                imageVector = Icons.Rounded.Remove,
                 contentDescription = null,
                 tint = if (quantity > minQuantity) ext.primaryText else ext.divider,
                 modifier = Modifier.size(18.dp),
@@ -107,7 +107,7 @@ fun ChinaQuantityStepper(
         )
         IconButton(onClick = { onChange(quantity + 1) }, modifier = Modifier.size(34.dp)) {
             Icon(
-                imageVector = Icons.Outlined.Add,
+                imageVector = Icons.Rounded.Add,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(18.dp),
@@ -177,7 +177,7 @@ fun ChinaCartItemTile(
             )
             IconButton(onClick = onDelete, modifier = Modifier.size(30.dp)) {
                 Icon(
-                    imageVector = Icons.Outlined.Close,
+                    imageVector = Icons.Rounded.Close,
                     contentDescription = null,
                     tint = ext.secondaryText,
                     modifier = Modifier.size(16.dp),

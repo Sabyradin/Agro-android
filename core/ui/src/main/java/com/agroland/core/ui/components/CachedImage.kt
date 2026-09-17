@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -58,7 +58,7 @@ fun CachedImage(
     contentDescription: String?,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop,
-    placeholderIcon: ImageVector = Icons.Outlined.Image,
+    placeholderIcon: ImageVector = Icons.Rounded.Image,
     showPlaceholder: Boolean = true,
 ) {
     val context = LocalContext.current

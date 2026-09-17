@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Unarchive
-import androidx.compose.material.icons.outlined.VolumeOff
-import androidx.compose.material.icons.outlined.VolumeUp
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Unarchive
+import androidx.compose.material.icons.rounded.VolumeOff
+import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -86,7 +86,7 @@ fun ArchivedChatsPage(
             if (state.archivedRows.isEmpty()) {
                 EmptyView(
                     modifier = Modifier.align(Alignment.Center),
-                    icon = Icons.Outlined.Unarchive,
+                    icon = Icons.Rounded.Unarchive,
                     title = emptyTitle,
                 )
             } else {
@@ -95,20 +95,20 @@ fun ArchivedChatsPage(
                         SwipeActionRow(
                             actions = listOf(
                                 SwipeAction(
-                                    icon = if (row.muted) Icons.Outlined.VolumeUp else Icons.Outlined.VolumeOff,
+                                    icon = if (row.muted) Icons.Rounded.VolumeUp else Icons.Rounded.VolumeOff,
                                     label = stringResource(if (row.muted) L10nR.string.chat_swipe_unmute else L10nR.string.chat_swipe_mute),
                                     color = Color(0xFF8E8E93),
                                     onClick = { viewModel.toggleMute(row.room) },
                                 ),
                                 SwipeAction(
-                                    icon = Icons.Outlined.Delete,
+                                    icon = Icons.Rounded.Delete,
                                     label = stringResource(L10nR.string.chat_swipe_delete),
                                     color = Color(0xFFFF3B30),
                                     destructive = true,
                                     onClick = { pendingDelete = row.room },
                                 ),
                                 SwipeAction(
-                                    icon = Icons.Outlined.Unarchive,
+                                    icon = Icons.Rounded.Unarchive,
                                     label = stringResource(L10nR.string.chat_swipe_archive),
                                     color = Color(0xFF3478F6),
                                     isPrimary = true,

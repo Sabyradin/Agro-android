@@ -36,22 +36,22 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.WorkspacePremium
-import androidx.compose.material.icons.outlined.Call
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.GridView
-import androidx.compose.material.icons.outlined.Headset
-import androidx.compose.material.icons.outlined.Inventory2
-import androidx.compose.material.icons.outlined.PhoneInTalk
-import androidx.compose.material.icons.outlined.Place
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.Storefront
-import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.WorkspacePremium
+import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.ChatBubbleOutline
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Headset
+import androidx.compose.material.icons.rounded.Inventory2
+import androidx.compose.material.icons.rounded.PhoneInTalk
+import androidx.compose.material.icons.rounded.Place
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Storefront
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -226,7 +226,7 @@ fun AnnouncementDetailPage(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 FloatingCircleButton(
-                    icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                    icon = Icons.AutoMirrored.Rounded.ArrowBack,
                     contentDescription = null,
                     onClick = onBack,
                 )
@@ -234,7 +234,7 @@ fun AnnouncementDetailPage(
                 val item = detail
                 if (item != null) {
                     FloatingCircleButton(
-                        icon = Icons.Outlined.Share,
+                        icon = Icons.Rounded.Share,
                         contentDescription = stringResource(L10nR.string.common_share),
                         onClick = {
                             val share = Intent(Intent.ACTION_SEND).apply {
@@ -249,7 +249,7 @@ fun AnnouncementDetailPage(
                         },
                     )
                     FloatingCircleButton(
-                        icon = if (favorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        icon = if (favorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                         contentDescription = stringResource(L10nR.string.favorites_title),
                         onClick = {
                             favoriteTapped = true
@@ -552,7 +552,7 @@ private fun MainInfoCard(detail: FullAnnouncement, favoritesCount: Int) {
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 if (base.isVip) {
-                    InfoChip(text = "VIP", color = VipGold, icon = Icons.Filled.WorkspacePremium)
+                    InfoChip(text = "VIP", color = VipGold, icon = Icons.Rounded.WorkspacePremium)
                 }
                 if (base.negotiable) {
                     InfoChip(
@@ -567,7 +567,7 @@ private fun MainInfoCard(detail: FullAnnouncement, favoritesCount: Int) {
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Outlined.Place,
+                    imageVector = Icons.Rounded.Place,
                     contentDescription = null,
                     tint = ext.secondaryText,
                     modifier = Modifier.size(18.dp),
@@ -581,9 +581,9 @@ private fun MainInfoCard(detail: FullAnnouncement, favoritesCount: Int) {
         HorizontalDivider(color = ext.divider)
         Spacer(Modifier.height(10.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            StatItem(icon = Icons.Outlined.Visibility, value = base.viewsCount.toString())
+            StatItem(icon = Icons.Rounded.Visibility, value = base.viewsCount.toString())
             Spacer(Modifier.width(18.dp))
-            StatItem(icon = Icons.Outlined.FavoriteBorder, value = favoritesCount.toString())
+            StatItem(icon = Icons.Rounded.FavoriteBorder, value = favoritesCount.toString())
             Spacer(Modifier.weight(1f))
             Text(
                 text = "ID ${"%,d".format(base.id).replace(',', ' ')}",
@@ -729,7 +729,7 @@ private fun DeliveryCard(base: Announcement) {
         }
         if (base.deliveryAvailable) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.Inventory2, contentDescription = null, tint = primary, modifier = Modifier.size(22.dp))
+                Icon(Icons.Rounded.Inventory2, contentDescription = null, tint = primary, modifier = Modifier.size(22.dp))
                 Spacer(Modifier.width(10.dp))
                 Text(stringResource(L10nR.string.detail_delivery), fontSize = 17.sp, color = primary)
             }
@@ -737,7 +737,7 @@ private fun DeliveryCard(base: Announcement) {
         if (base.pickupAvailable) {
             if (base.deliveryAvailable) Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.Storefront, contentDescription = null, tint = primary, modifier = Modifier.size(22.dp))
+                Icon(Icons.Rounded.Storefront, contentDescription = null, tint = primary, modifier = Modifier.size(22.dp))
                 Spacer(Modifier.width(10.dp))
                 Column {
                     Text(stringResource(L10nR.string.detail_pickup), fontSize = 17.sp, color = primary)
@@ -829,7 +829,7 @@ private fun SellerCard(
                         val full = rating.coerceIn(0.0, 5.0).let { kotlin.math.round(it).toInt() }
                         repeat(5) { i ->
                             Icon(
-                                imageVector = Icons.Filled.Star,
+                                imageVector = Icons.Rounded.Star,
                                 contentDescription = null,
                                 tint = if (i < full) VipGold else ext.grey,
                                 modifier = Modifier.size(16.dp),
@@ -846,7 +846,7 @@ private fun SellerCard(
                 }
             }
             Icon(
-                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 contentDescription = null,
                 tint = ext.secondaryText,
             )
@@ -863,7 +863,7 @@ private fun SellerCard(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(Icons.Outlined.GridView, contentDescription = null, tint = primary, modifier = Modifier.size(20.dp))
+                Icon(Icons.Rounded.GridView, contentDescription = null, tint = primary, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = stringResource(L10nR.string.detail_seller_all_ads),
@@ -923,7 +923,7 @@ private fun ContactBottomBar(onWrite: () -> Unit, onContact: () -> Unit) {
         ) {
             BarButton(
                 text = stringResource(L10nR.string.detail_write),
-                icon = Icons.Outlined.ChatBubbleOutline,
+                icon = Icons.Rounded.ChatBubbleOutline,
                 container = primary,
                 content = Color.White,
                 onClick = onWrite,
@@ -931,7 +931,7 @@ private fun ContactBottomBar(onWrite: () -> Unit, onContact: () -> Unit) {
             )
             BarButton(
                 text = stringResource(L10nR.string.detail_contact),
-                icon = Icons.Outlined.Call,
+                icon = Icons.Rounded.Call,
                 container = primary.copy(alpha = 0.16f),
                 content = primary,
                 onClick = onContact,
@@ -1001,7 +1001,7 @@ private fun ContactSheet(
             )
             if (numbers.isEmpty()) {
                 ContactOption(
-                    icon = Icons.Outlined.PhoneInTalk,
+                    icon = Icons.Rounded.PhoneInTalk,
                     title = stringResource(L10nR.string.detail_call_phone),
                     subtitle = stringResource(L10nR.string.detail_no_phone),
                     enabled = false,
@@ -1010,7 +1010,7 @@ private fun ContactSheet(
             }
             numbers.forEach { phone ->
                 ContactOption(
-                    icon = Icons.Outlined.PhoneInTalk,
+                    icon = Icons.Rounded.PhoneInTalk,
                     title = stringResource(L10nR.string.detail_call_phone),
                     subtitle = phone,
                     onClick = {
@@ -1024,7 +1024,7 @@ private fun ContactSheet(
             }
             if (onCallInApp != null) {
                 ContactOption(
-                    icon = Icons.Outlined.Headset,
+                    icon = Icons.Rounded.Headset,
                     title = stringResource(L10nR.string.detail_call_in_app),
                     subtitle = stringResource(L10nR.string.detail_call_in_app_hint),
                     onClick = {
@@ -1078,7 +1078,7 @@ private fun ContactOption(
         }
         if (enabled) {
             Icon(
-                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 contentDescription = null,
                 tint = ext.secondaryText,
             )

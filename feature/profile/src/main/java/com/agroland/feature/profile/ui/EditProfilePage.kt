@@ -19,7 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -145,7 +145,7 @@ fun EditProfilePage(onBack: () -> Unit) {
                     )
                     if (currentAvatar == null) {
                         Icon(
-                            imageVector = Icons.Outlined.PhotoCamera,
+                            imageVector = Icons.Rounded.PhotoCamera,
                             contentDescription = null,
                             tint = extendedColors().secondaryText,
                             modifier = Modifier.size(36.dp),
@@ -160,7 +160,7 @@ fun EditProfilePage(onBack: () -> Unit) {
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.PhotoCamera,
+                                imageVector = Icons.Rounded.PhotoCamera,
                                 contentDescription = null,
                                 tint = extendedColors().white,
                                 modifier = Modifier.size(18.dp),

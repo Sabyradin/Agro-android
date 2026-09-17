@@ -20,10 +20,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Article
-import androidx.compose.material.icons.outlined.Badge
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material.icons.automirrored.rounded.Article
+import androidx.compose.material.icons.rounded.Badge
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -90,24 +90,24 @@ fun CompanySettingsPage(
             SectionTile(
                 title = stringResource(L10nR.string.company_data_title),
                 subtitle = company?.representativeName,
-                icon = Icons.Outlined.Badge,
+                icon = Icons.Rounded.Badge,
                 onClick = { onOpenSection(CompanySection.DATA) },
             )
             SectionTile(
                 title = stringResource(L10nR.string.company_about_title),
                 subtitle = company?.about,
-                icon = Icons.AutoMirrored.Outlined.Article,
+                icon = Icons.AutoMirrored.Rounded.Article,
                 onClick = { onOpenSection(CompanySection.ABOUT) },
             )
             SectionTile(
                 title = stringResource(L10nR.string.company_contacts_title),
                 subtitle = company?.phone,
-                icon = Icons.Outlined.Phone,
+                icon = Icons.Rounded.Phone,
                 onClick = { onOpenSection(CompanySection.CONTACTS) },
             )
             SectionTile(
                 title = stringResource(L10nR.string.company_decor_title),
-                icon = Icons.Outlined.Image,
+                icon = Icons.Rounded.Image,
                 onClick = { onOpenSection(CompanySection.DECOR) },
             )
         }
@@ -415,7 +415,7 @@ private fun DecorPickerRow(
         ) {
             if (pendingUri != null) {
                 Icon(
-                    imageVector = Icons.Outlined.Image,
+                    imageVector = Icons.Rounded.Image,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(32.dp),
@@ -428,7 +428,7 @@ private fun DecorPickerRow(
                 )
                 if (currentUrl == null) {
                     Icon(
-                        imageVector = Icons.Outlined.Image,
+                        imageVector = Icons.Rounded.Image,
                         contentDescription = null,
                         tint = ext.secondaryText,
                         modifier = Modifier.size(32.dp),

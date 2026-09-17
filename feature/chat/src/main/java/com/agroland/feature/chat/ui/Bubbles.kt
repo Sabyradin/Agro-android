@@ -28,22 +28,22 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.CallMade
-import androidx.compose.material.icons.automirrored.filled.CallMissed
-import androidx.compose.material.icons.automirrored.filled.CallReceived
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.Archive
-import androidx.compose.material.icons.outlined.BrokenImage
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.LocalShipping
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.automirrored.rounded.CallMade
+import androidx.compose.material.icons.automirrored.rounded.CallMissed
+import androidx.compose.material.icons.automirrored.rounded.CallReceived
+import androidx.compose.material.icons.rounded.Done
+import androidx.compose.material.icons.rounded.DoneAll
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Archive
+import androidx.compose.material.icons.rounded.BrokenImage
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.LocalShipping
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.PlayCircle
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -160,7 +160,7 @@ private fun MessageMeta(
             Spacer(Modifier.width(3.dp))
             when {
                 message.sendError -> Icon(
-                    Icons.Filled.ErrorOutline,
+                    Icons.Rounded.ErrorOutline,
                     contentDescription = null,
                     tint = Color(0xFFE53935),
                     modifier = Modifier
@@ -170,13 +170,13 @@ private fun MessageMeta(
                 )
                 // Сервер әлі растамаған (optimistic) — сағат.
                 message.id == null -> Icon(
-                    Icons.Outlined.Schedule,
+                    Icons.Rounded.Schedule,
                     contentDescription = null,
                     tint = metaColor,
                     modifier = Modifier.size(13.dp),
                 )
                 else -> Icon(
-                    imageVector = if (message.isRead) Icons.Filled.DoneAll else Icons.Filled.Done,
+                    imageVector = if (message.isRead) Icons.Rounded.DoneAll else Icons.Rounded.Done,
                     contentDescription = null,
                     tint = if (message.isRead) palette.readTick else metaColor,
                     modifier = Modifier.size(16.dp),
@@ -379,9 +379,9 @@ fun CallBubble(
             ) {
                 Icon(
                     imageVector = when {
-                        problem -> Icons.AutoMirrored.Filled.CallMissed
-                        isMine -> Icons.AutoMirrored.Filled.CallMade
-                        else -> Icons.AutoMirrored.Filled.CallReceived
+                        problem -> Icons.AutoMirrored.Rounded.CallMissed
+                        isMine -> Icons.AutoMirrored.Rounded.CallMade
+                        else -> Icons.AutoMirrored.Rounded.CallReceived
                     },
                     contentDescription = null,
                     tint = if (problem) Color(0xFFE53935) else palette.accent,
@@ -473,7 +473,7 @@ fun VideoBubble(
                     modifier = Modifier.fillMaxSize(),
                 )
             } else {
-                MediaUnavailableBox(modifier = Modifier.fillMaxSize(), icon = Icons.Outlined.PlayCircle)
+                MediaUnavailableBox(modifier = Modifier.fillMaxSize(), icon = Icons.Rounded.PlayCircle)
             }
             Box(
                 modifier = Modifier
@@ -484,7 +484,7 @@ fun VideoBubble(
                     .border(1.5.dp, Color.White.copy(alpha = 0.8f), CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.Filled.PlayArrow, contentDescription = videoLabel, tint = Color.White, modifier = Modifier.size(34.dp))
+                Icon(Icons.Rounded.PlayArrow, contentDescription = videoLabel, tint = Color.White, modifier = Modifier.size(34.dp))
             }
             MediaMetaOverlay(message = message, timestamp = timestamp, isMine = isMine)
         }
@@ -636,7 +636,7 @@ fun VoiceBubble(
                     )
                 } else {
                     Icon(
-                        imageVector = if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        imageVector = if (playing) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                         contentDescription = null,
                         tint = palette.meta,
                         modifier = Modifier.size(34.dp),
@@ -681,7 +681,7 @@ fun VoiceBubble(
                     .background(palette.accent.copy(alpha = 0.18f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.Filled.Mic, contentDescription = null, tint = palette.accent, modifier = Modifier.size(24.dp))
+                Icon(Icons.Rounded.Mic, contentDescription = null, tint = palette.accent, modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -771,7 +771,7 @@ fun FileBubble(
                 if (ext.isNotBlank()) {
                     Text(ext, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 } else {
-                    Icon(Icons.Outlined.Description, contentDescription = null, tint = Color.White)
+                    Icon(Icons.Rounded.Description, contentDescription = null, tint = Color.White)
                 }
             }
             Spacer(Modifier.width(10.dp))
@@ -823,7 +823,7 @@ fun LocationBubble(
                     onOpenMap = onOpenMap,
                 )
             } else {
-                MediaUnavailableBox(modifier = Modifier.fillMaxSize(), icon = Icons.Outlined.LocationOn)
+                MediaUnavailableBox(modifier = Modifier.fillMaxSize(), icon = Icons.Rounded.LocationOn)
             }
         }
         Column(
@@ -929,7 +929,7 @@ fun DeliveryRequestCard(
     val address = message.deliveryAddress()
     BubbleSurface(isMine = !isDealer, modifier = modifier.width(270.dp), padding = 12.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Archive, contentDescription = null, tint = primary, modifier = Modifier.size(20.dp))
+            Icon(Icons.Rounded.Archive, contentDescription = null, tint = primary, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(8.dp))
             Text(title, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = palette.text)
         }
@@ -964,7 +964,7 @@ fun DeliveryAnswerCard(
     val pickupLabel = stringResource(L10nR.string.pickup)
     BubbleSurface(isMine = true, modifier = modifier.width(270.dp), padding = 12.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.LocalShipping, contentDescription = null, tint = palette.accent, modifier = Modifier.size(20.dp))
+            Icon(Icons.Rounded.LocalShipping, contentDescription = null, tint = palette.accent, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(8.dp))
             Text(title, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = palette.text)
         }
@@ -1016,7 +1016,7 @@ private fun DeliveryChip(
 @Composable
 fun MediaUnavailableBox(
     modifier: Modifier = Modifier,
-    icon: androidx.compose.ui.graphics.vector.ImageVector = Icons.Outlined.BrokenImage,
+    icon: androidx.compose.ui.graphics.vector.ImageVector = Icons.Rounded.BrokenImage,
 ) {
     val palette = chatPalette()
     Box(

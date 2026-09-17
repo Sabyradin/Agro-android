@@ -14,8 +14,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Clear
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -156,7 +156,7 @@ fun AgroSearchField(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Search,
+                    imageVector = Icons.Rounded.Search,
                     contentDescription = null,
                     tint = ext.secondaryText,
                     modifier = Modifier.size(20.dp),
@@ -180,7 +180,7 @@ fun AgroSearchField(
                 }
                 if (value.isNotEmpty()) {
                     AgroIconButton(
-                        icon = Icons.Outlined.Clear,
+                        icon = Icons.Rounded.Clear,
                         contentDescription = null,
                         onClick = { onValueChange("") },
                         tint = ext.secondaryText,

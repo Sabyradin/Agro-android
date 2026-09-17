@@ -15,10 +15,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -94,7 +94,7 @@ fun ProfileAddressesPage(onBack: () -> Unit, onEditLocation: (UserLocation?) -> 
                 loading && profile == null -> LoadingWidget()
                 locations.isEmpty() -> CenteredContent {
                     EmptyView(
-                        icon = Icons.Outlined.LocationOn,
+                        icon = Icons.Rounded.LocationOn,
                         title = stringResource(L10nR.string.address_empty_title),
                         message = stringResource(L10nR.string.address_empty_message),
                     )
@@ -150,7 +150,7 @@ private fun LocationTile(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Icon(
-            imageVector = Icons.Outlined.Place,
+            imageVector = Icons.Rounded.Place,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.height(24.dp),
@@ -175,13 +175,13 @@ private fun LocationTile(
             }
         }
         AgroIconButton(
-            icon = Icons.Outlined.Edit,
+            icon = Icons.Rounded.Edit,
             contentDescription = stringResource(L10nR.string.common_edit),
             tint = ext.secondaryText,
             onClick = onEdit,
         )
         AgroIconButton(
-            icon = Icons.Outlined.Delete,
+            icon = Icons.Rounded.Delete,
             contentDescription = stringResource(L10nR.string.common_delete),
             tint = MaterialTheme.colorScheme.error,
             onClick = onDelete,

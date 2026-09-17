@@ -21,9 +21,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Map
+import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -197,7 +197,7 @@ fun LocationSelectionPage(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Map,
+                            imageVector = Icons.Rounded.Map,
                             contentDescription = null,
                             tint = extendedColors().secondaryText,
                         )
@@ -369,7 +369,7 @@ private fun CatalogRow(label: String, filled: Boolean, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Icon(
-            imageVector = Icons.Outlined.LocationOn,
+            imageVector = Icons.Rounded.LocationOn,
             contentDescription = null,
             tint = if (filled) MaterialTheme.colorScheme.primary else extendedColors().secondaryText,
         )

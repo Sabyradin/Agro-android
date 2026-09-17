@@ -26,16 +26,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.outlined.AddCircleOutline
-import androidx.compose.material.icons.outlined.AddPhotoAlternate
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.PinDrop
-import androidx.compose.material.icons.outlined.RemoveCircleOutline
-import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.rounded.AddCircleOutline
+import androidx.compose.material.icons.rounded.AddPhotoAlternate
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Map
+import androidx.compose.material.icons.rounded.PinDrop
+import androidx.compose.material.icons.rounded.RemoveCircleOutline
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -277,7 +277,7 @@ fun CreateAdPage(
                                             LoadingWidget(Modifier.size(20.dp))
                                         } else {
                                             Icon(
-                                                imageVector = Icons.Outlined.AutoAwesome,
+                                                imageVector = Icons.Rounded.AutoAwesome,
                                                 contentDescription = stringResource(L10nR.string.ai_generate),
                                                 tint = MaterialTheme.colorScheme.primary.copy(
                                                     alpha = if (draft.title.isNotBlank()) 1f else 0.4f,
@@ -379,7 +379,7 @@ fun CreateAdPage(
                         if (showPreview) {
                             CreateBarButton(
                                 text = stringResource(L10nR.string.ad_preview_edit),
-                                icon = Icons.Outlined.Edit,
+                                icon = Icons.Rounded.Edit,
                                 primary = false,
                                 onClick = { showPreview = false },
                                 modifier = Modifier.weight(1f),
@@ -387,7 +387,7 @@ fun CreateAdPage(
                         } else {
                             CreateBarButton(
                                 text = stringResource(L10nR.string.ad_preview),
-                                icon = Icons.Outlined.Visibility,
+                                icon = Icons.Rounded.Visibility,
                                 primary = false,
                                 onClick = { validateThen { showPreview = true } },
                                 modifier = Modifier.weight(1f),
@@ -395,7 +395,7 @@ fun CreateAdPage(
                         }
                         CreateBarButton(
                             text = stringResource(L10nR.string.create_publish),
-                            icon = Icons.AutoMirrored.Outlined.Send,
+                            icon = Icons.AutoMirrored.Rounded.Send,
                             loading = submitting,
                             onClick = { validateThen(viewModel::submit) },
                             modifier = Modifier.weight(1f),
@@ -524,7 +524,7 @@ private fun ContactSection(
                 isError = phonesError && phone.isBlank(),
                 trailing = {
                     Icon(
-                        imageVector = Icons.Outlined.RemoveCircleOutline,
+                        imageVector = Icons.Rounded.RemoveCircleOutline,
                         contentDescription = stringResource(L10nR.string.common_delete),
                         tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
                         modifier = Modifier
@@ -537,7 +537,7 @@ private fun ContactSection(
             FormDivider()
         }
         FormActionRow(
-            icon = Icons.Outlined.AddCircleOutline,
+            icon = Icons.Rounded.AddCircleOutline,
             text = stringResource(L10nR.string.create_add_more),
             onClick = { onEditPhones(phones + "") },
         )
@@ -546,7 +546,7 @@ private fun ContactSection(
             label = null,
             value = addressLabel ?: stringResource(L10nR.string.create_specify_address),
             valueIsPlaceholder = addressLabel == null,
-            leadingIcon = Icons.Outlined.PinDrop,
+            leadingIcon = Icons.Rounded.PinDrop,
             isError = addressError,
             onClick = onPickAddress,
         )
@@ -636,7 +636,7 @@ private fun AddPhotoTile(onClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null, tint = primary, modifier = Modifier.size(30.dp))
+        Icon(Icons.Rounded.AddPhotoAlternate, contentDescription = null, tint = primary, modifier = Modifier.size(30.dp))
         Spacer(Modifier.height(6.dp))
         Text(text = stringResource(L10nR.string.create_add_short), fontSize = 13.sp, color = primary)
     }
@@ -662,7 +662,7 @@ private fun PhotoTile(onRemove: () -> Unit, content: @Composable () -> Unit) {
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = Icons.Outlined.Close,
+                imageVector = Icons.Rounded.Close,
                 contentDescription = stringResource(L10nR.string.common_delete),
                 tint = androidx.compose.ui.graphics.Color.White,
                 modifier = Modifier.size(14.dp),
@@ -853,7 +853,7 @@ internal fun AddressPickerSheet(
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(Icons.Outlined.PinDrop, contentDescription = null, tint = primary, modifier = Modifier.size(22.dp))
+                        Icon(Icons.Rounded.PinDrop, contentDescription = null, tint = primary, modifier = Modifier.size(22.dp))
                         Spacer(Modifier.width(16.dp))
                         Text(
                             text = location.fullAddress,
@@ -868,7 +868,7 @@ internal fun AddressPickerSheet(
             if (onPickMap != null) {
                 FormCard {
                     FormActionRow(
-                        icon = Icons.Outlined.Map,
+                        icon = Icons.Rounded.Map,
                         text = stringResource(L10nR.string.create_pick_location_map),
                         onClick = onPickMap,
                     )

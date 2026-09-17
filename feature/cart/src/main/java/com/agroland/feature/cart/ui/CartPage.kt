@@ -20,12 +20,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Inbox
-import androidx.compose.material.icons.outlined.Remove
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Inbox
+import androidx.compose.material.icons.rounded.Remove
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -414,7 +414,7 @@ private fun BasketContent(
     if (items.isEmpty() && chinaItems.isEmpty()) {
         CenteredContent {
             EmptyView(
-                icon = Icons.Outlined.ShoppingCart,
+                icon = Icons.Rounded.ShoppingCart,
                 title = stringResource(L10nR.string.cart_empty),
                 message = stringResource(L10nR.string.cart_empty_hint),
             )
@@ -440,7 +440,7 @@ private fun BasketContent(
             )
             IconButton(onClick = onShare) {
                 Icon(
-                    imageVector = Icons.Outlined.Share,
+                    imageVector = Icons.Rounded.Share,
                     contentDescription = null,
                     tint = extendedColors().secondaryText,
                 )
@@ -595,7 +595,7 @@ private fun CartTile(
         }
         IconButton(onClick = onDelete) {
             Icon(
-                imageVector = Icons.Outlined.Delete,
+                imageVector = Icons.Rounded.Delete,
                 contentDescription = null,
                 tint = ext.secondaryText,
             )
@@ -621,7 +621,7 @@ private fun QuantityStepper(
             modifier = Modifier.size(30.dp),
         ) {
             Icon(
-                imageVector = Icons.Outlined.Remove,
+                imageVector = Icons.Rounded.Remove,
                 contentDescription = null,
                 tint = if (quantity > 1.0) ext.primaryText else ext.divider,
                 modifier = Modifier.size(18.dp),
@@ -634,7 +634,7 @@ private fun QuantityStepper(
         )
         IconButton(onClick = { onChange(1.0) }, modifier = Modifier.size(30.dp)) {
             Icon(
-                imageVector = Icons.Outlined.Add,
+                imageVector = Icons.Rounded.Add,
                 contentDescription = null,
                 tint = ext.primaryText,
                 modifier = Modifier.size(18.dp),
@@ -664,7 +664,7 @@ private fun OrdersSectionContent(
     if (orders.isEmpty() && chinaOrders.isEmpty()) {
         CenteredContent {
             EmptyView(
-                icon = Icons.Outlined.Inbox,
+                icon = Icons.Rounded.Inbox,
                 title = stringResource(L10nR.string.cart_section_empty),
             )
         }
@@ -832,7 +832,7 @@ private fun OrderTile(
 @Composable
 fun GuestCartTab(onLoginClick: () -> Unit) {
     com.agroland.core.ui.components.GuestGate(
-        icon = Icons.Outlined.ShoppingCart,
+        icon = Icons.Rounded.ShoppingCart,
         message = stringResource(L10nR.string.cart_login_prompt),
         loginText = stringResource(L10nR.string.auth_login_title),
         onLoginClick = onLoginClick,

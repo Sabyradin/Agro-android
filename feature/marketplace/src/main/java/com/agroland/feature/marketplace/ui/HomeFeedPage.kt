@@ -26,11 +26,11 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.QrCodeScanner
-import androidx.compose.material.icons.automirrored.outlined.Sort
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.QrCodeScanner
+import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -231,7 +231,7 @@ private fun HomeHeader(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AgroIconButton(
-                icon = Icons.Outlined.QrCodeScanner,
+                icon = Icons.Rounded.QrCodeScanner,
                 contentDescription = stringResource(L10nR.string.scan_qr),
                 onClick = onOpenQrScanner,
                 tint = MaterialTheme.colorScheme.primary,
@@ -239,7 +239,7 @@ private fun HomeHeader(
             )
             Spacer(Modifier.width(AgroSpacing.xs))
             AgroIconButton(
-                icon = Icons.Outlined.Notifications,
+                icon = Icons.Rounded.Notifications,
                 contentDescription = stringResource(L10nR.string.notifications),
                 onClick = onOpenNotifications,
                 tint = MaterialTheme.colorScheme.primary,
@@ -386,7 +386,7 @@ private fun FilterButton(onClick: () -> Unit, active: Boolean) {
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Outlined.Sort,
+                imageVector = Icons.AutoMirrored.Rounded.Sort,
                 contentDescription = stringResource(L10nR.string.home_filter),
                 tint = if (active) extendedColors().white else primary,
                 modifier = Modifier.size(16.dp),
@@ -646,7 +646,7 @@ private fun ProfileAvatarButton(avatarUrl: String?, onClick: () -> Unit) {
             )
         } else {
             Icon(
-                imageVector = Icons.Outlined.Person,
+                imageVector = Icons.Rounded.Person,
                 contentDescription = stringResource(L10nR.string.profile_title),
                 tint = ext.white,
                 modifier = Modifier.size(20.dp),
@@ -721,7 +721,7 @@ private fun SuggestionsDropdown(
                         }
                 }
                 Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                     contentDescription = null,
                     tint = ext.secondaryText,
                     modifier = Modifier.size(18.dp),

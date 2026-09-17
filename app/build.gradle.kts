@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -21,8 +23,8 @@ android {
         applicationId = "com.agroland.app"
         minSdk = 25
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 111
+        versionName = "1.2.0"
         vectorDrawables { useSupportLibrary = true }
 
         // Google Maps API кілті — gradle.properties MAPS_API_KEY=... (команда бергенше бос).
@@ -63,11 +65,28 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            // Play Store подпись кілті — бұрынғы Flutter mobile-app/android/KeyStore-пен бірдей
+            // (com.agroland.app үшін app signing key continuity).
+            // Құпиялар репода емес: env немесе local.properties (gitignored).
+            val localProps = Properties().apply {
+                rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+            }
+            fun secret(name: String): String? = System.getenv(name) ?: localProps.getProperty(name)
+            keyAlias = secret("ANDROID_KEY_ALIAS") ?: "key0"
+            keyPassword = secret("ANDROID_KEY_PASSWORD")
+            storeFile = file(secret("ANDROID_KEYSTORE") ?: "KeyStore")
+            storePassword = secret("ANDROID_KEYSTORE_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             isMinifyEnabled = false

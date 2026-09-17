@@ -20,8 +20,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.GroupAdd
-import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.rounded.GroupAdd
+import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -115,7 +115,7 @@ fun DealerEmployeesPage(
                 contentColor = extendedColors().white,
                 shape = RoundedCornerShape(16.dp),
             ) {
-                Icon(imageVector = Icons.Outlined.GroupAdd, contentDescription = null)
+                Icon(imageVector = Icons.Rounded.GroupAdd, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(L10nR.string.dealer_employee_add), fontWeight = FontWeight.W600)
             }
@@ -131,7 +131,7 @@ fun DealerEmployeesPage(
                     )
                 }
                 employees.isEmpty() -> EmptyView(
-                    icon = Icons.Outlined.Groups,
+                    icon = Icons.Rounded.Groups,
                     title = stringResource(L10nR.string.dealer_employees_empty),
                     message = stringResource(L10nR.string.dealer_employees_empty_hint),
                 )

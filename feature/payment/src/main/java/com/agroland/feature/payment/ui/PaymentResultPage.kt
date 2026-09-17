@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Error
-import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Error
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -74,7 +74,7 @@ fun PaymentResultPage(
                 }
 
                 PaymentResultPhase.Success -> ResultState(
-                    icon = Icons.Outlined.CheckCircle,
+                    icon = Icons.Rounded.CheckCircle,
                     iconTint = MaterialTheme.colorScheme.primary,
                     title = stringResource(L10nR.string.payment_successful),
                     message = null,
@@ -83,7 +83,7 @@ fun PaymentResultPage(
                 )
 
                 is PaymentResultPhase.Failed -> ResultState(
-                    icon = Icons.Outlined.Error,
+                    icon = Icons.Rounded.Error,
                     iconTint = MaterialTheme.colorScheme.error,
                     title = stringResource(L10nR.string.payment_failed),
                     message = current.error.displayText(),
@@ -92,7 +92,7 @@ fun PaymentResultPage(
                 )
 
                 PaymentResultPhase.TimedOut -> ResultState(
-                    icon = Icons.Outlined.Schedule,
+                    icon = Icons.Rounded.Schedule,
                     iconTint = MaterialTheme.colorScheme.primary,
                     title = stringResource(L10nR.string.payment_in_processing),
                     message = null,

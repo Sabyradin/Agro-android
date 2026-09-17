@@ -21,8 +21,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CloudOff
-import androidx.compose.material.icons.outlined.Inbox
+import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.Inbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -118,7 +118,7 @@ fun ErrorWithRetry(
     message: String? = null,
 ) {
     StatePlaceholder(
-        icon = Icons.Outlined.CloudOff,
+        icon = Icons.Rounded.CloudOff,
         modifier = modifier,
         title = stringResource(L10nR.string.error_generic_title),
         message = message ?: stringResource(L10nR.string.error_generic_message),
@@ -136,7 +136,7 @@ fun ErrorWithRetry(
 @Composable
 fun EmptyView(
     modifier: Modifier = Modifier,
-    icon: ImageVector = Icons.Outlined.Inbox,
+    icon: ImageVector = Icons.Rounded.Inbox,
     title: String? = null,
     message: String? = null,
     actionText: String? = null,

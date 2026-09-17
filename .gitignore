@@ -22,6 +22,8 @@ captures/
 local.properties
 *.jks
 *.keystore
+KeyStore
+app/KeyStore
 **/google-services.json.bak
 
 # Logs / OS

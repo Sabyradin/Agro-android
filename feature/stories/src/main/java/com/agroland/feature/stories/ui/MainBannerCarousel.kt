@@ -19,10 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.rounded.AddCircle
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.LocalFireDepartment
+import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -102,10 +102,10 @@ fun MainBannerCarousel(
 
     val statics = remember(createLabel, advertiseLabel, chinaLabel, promotedLabel) {
         listOf(
-            StaticPromo("static_create", Icons.Filled.AddCircle, createLabel, onOpenCreate),
-            StaticPromo("static_advertise", Icons.Filled.Bolt, advertiseLabel, onOpenAdvertise),
-            StaticPromo("static_china_catalog", Icons.Filled.ShoppingCart, chinaLabel, onOpenChinaCatalog),
-            StaticPromo("static_promoted", Icons.Filled.LocalFireDepartment, promotedLabel, onOpenPromoted),
+            StaticPromo("static_create", Icons.Rounded.AddCircle, createLabel, onOpenCreate),
+            StaticPromo("static_advertise", Icons.Rounded.Bolt, advertiseLabel, onOpenAdvertise),
+            StaticPromo("static_china_catalog", Icons.Rounded.ShoppingCart, chinaLabel, onOpenChinaCatalog),
+            StaticPromo("static_promoted", Icons.Rounded.LocalFireDepartment, promotedLabel, onOpenPromoted),
         )
     }
 

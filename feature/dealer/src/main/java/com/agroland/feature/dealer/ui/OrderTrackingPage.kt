@@ -18,10 +18,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.ReceiptLong
-import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Map
+import androidx.compose.material.icons.rounded.ReceiptLong
+import androidx.compose.material.icons.rounded.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -143,16 +143,16 @@ private fun TrackingContent(tracking: OrderTracking) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 tracking.pickupAddress?.let {
-                    AddressRow(Icons.Outlined.ShoppingBag, stringResource(L10nR.string.dealer_pickup_address), it)
+                    AddressRow(Icons.Rounded.ShoppingBag, stringResource(L10nR.string.dealer_pickup_address), it)
                 }
                 tracking.deliveryAddress?.let {
-                    AddressRow(Icons.Outlined.Map, stringResource(L10nR.string.dealer_delivery_address), it)
+                    AddressRow(Icons.Rounded.Map, stringResource(L10nR.string.dealer_delivery_address), it)
                 }
                 tracking.loadingDate?.let {
-                    AddressRow(Icons.Outlined.ReceiptLong, stringResource(L10nR.string.dealer_loading_date), it)
+                    AddressRow(Icons.Rounded.ReceiptLong, stringResource(L10nR.string.dealer_loading_date), it)
                 }
                 tracking.deliveryDate?.let {
-                    AddressRow(Icons.Outlined.ReceiptLong, stringResource(L10nR.string.dealer_delivery_date), it)
+                    AddressRow(Icons.Rounded.ReceiptLong, stringResource(L10nR.string.dealer_delivery_date), it)
                 }
             }
         }
@@ -301,7 +301,7 @@ private fun SignatureChip(label: String, signed: Boolean) {
     ) {
         if (signed) {
             Icon(
-                imageVector = Icons.Outlined.Check,
+                imageVector = Icons.Rounded.Check,
                 contentDescription = null,
                 tint = color,
                 modifier = Modifier.size(14.dp),

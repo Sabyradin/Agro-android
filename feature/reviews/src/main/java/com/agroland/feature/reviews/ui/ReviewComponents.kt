@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -134,7 +134,7 @@ fun RatingStars(
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         repeat(5) { i ->
             Icon(
-                imageVector = if (i < rating) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                imageVector = if (i < rating) Icons.Rounded.Star else Icons.Rounded.StarBorder,
                 contentDescription = null,
                 tint = if (i < rating) tint else extendedColors().secondaryText,
                 modifier = Modifier.size(starSize.dp),
@@ -157,7 +157,7 @@ fun RatingInput(
         for (i in 1..5) {
             IconButton(onClick = { onSelect(i) }) {
                 Icon(
-                    imageVector = if (i <= rating) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                    imageVector = if (i <= rating) Icons.Rounded.Star else Icons.Rounded.StarBorder,
                     contentDescription = i.toString(),
                     tint = if (i <= rating) {
                         MaterialTheme.colorScheme.secondary

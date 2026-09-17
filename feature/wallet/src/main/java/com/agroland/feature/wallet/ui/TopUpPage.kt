@@ -20,9 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material.icons.outlined.CreditCard
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.rounded.AccountBalanceWallet
+import androidx.compose.material.icons.rounded.CreditCard
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -207,7 +207,7 @@ private fun BalanceInfoCard(balance: Double, onInfo: () -> Unit) {
             )
             Spacer(modifier = Modifier.weight(1f))
             Icon(
-                imageVector = Icons.Outlined.AccountBalanceWallet,
+                imageVector = Icons.Rounded.AccountBalanceWallet,
                 contentDescription = null,
                 tint = ext.secondaryText,
                 modifier = Modifier.size(24.dp),
@@ -220,7 +220,7 @@ private fun BalanceInfoCard(balance: Double, onInfo: () -> Unit) {
                 .padding(horizontal = 20.dp, vertical = 16.dp),
         ) {
             Icon(
-                imageVector = Icons.Outlined.Info,
+                imageVector = Icons.Rounded.Info,
                 contentDescription = null,
                 tint = ext.secondaryText,
                 modifier = Modifier.size(20.dp),
@@ -323,7 +323,7 @@ private fun ServiceCard() {
             horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Icon(
-                imageVector = Icons.Outlined.CreditCard,
+                imageVector = Icons.Rounded.CreditCard,
                 contentDescription = null,
                 tint = ext.primaryText,
                 modifier = Modifier.size(24.dp),

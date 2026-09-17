@@ -27,23 +27,23 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Help
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.outlined.Agriculture
-import androidx.compose.material.icons.outlined.Archive
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.ChatBubble
-import androidx.compose.material.icons.outlined.PushPin
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Sell
-import androidx.compose.material.icons.outlined.ShoppingBag
-import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material.icons.outlined.Verified
-import androidx.compose.material.icons.outlined.VolumeOff
-import androidx.compose.material.icons.outlined.VolumeUp
+import androidx.compose.material.icons.automirrored.rounded.Help
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.Agriculture
+import androidx.compose.material.icons.rounded.Archive
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.ChatBubble
+import androidx.compose.material.icons.rounded.PushPin
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Sell
+import androidx.compose.material.icons.rounded.ShoppingBag
+import androidx.compose.material.icons.rounded.StarBorder
+import androidx.compose.material.icons.rounded.Verified
+import androidx.compose.material.icons.rounded.VolumeOff
+import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -152,7 +152,7 @@ fun ChatListPage(
         if (searchInput.isEmpty()) {
             if (onOpenMyReviews != null) {
                 ShortcutRow(
-                    icon = Icons.Outlined.StarBorder,
+                    icon = Icons.Rounded.StarBorder,
                     text = stringResource(L10nR.string.my_reviews_title),
                     badge = myReviewsBadge,
                     onClick = onOpenMyReviews,
@@ -169,7 +169,7 @@ fun ChatListPage(
                 }
                 state.rows.isEmpty() && (state.archivedCount == 0 || searchInput.isNotEmpty()) -> Box(Modifier.align(Alignment.Center)) {
                     EmptyView(
-                        icon = Icons.Outlined.ChatBubble,
+                        icon = Icons.Rounded.ChatBubble,
                         title = stringResource(L10nR.string.nothing_found),
                     )
                 }
@@ -194,20 +194,20 @@ fun ChatListPage(
                         SwipeActionRow(
                             actions = listOf(
                                 SwipeAction(
-                                    icon = if (row.muted) Icons.Outlined.VolumeUp else Icons.Outlined.VolumeOff,
+                                    icon = if (row.muted) Icons.Rounded.VolumeUp else Icons.Rounded.VolumeOff,
                                     label = if (row.muted) muteOffLabel else muteOnLabel,
                                     color = Color(0xFF8E8E93),
                                     onClick = { viewModel.toggleMute(row.room) },
                                 ),
                                 SwipeAction(
-                                    icon = Icons.Outlined.Delete,
+                                    icon = Icons.Rounded.Delete,
                                     label = deleteSwipeLabel,
                                     color = Color(0xFFFF3B30),
                                     destructive = true,
                                     onClick = { pendingDelete = row.room },
                                 ),
                                 SwipeAction(
-                                    icon = Icons.Outlined.Archive,
+                                    icon = Icons.Rounded.Archive,
                                     label = archiveSwipeLabel,
                                     color = Color(0xFF3478F6),
                                     isPrimary = true,
@@ -316,7 +316,7 @@ private fun ChatSearchAppBar(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Search,
+                            imageVector = Icons.Rounded.Search,
                             contentDescription = null,
                             tint = ext.secondaryText,
                             modifier = Modifier.size(18.dp),
@@ -353,7 +353,7 @@ private fun ChatSearchAppBar(
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Icon(
-                                    imageVector = Icons.Outlined.Close,
+                                    imageVector = Icons.Rounded.Close,
                                     contentDescription = null,
                                     tint = ext.secondaryText,
                                     modifier = Modifier.size(16.dp),
@@ -384,7 +384,7 @@ private fun ChatSearchAppBar(
                         searchOpen = true
                     }) {
                         Icon(
-                            imageVector = Icons.Outlined.Search,
+                            imageVector = Icons.Rounded.Search,
                             contentDescription = stringResource(L10nR.string.search),
                             tint = ext.primaryText,
                         )
@@ -454,7 +454,7 @@ private fun ShortcutRow(
             Spacer(Modifier.width(6.dp))
         }
         Icon(
-            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
             contentDescription = null,
             tint = ext.secondaryText,
             modifier = Modifier.size(20.dp),
@@ -495,7 +495,7 @@ private fun ArchivedChatsTile(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Archive,
+                    imageVector = Icons.Rounded.Archive,
                     contentDescription = null,
                     tint = ext.white,
                     modifier = Modifier.size(26.dp),
@@ -551,12 +551,12 @@ private fun ArchivedChatsTile(
 
 /** Жүйелі чат иконкалары (Flutter _systemChatIcons): id → иконка + түс. */
 internal fun systemChatIcon(peerId: Long?): Pair<ImageVector, Color>? = when (peerId) {
-    31L -> Icons.AutoMirrored.Outlined.Help to Color(0xFFFF9500)
-    1001L -> Icons.Outlined.Sell to Color(0xFFFF3B30)
-    1002L -> Icons.Outlined.Agriculture to Color(0xFF34C759)
-    1003L -> Icons.AutoMirrored.Outlined.MenuBook to Color(0xFF30B0C7)
-    1004L -> Icons.Outlined.Description to Color(0xFF007AFF)
-    1005L -> Icons.Outlined.ShoppingBag to Color(0xFFAF52DE)
+    31L -> Icons.AutoMirrored.Rounded.Help to Color(0xFFFF9500)
+    1001L -> Icons.Rounded.Sell to Color(0xFFFF3B30)
+    1002L -> Icons.Rounded.Agriculture to Color(0xFF34C759)
+    1003L -> Icons.AutoMirrored.Rounded.MenuBook to Color(0xFF30B0C7)
+    1004L -> Icons.Rounded.Description to Color(0xFF007AFF)
+    1005L -> Icons.Rounded.ShoppingBag to Color(0xFFAF52DE)
     else -> null
 }
 
@@ -713,7 +713,7 @@ internal fun ChatTile(
                     if (room.isChecked) {
                         Spacer(Modifier.width(4.dp))
                         Icon(
-                            imageVector = Icons.Outlined.Verified,
+                            imageVector = Icons.Rounded.Verified,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(14.dp),
@@ -738,7 +738,7 @@ internal fun ChatTile(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (pinned) {
                         Icon(
-                            imageVector = Icons.Outlined.PushPin,
+                            imageVector = Icons.Rounded.PushPin,
                             contentDescription = null,
                             tint = ext.secondaryText,
                             modifier = Modifier.size(14.dp),
@@ -777,7 +777,7 @@ internal fun ChatTile(
 @Composable
 fun GuestChatTab(onLoginClick: () -> Unit) {
     com.agroland.core.ui.components.GuestGate(
-        icon = Icons.Outlined.ChatBubble,
+        icon = Icons.Rounded.ChatBubble,
         message = stringResource(L10nR.string.chat_login_prompt),
         loginText = stringResource(L10nR.string.auth_login_title),
         onLoginClick = onLoginClick,

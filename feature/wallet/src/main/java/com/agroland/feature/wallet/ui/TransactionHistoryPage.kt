@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ReceiptLong
+import androidx.compose.material.icons.rounded.ReceiptLong
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,7 +55,7 @@ fun TransactionHistoryPage(
                 }
                 transactions!!.isEmpty() -> CenteredContent {
                     EmptyView(
-                        icon = Icons.Outlined.ReceiptLong,
+                        icon = Icons.Rounded.ReceiptLong,
                         title = stringResource(L10nR.string.wallet_empty),
                     )
                 }

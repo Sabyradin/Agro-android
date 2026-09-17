@@ -18,12 +18,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.CreditCard
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Inbox
-import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CreditCard
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Inbox
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -102,7 +102,7 @@ fun DealerLogisticsTab(
             zones.isEmpty() -> CenteredContent {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        imageVector = Icons.Outlined.Inbox,
+                        imageVector = Icons.Rounded.Inbox,
                         contentDescription = null,
                         tint = extendedColors().secondaryText,
                         modifier = Modifier.size(64.dp),
@@ -140,7 +140,7 @@ fun DealerLogisticsTab(
             onClick = onAddZone,
             icon = {
                 Icon(
-                    imageVector = Icons.Outlined.Add,
+                    imageVector = Icons.Rounded.Add,
                     contentDescription = null,
                     tint = extendedColors().white,
                 )
@@ -206,13 +206,13 @@ private fun ZoneCard(
             ZoneActiveBadge(isActive = zone.isActive)
             Spacer(Modifier.width(4.dp))
             AgroIconButton(
-                icon = Icons.Outlined.Edit,
+                icon = Icons.Rounded.Edit,
                 contentDescription = stringResource(L10nR.string.dealer_edit_zone),
                 onClick = onEdit,
                 modifier = Modifier.size(36.dp),
             )
             AgroIconButton(
-                icon = Icons.Outlined.Delete,
+                icon = Icons.Rounded.Delete,
                 contentDescription = stringResource(L10nR.string.dealer_delete_zone),
                 onClick = onDelete,
                 enabled = !deleting,
@@ -223,7 +223,7 @@ private fun ZoneCard(
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Outlined.CreditCard,
+                imageVector = Icons.Rounded.CreditCard,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(16.dp),
@@ -237,7 +237,7 @@ private fun ZoneCard(
             )
             Spacer(Modifier.width(16.dp))
             Icon(
-                imageVector = Icons.Outlined.Schedule,
+                imageVector = Icons.Rounded.Schedule,
                 contentDescription = null,
                 tint = ext.secondaryText,
                 modifier = Modifier.size(16.dp),

@@ -17,7 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -144,7 +144,7 @@ private fun ChinaSubcategoryTile(
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Outlined.Image,
+                    imageVector = Icons.Rounded.Image,
                     contentDescription = null,
                     tint = ext.secondaryText,
                     modifier = Modifier.size(36.dp),

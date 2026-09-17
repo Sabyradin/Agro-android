@@ -19,20 +19,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.AccountBalance
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Campaign
-import androidx.compose.material.icons.outlined.Agriculture
-import androidx.compose.material.icons.outlined.Calculate
-import androidx.compose.material.icons.outlined.Computer
-import androidx.compose.material.icons.outlined.Engineering
-import androidx.compose.material.icons.outlined.Gavel
-import androidx.compose.material.icons.outlined.LocalFlorist
-import androidx.compose.material.icons.outlined.LocalShipping
-import androidx.compose.material.icons.outlined.MenuBook
-import androidx.compose.material.icons.outlined.QueryStats
-import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.AccountBalance
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.Campaign
+import androidx.compose.material.icons.rounded.Agriculture
+import androidx.compose.material.icons.rounded.Calculate
+import androidx.compose.material.icons.rounded.Computer
+import androidx.compose.material.icons.rounded.Engineering
+import androidx.compose.material.icons.rounded.Gavel
+import androidx.compose.material.icons.rounded.LocalFlorist
+import androidx.compose.material.icons.rounded.LocalShipping
+import androidx.compose.material.icons.rounded.MenuBook
+import androidx.compose.material.icons.rounded.QueryStats
+import androidx.compose.material.icons.rounded.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -99,17 +99,17 @@ fun ServicesPage(
 
     val services = remember {
         listOf(
-            ServiceItem(Icons.Outlined.Calculate, L10nR.string.service_tile_accounting, L10nR.string.service_tile_accounting_desc),
-            ServiceItem(Icons.Outlined.Gavel, L10nR.string.service_tile_legal, L10nR.string.service_tile_legal_desc),
-            ServiceItem(Icons.Outlined.AccountBalance, L10nR.string.service_tile_egov, L10nR.string.service_tile_egov_desc, isEgov = true),
-            ServiceItem(Icons.Outlined.Computer, L10nR.string.service_tile_it, L10nR.string.service_tile_it_desc),
-            ServiceItem(Icons.Outlined.LocalShipping, L10nR.string.service_tile_china_import, L10nR.string.service_tile_china_import_desc),
-            ServiceItem(Icons.Outlined.QueryStats, L10nR.string.service_tile_marketing, L10nR.string.service_tile_marketing_desc),
-            ServiceItem(Icons.Outlined.Agriculture, L10nR.string.service_tile_agro_consulting, L10nR.string.service_tile_agro_consulting_desc),
-            ServiceItem(Icons.Outlined.Engineering, L10nR.string.service_tile_engineering, L10nR.string.service_tile_engineering_desc),
-            ServiceItem(Icons.Outlined.LocalFlorist, L10nR.string.service_tile_plant_protection, L10nR.string.service_tile_plant_protection_desc),
-            ServiceItem(Icons.Outlined.ShoppingBag, L10nR.string.service_tile_agro_market, L10nR.string.service_tile_agro_market_desc),
-            ServiceItem(Icons.Outlined.MenuBook, L10nR.string.service_tile_agro_education, L10nR.string.service_tile_agro_education_desc),
+            ServiceItem(Icons.Rounded.Calculate, L10nR.string.service_tile_accounting, L10nR.string.service_tile_accounting_desc),
+            ServiceItem(Icons.Rounded.Gavel, L10nR.string.service_tile_legal, L10nR.string.service_tile_legal_desc),
+            ServiceItem(Icons.Rounded.AccountBalance, L10nR.string.service_tile_egov, L10nR.string.service_tile_egov_desc, isEgov = true),
+            ServiceItem(Icons.Rounded.Computer, L10nR.string.service_tile_it, L10nR.string.service_tile_it_desc),
+            ServiceItem(Icons.Rounded.LocalShipping, L10nR.string.service_tile_china_import, L10nR.string.service_tile_china_import_desc),
+            ServiceItem(Icons.Rounded.QueryStats, L10nR.string.service_tile_marketing, L10nR.string.service_tile_marketing_desc),
+            ServiceItem(Icons.Rounded.Agriculture, L10nR.string.service_tile_agro_consulting, L10nR.string.service_tile_agro_consulting_desc),
+            ServiceItem(Icons.Rounded.Engineering, L10nR.string.service_tile_engineering, L10nR.string.service_tile_engineering_desc),
+            ServiceItem(Icons.Rounded.LocalFlorist, L10nR.string.service_tile_plant_protection, L10nR.string.service_tile_plant_protection_desc),
+            ServiceItem(Icons.Rounded.ShoppingBag, L10nR.string.service_tile_agro_market, L10nR.string.service_tile_agro_market_desc),
+            ServiceItem(Icons.Rounded.MenuBook, L10nR.string.service_tile_agro_education, L10nR.string.service_tile_agro_education_desc),
         )
     }
     val partners = remember {
@@ -245,7 +245,7 @@ fun ServicesPage(
                     color = DemandOrange,
                     initial = "",
                 ),
-                icon = Icons.Outlined.Campaign,
+                icon = Icons.Rounded.Campaign,
                 onClick = onOpenDemand,
             )
         }
@@ -353,7 +353,7 @@ private fun PartnerCard(
         }
         Spacer(Modifier.width(8.dp))
         Icon(
-            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
             contentDescription = null,
             tint = ext.secondaryText,
         )
@@ -387,7 +387,7 @@ private fun AgroGitBanner(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = Icons.Outlined.AutoAwesome,
+                imageVector = Icons.Rounded.AutoAwesome,
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier.size(28.dp),
@@ -412,7 +412,7 @@ private fun AgroGitBanner(
         }
         Spacer(Modifier.width(8.dp))
         Icon(
-            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
             contentDescription = null,
             tint = Color.White,
         )

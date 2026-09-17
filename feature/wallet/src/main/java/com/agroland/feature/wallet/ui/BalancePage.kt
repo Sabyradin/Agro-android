@@ -16,10 +16,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDownward
-import androidx.compose.material.icons.outlined.ArrowUpward
-import androidx.compose.material.icons.outlined.PauseCircle
-import androidx.compose.material.icons.outlined.SwapHoriz
+import androidx.compose.material.icons.rounded.ArrowDownward
+import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.PauseCircle
+import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -217,10 +217,10 @@ internal fun TxTile(tx: WalletTransaction) {
     val isCredit = tx.type == TxType.ACCRUAL
     val color = if (isCredit) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
     val (icon, label) = when (tx.type) {
-        TxType.ACCRUAL -> Icons.Outlined.ArrowDownward to stringResource(L10nR.string.wallet_tx_accrual)
-        TxType.WITHDRAW -> Icons.Outlined.ArrowUpward to stringResource(L10nR.string.wallet_tx_withdraw)
-        TxType.HOLD -> Icons.Outlined.PauseCircle to stringResource(L10nR.string.wallet_tx_hold)
-        TxType.UNKNOWN -> Icons.Outlined.SwapHoriz to stringResource(L10nR.string.wallet_tx_unknown)
+        TxType.ACCRUAL -> Icons.Rounded.ArrowDownward to stringResource(L10nR.string.wallet_tx_accrual)
+        TxType.WITHDRAW -> Icons.Rounded.ArrowUpward to stringResource(L10nR.string.wallet_tx_withdraw)
+        TxType.HOLD -> Icons.Rounded.PauseCircle to stringResource(L10nR.string.wallet_tx_hold)
+        TxType.UNKNOWN -> Icons.Rounded.SwapHoriz to stringResource(L10nR.string.wallet_tx_unknown)
     }
     val dateText = DateFormatter.formatDateTime(tx.createdAt)
 

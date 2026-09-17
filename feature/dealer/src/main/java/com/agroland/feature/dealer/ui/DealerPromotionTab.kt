@@ -18,10 +18,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowUpward
-import androidx.compose.material.icons.outlined.Flag
-import androidx.compose.material.icons.outlined.MilitaryTech
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.Flag
+import androidx.compose.material.icons.rounded.MilitaryTech
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -129,7 +129,7 @@ fun DealerPromotionTab(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Flag,
+                        imageVector = Icons.Rounded.Flag,
                         contentDescription = null,
                         tint = ext.secondaryText,
                         modifier = Modifier.size(48.dp),
@@ -163,7 +163,7 @@ fun DealerPromotionTab(
             }
             item {
                 PackageCard(
-                    icon = Icons.Outlined.ArrowUpward,
+                    icon = Icons.Rounded.ArrowUpward,
                     title = stringResource(L10nR.string.dealer_boost_to_top),
                     subtitle = stringResource(L10nR.string.dealer_active_days, "7"),
                     price = "500 ₸",
@@ -173,7 +173,7 @@ fun DealerPromotionTab(
             }
             item {
                 PackageCard(
-                    icon = Icons.Outlined.Star,
+                    icon = Icons.Rounded.Star,
                     title = "VIP",
                     subtitle = stringResource(L10nR.string.dealer_active_days, "30"),
                     price = "2 000 ₸",
@@ -183,7 +183,7 @@ fun DealerPromotionTab(
             }
             item {
                 PackageCard(
-                    icon = Icons.Outlined.MilitaryTech,
+                    icon = Icons.Rounded.MilitaryTech,
                     title = "Premium",
                     subtitle = stringResource(L10nR.string.dealer_coverage_3x),
                     price = "5 000 ₸",

@@ -37,23 +37,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.outlined.Reply
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Headphones
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.KeyboardArrowUp
-import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.rounded.Reply
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.Headphones
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material.icons.rounded.Videocam
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -322,7 +322,7 @@ fun ChatInputBar(
                     (mode == RecordMode.IDLE && (input.isNotBlank() || editing != null))
                 if (showSend) {
                     RoundActionButton(
-                        icon = Icons.AutoMirrored.Filled.Send,
+                        icon = Icons.AutoMirrored.Rounded.Send,
                         contentDescription = stringResource(L10nR.string.voice_send_hint),
                         onClick = {
                             if (mode == RecordMode.LOCKED) stopAndSend() else onSend()
@@ -370,7 +370,7 @@ fun ChatInputBar(
                     )
                 } else {
                     RoundActionButton(
-                        icon = Icons.Filled.Mic,
+                        icon = Icons.Rounded.Mic,
                         contentDescription = null,
                         onClick = {},
                         enabled = false,
@@ -406,14 +406,14 @@ fun ChatInputBar(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Icon(
-                            Icons.Filled.Lock,
+                            Icons.Rounded.Lock,
                             contentDescription = stringResource(L10nR.string.voice_lock_hint),
                             tint = if (progress > 0.8f) palette.accent else palette.meta,
                             modifier = Modifier.size(20.dp),
                         )
                         Spacer(Modifier.height(4.dp))
                         Icon(
-                            Icons.Outlined.KeyboardArrowUp,
+                            Icons.Rounded.KeyboardArrowUp,
                             contentDescription = null,
                             tint = palette.meta,
                             modifier = Modifier.size(20.dp),
@@ -463,7 +463,7 @@ private fun ComposeRow(
                 .clickable(onClick = onOpenAttach),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Outlined.Add, contentDescription = null, tint = palette.accent, modifier = Modifier.size(30.dp))
+            Icon(Icons.Rounded.Add, contentDescription = null, tint = palette.accent, modifier = Modifier.size(30.dp))
         }
         Spacer(Modifier.width(2.dp))
         Column(
@@ -480,7 +480,7 @@ private fun ComposeRow(
             ) {
                 quoteTarget?.let { target ->
                     ComposerQuote(
-                        icon = if (editing != null) Icons.Outlined.Edit else Icons.AutoMirrored.Outlined.Reply,
+                        icon = if (editing != null) Icons.Rounded.Edit else Icons.AutoMirrored.Rounded.Reply,
                         title = if (editing != null) stringResource(L10nR.string.edit) else (replyAuthor ?: stringResource(L10nR.string.reply)),
                         text = target.displayText(),
                         onClose = if (editing != null) onClearEditing else onClearReply,
@@ -517,7 +517,7 @@ private fun ComposeRow(
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
-                            Icons.Outlined.PhotoCamera,
+                            Icons.Rounded.PhotoCamera,
                             contentDescription = stringResource(L10nR.string.attach_camera),
                             tint = palette.meta,
                             modifier = Modifier.size(24.dp),
@@ -572,7 +572,7 @@ private fun ComposerQuote(
                 .clickable(onClick = onClose),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Outlined.Close, contentDescription = stringResource(L10nR.string.cancel), tint = palette.meta, modifier = Modifier.size(18.dp))
+            Icon(Icons.Rounded.Close, contentDescription = stringResource(L10nR.string.cancel), tint = palette.meta, modifier = Modifier.size(18.dp))
         }
     }
 }
@@ -598,7 +598,7 @@ private fun HoldingStrip(seconds: Int, dragX: Float, cancelFraction: Float) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            Icons.Filled.Mic,
+            Icons.Rounded.Mic,
             contentDescription = null,
             tint = Color(0xFFE53935).copy(alpha = alpha),
             modifier = Modifier.size(22.dp),
@@ -619,7 +619,7 @@ private fun HoldingStrip(seconds: Int, dragX: Float, cancelFraction: Float) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+                    Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
                     contentDescription = null,
                     tint = palette.meta,
                     modifier = Modifier.size(20.dp),
@@ -657,7 +657,7 @@ private fun LockedStrip(seconds: Int, levels: List<Float>, onDelete: () -> Unit)
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                Icons.Filled.Delete,
+                Icons.Rounded.Delete,
                 contentDescription = stringResource(L10nR.string.voice_cancel_hint),
                 tint = palette.meta,
                 modifier = Modifier.size(24.dp),
@@ -799,7 +799,7 @@ private fun MicButton(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = Icons.Filled.Mic,
+                imageVector = Icons.Rounded.Mic,
                 contentDescription = stringResource(L10nR.string.voice_hold_to_record),
                 tint = Color.White,
                 modifier = Modifier.size(24.dp),
@@ -822,12 +822,12 @@ private fun AttachmentSheet(
 ) {
     val palette = chatPalette()
     val items = listOf(
-        AttachItem(Icons.Filled.Image, stringResource(L10nR.string.attach_gallery), Color(0xFF3D8BFD), onPickImage),
-        AttachItem(Icons.Filled.PhotoCamera, stringResource(L10nR.string.attach_camera), Color(0xFFFF2E74), onTakePhoto),
-        AttachItem(Icons.Filled.Videocam, stringResource(L10nR.string.attach_video), Color(0xFFC861FA), onRecordVideo),
-        AttachItem(Icons.Filled.Description, stringResource(L10nR.string.attach_document), Color(0xFF7F66FF), onPickFile),
-        AttachItem(Icons.Filled.Headphones, stringResource(L10nR.string.attach_audio_short), Color(0xFFFF7F2E), onPickAudio),
-        AttachItem(Icons.Filled.LocationOn, stringResource(L10nR.string.attach_location), Color(0xFF1FA855), onPickLocation),
+        AttachItem(Icons.Rounded.Image, stringResource(L10nR.string.attach_gallery), Color(0xFF3D8BFD), onPickImage),
+        AttachItem(Icons.Rounded.PhotoCamera, stringResource(L10nR.string.attach_camera), Color(0xFFFF2E74), onTakePhoto),
+        AttachItem(Icons.Rounded.Videocam, stringResource(L10nR.string.attach_video), Color(0xFFC861FA), onRecordVideo),
+        AttachItem(Icons.Rounded.Description, stringResource(L10nR.string.attach_document), Color(0xFF7F66FF), onPickFile),
+        AttachItem(Icons.Rounded.Headphones, stringResource(L10nR.string.attach_audio_short), Color(0xFFFF7F2E), onPickAudio),
+        AttachItem(Icons.Rounded.LocationOn, stringResource(L10nR.string.attach_location), Color(0xFF1FA855), onPickLocation),
     )
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = palette.inputField) {
         Column(

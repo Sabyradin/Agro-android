@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Campaign
-import androidx.compose.material.icons.outlined.Percent
-import androidx.compose.material.icons.outlined.SupportAgent
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Campaign
+import androidx.compose.material.icons.rounded.Percent
+import androidx.compose.material.icons.rounded.SupportAgent
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -105,21 +105,21 @@ private fun HubList(
         ) {
             Column(Modifier.fillMaxWidth()) {
                 HubRow(
-                    icon = Icons.Outlined.Campaign,
+                    icon = Icons.Rounded.Campaign,
                     title = stringResource(L10nR.string.app_title),
                     count = counter.serviceCount,
                     onClick = { onOpenType(NotificationType.SERVICE) },
                 )
                 HorizontalDivider(color = ext.divider, modifier = Modifier.padding(start = 68.dp))
                 HubRow(
-                    icon = Icons.Outlined.SupportAgent,
+                    icon = Icons.Rounded.SupportAgent,
                     title = stringResource(L10nR.string.support),
                     count = counter.supportCount,
                     onClick = { onOpenType(NotificationType.SUPPORT) },
                 )
                 HorizontalDivider(color = ext.divider, modifier = Modifier.padding(start = 68.dp))
                 HubRow(
-                    icon = Icons.Outlined.Percent,
+                    icon = Icons.Rounded.Percent,
                     title = stringResource(L10nR.string.promotions),
                     count = counter.promotionsCount,
                     onClick = { onOpenType(NotificationType.PROMOTIONS) },
@@ -173,7 +173,7 @@ private fun HubRow(
             BadgeChip(count = count)
         }
         Icon(
-            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
             contentDescription = null,
             tint = ext.secondaryText,
         )

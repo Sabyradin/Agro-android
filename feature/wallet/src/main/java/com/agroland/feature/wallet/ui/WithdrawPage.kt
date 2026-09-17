@@ -16,7 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -224,7 +224,7 @@ private fun AvailableBalanceCard(availableBalance: Double) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Icon(
-            imageVector = Icons.Outlined.AccountBalanceWallet,
+            imageVector = Icons.Rounded.AccountBalanceWallet,
             contentDescription = null,
             tint = ext.secondaryText,
             modifier = Modifier.size(24.dp),

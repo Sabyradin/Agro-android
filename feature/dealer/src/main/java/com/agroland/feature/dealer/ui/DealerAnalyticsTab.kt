@@ -18,11 +18,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Bolt
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.ShoppingBag
-import androidx.compose.material.icons.outlined.RemoveRedEye
-import androidx.compose.material.icons.outlined.QueryStats
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.ShoppingBag
+import androidx.compose.material.icons.rounded.RemoveRedEye
+import androidx.compose.material.icons.rounded.QueryStats
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -125,14 +125,14 @@ fun DealerAnalyticsTab(
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             StatTile(
-                                icon = Icons.Outlined.RemoveRedEye,
+                                icon = Icons.Rounded.RemoveRedEye,
                                 label = stringResource(L10nR.string.dealer_total_views),
                                 value = CountFormatter.formatCompact(totals.views),
                                 color = Color(0xFF2196F3),
                                 modifier = Modifier.weight(1f),
                             )
                             StatTile(
-                                icon = Icons.Outlined.ShoppingBag,
+                                icon = Icons.Rounded.ShoppingBag,
                                 label = stringResource(L10nR.string.dealer_total_orders),
                                 value = CountFormatter.formatCompact(totals.orders),
                                 color = Color(0xFF4CAF50),
@@ -143,14 +143,14 @@ fun DealerAnalyticsTab(
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             StatTile(
-                                icon = Icons.Outlined.Bolt,
+                                icon = Icons.Rounded.Bolt,
                                 label = stringResource(L10nR.string.dealer_total_revenue),
                                 value = CountFormatter.formatCompact(totals.revenue.toInt()),
                                 color = Color(0xFFFF9800),
                                 modifier = Modifier.weight(1f),
                             )
                             StatTile(
-                                icon = Icons.Outlined.QueryStats,
+                                icon = Icons.Rounded.QueryStats,
                                 label = stringResource(L10nR.string.dealer_conversion),
                                 value = formatConversionPercent(totals.conversion),
                                 color = Color(0xFF9C27B0),
@@ -195,7 +195,7 @@ private fun AnalyticsLockedPlaceholder() {
     CenteredContent {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 40.dp)) {
             Icon(
-                imageVector = Icons.Outlined.Lock,
+                imageVector = Icons.Rounded.Lock,
                 contentDescription = null,
                 tint = ext.secondaryText,
                 modifier = Modifier.size(64.dp),
@@ -327,7 +327,7 @@ private fun TopProductRow(title: String, views: Int, orders: Int, revenue: Doubl
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Icon(
-            imageVector = Icons.Outlined.RemoveRedEye,
+            imageVector = Icons.Rounded.RemoveRedEye,
             contentDescription = null,
             tint = ext.secondaryText,
             modifier = Modifier.size(18.dp),

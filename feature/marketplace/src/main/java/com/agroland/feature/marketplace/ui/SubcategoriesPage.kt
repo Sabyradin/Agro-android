@@ -15,8 +15,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -84,7 +84,7 @@ fun SubcategoriesPage(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 androidx.compose.material3.Icon(
-                    imageVector = Icons.Outlined.GridView,
+                    imageVector = Icons.Rounded.GridView,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp),
@@ -96,7 +96,7 @@ fun SubcategoriesPage(
                     modifier = Modifier.weight(1f),
                 )
                 androidx.compose.material3.Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                     contentDescription = null,
                     tint = extendedColors().secondaryText,
                     modifier = Modifier.size(20.dp),

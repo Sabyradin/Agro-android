@@ -24,9 +24,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.LocalShipping
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.LocalShipping
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -232,7 +232,7 @@ private fun ChinaHeroCard() {
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.LocalShipping,
+                    imageVector = Icons.Rounded.LocalShipping,
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(24.dp),
@@ -349,7 +349,7 @@ fun ChinaCategoryChip(
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Outlined.Image,
+                    imageVector = Icons.Rounded.Image,
                     contentDescription = null,
                     tint = ext.secondaryText,
                     modifier = Modifier.size(30.dp),
@@ -434,7 +434,7 @@ private fun ChinaAllCategoriesSheet(
                                 )
                             } else {
                                 Icon(
-                                    imageVector = Icons.Outlined.Image,
+                                    imageVector = Icons.Rounded.Image,
                                     contentDescription = null,
                                     tint = ext.secondaryText,
                                     modifier = Modifier.size(20.dp),
@@ -459,7 +459,7 @@ private fun ChinaAllCategoriesSheet(
                             )
                         }
                         Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                             contentDescription = null,
                             tint = ext.secondaryText,
                         )

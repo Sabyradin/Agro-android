@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -150,13 +150,13 @@ fun SingleNotificationPage(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             HeroIconButton(
-                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                icon = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = androidx.compose.ui.res.stringResource(L10nR.string.common_back),
                 tint = Color.White,
                 onClick = onBack,
             )
             HeroIconButton(
-                icon = Icons.Outlined.Share,
+                icon = Icons.Rounded.Share,
                 contentDescription = androidx.compose.ui.res.stringResource(L10nR.string.common_share),
                 tint = Color.White,
                 onClick = {

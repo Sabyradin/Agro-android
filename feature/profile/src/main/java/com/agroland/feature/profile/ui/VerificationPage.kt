@@ -17,11 +17,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Cancel
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -184,7 +184,7 @@ fun VerificationPage(onBack: () -> Unit) {
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Description,
+                                imageVector = Icons.Rounded.Description,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp),
@@ -199,7 +199,7 @@ fun VerificationPage(onBack: () -> Unit) {
                             )
                             if (!locked) {
                                 AgroIconButton(
-                                    icon = Icons.Outlined.Cancel,
+                                    icon = Icons.Rounded.Cancel,
                                     contentDescription = stringResource(L10nR.string.common_delete),
                                     tint = extendedColors().secondaryText,
                                     onClick = { files = files.filterNot { it == uri } },
@@ -270,17 +270,17 @@ private fun StatusBanner(status: VerificationStatus) {
     val ext = extendedColors()
     val (icon, tint, titleRes) = when {
         status.isApproved -> Triple(
-            Icons.Filled.CheckCircle,
+            Icons.Rounded.CheckCircle,
             MaterialTheme.colorScheme.primary,
             L10nR.string.verification_status_approved,
         )
         status.isPending -> Triple(
-            Icons.Outlined.Schedule,
+            Icons.Rounded.Schedule,
             ext.secondaryText,
             L10nR.string.verification_status_pending,
         )
         status.isRejected -> Triple(
-            Icons.Outlined.ErrorOutline,
+            Icons.Rounded.ErrorOutline,
             MaterialTheme.colorScheme.error,
             L10nR.string.verification_status_rejected,
         )

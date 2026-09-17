@@ -16,8 +16,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -102,14 +102,14 @@ fun DemandDetailPage(
                     if (demand != null) {
                         IconButton(onClick = { onOpenEdit(viewModel.demandId) }) {
                             Icon(
-                                imageVector = Icons.Outlined.Edit,
+                                imageVector = Icons.Rounded.Edit,
                                 contentDescription = null,
                                 tint = extendedColors().primaryText,
                             )
                         }
                         IconButton(onClick = { showDeleteConfirm = true }) {
                             Icon(
-                                imageVector = Icons.Outlined.Delete,
+                                imageVector = Icons.Rounded.Delete,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.error,
                             )
@@ -151,7 +151,7 @@ fun DemandDetailPage(
                             shape = RoundedCornerShape(14.dp),
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Delete,
+                                imageVector = Icons.Rounded.Delete,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.error,
                             )

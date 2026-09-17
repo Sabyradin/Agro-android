@@ -18,8 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Call
-import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -489,7 +489,7 @@ private fun TimelineStep(
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                imageVector = Icons.Outlined.CheckCircle,
+                imageVector = Icons.Rounded.CheckCircle,
                 contentDescription = null,
                 tint = accent,
                 modifier = Modifier.size(22.dp),
@@ -555,7 +555,7 @@ private fun SellerCard(order: Order) {
                     context.startActivity(intent)
                 }) {
                     Icon(
-                        imageVector = Icons.Outlined.Call,
+                        imageVector = Icons.Rounded.Call,
                         contentDescription = stringResource(L10nR.string.cart_call_seller),
                         tint = MaterialTheme.colorScheme.primary,
                     )

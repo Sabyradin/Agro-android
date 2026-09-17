@@ -11,8 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Campaign
-import androidx.compose.material.icons.outlined.PinDrop
+import androidx.compose.material.icons.rounded.Campaign
+import androidx.compose.material.icons.rounded.PinDrop
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -126,7 +126,7 @@ fun MakeOfferPage(
                         FormSelectRow(
                             label = stringResource(L10nR.string.create_address),
                             value = addressLabel ?: stringResource(L10nR.string.create_specify_address),
-                            leadingIcon = Icons.Outlined.PinDrop,
+                            leadingIcon = Icons.Rounded.PinDrop,
                             valueIsPlaceholder = true,
                             updown = true,
                             isError = invalidField == AdDraft.FIELD_LOCATION,
@@ -208,7 +208,7 @@ fun MakeOfferPage(
                 CreateBottomBar {
                     CreateBarButton(
                         text = stringResource(L10nR.string.offer_publish),
-                        icon = Icons.Outlined.Campaign,
+                        icon = Icons.Rounded.Campaign,
                         loading = submitting,
                         onClick = {
                             val field = draft.validate()

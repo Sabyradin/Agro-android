@@ -15,15 +15,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.WorkspacePremium
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AddShoppingCart
-import androidx.compose.material.icons.outlined.CalendarToday
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.LocalFireDepartment
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.WorkspacePremium
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.AddShoppingCart
+import androidx.compose.material.icons.rounded.CalendarToday
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.LocalFireDepartment
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -104,7 +104,7 @@ fun AnnouncementGridCard(
                         text = "VIP",
                         containerColor = ext.accent,
                         contentColor = ext.white,
-                        icon = Icons.Filled.WorkspacePremium,
+                        icon = Icons.Rounded.WorkspacePremium,
                     )
                 }
                 if (item.isHot) {
@@ -112,7 +112,7 @@ fun AnnouncementGridCard(
                         text = stringResource(L10nR.string.mp_hot_badge),
                         containerColor = MaterialTheme.colorScheme.error,
                         contentColor = ext.white,
-                        icon = Icons.Outlined.LocalFireDepartment,
+                        icon = Icons.Rounded.LocalFireDepartment,
                     )
                 }
             }
@@ -129,9 +129,9 @@ fun AnnouncementGridCard(
                 ) {
                     Icon(
                         imageVector = if (item.isFavorite) {
-                            Icons.Filled.Favorite
+                            Icons.Rounded.Favorite
                         } else {
-                            Icons.Outlined.FavoriteBorder
+                            Icons.Rounded.FavoriteBorder
                         },
                         contentDescription = stringResource(L10nR.string.favorites_title),
                         tint = if (item.isFavorite) {
@@ -153,7 +153,7 @@ fun AnnouncementGridCard(
             if (place.isNotBlank()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Outlined.LocationOn,
+                        imageVector = Icons.Rounded.LocationOn,
                         contentDescription = null,
                         tint = ext.secondaryText,
                         modifier = Modifier.size(14.dp),
@@ -231,7 +231,7 @@ fun AnnouncementGridCard(
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Outlined.CalendarToday,
+                        imageVector = Icons.Rounded.CalendarToday,
                         contentDescription = null,
                         tint = ext.secondaryText,
                         modifier = Modifier.size(13.dp),
@@ -283,7 +283,7 @@ private fun CartQuantityStepper(
             .background(MaterialTheme.colorScheme.primaryContainer),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        StepperButton(icon = Icons.Outlined.Remove, onClick = { onChange(-1.0) })
+        StepperButton(icon = Icons.Rounded.Remove, onClick = { onChange(-1.0) })
         Text(
             text = formatCartQuantity(quantity) +
                 (unit?.takeIf { it.isNotBlank() }?.let { " $it" } ?: ""),
@@ -294,7 +294,7 @@ private fun CartQuantityStepper(
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f),
         )
-        StepperButton(icon = Icons.Outlined.Add, onClick = { onChange(1.0) })
+        StepperButton(icon = Icons.Rounded.Add, onClick = { onChange(1.0) })
     }
 }
 
@@ -336,7 +336,7 @@ private fun AddToCartButton(onClick: () -> Unit) {
         horizontalArrangement = Arrangement.Center,
     ) {
         Icon(
-            imageVector = Icons.Outlined.AddShoppingCart,
+            imageVector = Icons.Rounded.AddShoppingCart,
             contentDescription = null,
             tint = extendedColors().white,
             modifier = Modifier.size(16.dp),

@@ -16,10 +16,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocalMall
-import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.rounded.LocalMall
+import androidx.compose.material.icons.rounded.ShoppingCart
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -106,7 +106,7 @@ fun DetailBuyBar(
             // iOS: сол жақта толық жасыл «Сатып алу», оң жақта ашық «Себетке».
             BuyBarButton(
                 text = stringResource(L10nR.string.cart_buy),
-                icon = Icons.Filled.LocalMall,
+                icon = Icons.Rounded.LocalMall,
                 container = primary,
                 content = androidx.compose.ui.graphics.Color.White,
                 onClick = { viewModel.openSheet(current) },
@@ -114,7 +114,7 @@ fun DetailBuyBar(
             )
             BuyBarButton(
                 text = stringResource(L10nR.string.cart_add_to_cart_short),
-                icon = Icons.Outlined.ShoppingCart,
+                icon = Icons.Rounded.ShoppingCart,
                 container = primary.copy(alpha = 0.16f),
                 content = primary,
                 onClick = { viewModel.addToCart(current) },
@@ -201,7 +201,7 @@ private fun BuySheet(
                     modifier = Modifier.size(32.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Remove,
+                        imageVector = Icons.Rounded.Remove,
                         contentDescription = null,
                         tint = if (state.quantity > 1.0) ext.primaryText else ext.divider,
                         modifier = Modifier.size(18.dp),
@@ -216,7 +216,7 @@ private fun BuySheet(
                 )
                 IconButton(onClick = { onQuantity(1.0) }, modifier = Modifier.size(32.dp)) {
                     Icon(
-                        imageVector = Icons.Outlined.Add,
+                        imageVector = Icons.Rounded.Add,
                         contentDescription = null,
                         tint = ext.primaryText,
                         modifier = Modifier.size(18.dp),

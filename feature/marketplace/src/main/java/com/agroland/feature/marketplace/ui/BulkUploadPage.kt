@@ -18,12 +18,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.NoteAdd
-import androidx.compose.material.icons.outlined.CloudUpload
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material.icons.outlined.TableChart
-import androidx.compose.material.icons.outlined.UploadFile
+import androidx.compose.material.icons.automirrored.rounded.NoteAdd
+import androidx.compose.material.icons.rounded.CloudUpload
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.FileDownload
+import androidx.compose.material.icons.rounded.TableChart
+import androidx.compose.material.icons.rounded.UploadFile
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -137,13 +137,13 @@ fun BulkUploadPage(
                     // 1 — Excel шаблонын жүктеп алу.
                     FormCard {
                         BulkCardHeader(
-                            icon = Icons.Outlined.TableChart,
+                            icon = Icons.Rounded.TableChart,
                             title = stringResource(L10nR.string.bulk_template_title),
                             subtitle = stringResource(L10nR.string.bulk_template_subtitle),
                         )
                         FormDivider(start = 54.dp)
                         FormActionRow(
-                            icon = Icons.Outlined.FileDownload,
+                            icon = Icons.Rounded.FileDownload,
                             text = stringResource(L10nR.string.bulk_template_action),
                             loading = templateLoading,
                             onClick = { viewModel.downloadTemplate(localeTag ?: "ru") },
@@ -153,14 +153,14 @@ fun BulkUploadPage(
                     // 2 — толтырылған файлды таңдау.
                     FormCard {
                         BulkCardHeader(
-                            icon = Icons.Outlined.UploadFile,
+                            icon = Icons.Rounded.UploadFile,
                             title = stringResource(L10nR.string.bulk_file_title),
                             subtitle = stringResource(L10nR.string.bulk_file_subtitle),
                         )
                         FormDivider(start = 54.dp)
                         if (pickedFile == null) {
                             FormActionRow(
-                                icon = Icons.AutoMirrored.Outlined.NoteAdd,
+                                icon = Icons.AutoMirrored.Rounded.NoteAdd,
                                 text = stringResource(L10nR.string.bulk_file_action),
                                 onClick = { launchPicker() },
                             )
@@ -173,7 +173,7 @@ fun BulkUploadPage(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Icon(
-                                    imageVector = Icons.Outlined.Description,
+                                    imageVector = Icons.Rounded.Description,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp),
@@ -200,7 +200,7 @@ fun BulkUploadPage(
                 CreateBottomBar {
                     CreateBarButton(
                         text = stringResource(L10nR.string.bulk_upload_server),
-                        icon = Icons.Outlined.CloudUpload,
+                        icon = Icons.Rounded.CloudUpload,
                         enabled = pickedFile != null,
                         loading = uploading,
                         onClick = viewModel::upload,
