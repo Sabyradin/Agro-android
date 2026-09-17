@@ -8,6 +8,9 @@ plugins {
     // google-services.json — flavor source setтерінде (app/src/dev, app/src/prod);
     // плейсхолдер конфигте push үнсіз ыдырайды (ISSUES.md #1).
     alias(libs.plugins.google.services)
+    // Crashlytics плагині build ID жасайды; ол болмаса FirebaseInitProvider
+    // іске қосылған сәтте-ақ құлайды (try/catch қорғай алмайды — eager init).
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -37,12 +40,26 @@ android {
             // dev: https://backend-test-42ygumvdeq-lm.a.run.app/api/v1
             buildConfigField("String", "BASE_API_URL", "\"https://backend-test-42ygumvdeq-lm.a.run.app/api/v1\"")
             buildConfigField("boolean", "IS_PRODUCTION", "false")
+            // Фаза 19: мониторинг servisi бөлек Cloud Run host — ортада жалғыз,
+            // dev-те де нақты URL ( Flutter app_config parity). TikTok dev-те өшірулі
+            // (сәтсіз init TikTokAnalytics-та қауіпсіз skip).
+            buildConfigField("String", "MONITORING_API_URL", "\"https://monitoring-service-42ygumvdeq-uc.a.run.app\"")
+            buildConfigField("String", "TIKTOK_APP_ID", "\"\"")
+            buildConfigField("String", "TIKTOK_TT_APP_ID", "\"\"")
+            buildConfigField("String", "TIKTOK_ACCESS_TOKEN", "\"\"")
         }
         create("prod") {
             dimension = "environment"
             // prod: https://backend-237397542353.europe-central2.run.app/api/v1
             buildConfigField("String", "BASE_API_URL", "\"https://backend-237397542353.europe-central2.run.app/api/v1\"")
             buildConfigField("boolean", "IS_PRODUCTION", "true")
+            // Flutter main.json нақты мәндері (Фаза 19): appId — Google Play package,
+            // ttAppId — TikTok Events Manager. accessToken клиентте Android SDK
+            // қолданбайды (iOS HMAC iOS-only) — тек сақтау/толық паритет үшін.
+            buildConfigField("String", "MONITORING_API_URL", "\"https://monitoring-service-42ygumvdeq-uc.a.run.app\"")
+            buildConfigField("String", "TIKTOK_APP_ID", "\"com.agroland.app\"")
+            buildConfigField("String", "TIKTOK_TT_APP_ID", "\"7677876072366063636\"")
+            buildConfigField("String", "TIKTOK_ACCESS_TOKEN", "\"TTKqizd4aEPuG1IanLtG1KzBDeNhwmrn\"")
         }
     }
 
@@ -98,6 +115,8 @@ dependencies {
     // Фаза 18: пікірлер (MyReviews/seller/announcement) + медиа көрсеткіштері.
     implementation(project(":feature:reviews"))
     implementation(project(":feature:media"))
+    // Фаза 19: аналитика (monitoring fan-out + TikTok + Firebase wrapper).
+    implementation(project(":core:analytics"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))
@@ -119,8 +138,12 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
 
     // Push (Фаза 11): FCM токендері плейсхолдер конфигте де қауіпсіз ыдырайды.
+    // Аналитика (Фаза 19): Analytics + Crashlytics осы BOM-нан; плейсхолдер
+    // google-services.json-де FirebaseAnalyticsService try/catch қорғайды.
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 
     // Фаза 17: MercuryX категория суреттері (SVG) — Coil-дің SVG декодері.
     implementation(libs.coil.svg)
@@ -128,6 +151,10 @@ dependencies {
     implementation(libs.coil)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    // Фаза 20: force-update шешім-логикасының бірлік-тесттері (таза функциялар).
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.compose.ui.tooling.preview)

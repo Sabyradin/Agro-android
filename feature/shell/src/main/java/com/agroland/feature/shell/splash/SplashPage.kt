@@ -1,6 +1,7 @@
 package com.agroland.feature.shell.splash
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -73,16 +74,29 @@ fun SplashPage(
     LaunchedEffect(Unit) {
         viewModel.decide { target -> onDecided(target) }
     }
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
     ) {
-        AppLogo()
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            AppLogo(size = 150.dp, showTagline = true)
+        }
+        // Индикатор логотиптің астында, экранның төменгі үштен бірінде.
+        // (Бұрын `.size(40.dp).padding(top = 24.dp)` деп жазылып, соқпа
+        //  40dp-тің ІШІНЕН алынатын да, индикатор 16dp нүктеге айналатын.)
         CircularProgressIndicator(
             color = MaterialTheme.colorScheme.primary,
             strokeWidth = 3.dp,
-            modifier = Modifier.size(40.dp).padding(top = 24.dp),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 96.dp)
+                .size(36.dp),
         )
     }
 }

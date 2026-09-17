@@ -4,6 +4,7 @@ import com.agroland.core.network.auth.AuthInterceptor
 import com.agroland.core.network.error.ApiErrorParser
 import com.agroland.core.network.error.Failure
 import com.agroland.core.network.error.TariffLimitException
+import com.agroland.core.network.interceptors.ApiMonitoringInterceptor
 import com.agroland.core.network.interceptors.MonitoringInterceptor
 import com.agroland.core.network.interceptors.PlatformInterceptor
 import com.agroland.core.network.interceptors.RetryInterceptor
@@ -33,17 +34,20 @@ object NetworkModule {
 
     /**
      * Интерцептор тізбегінің реті КРИТИКАЛЫҚ (spec §4):
-     * 1) Auth      — Bearer + single-flight 401 refresh
+     * 1) Auth       — Bearer + single-flight 401 refresh
      * 2) Monitoring — логтар
-     * 3) Retry     — GET-only, max 2, 800мс экспоненциал
-     * 4) TariffLimit — 403 TARIFF_LIMIT_* → типтелген ерекшелік
-     * 5) Platform  — төлем сұрауларына X-Platform: android (spec §5)
+     * 3) ApiMonitoring — оқиға мониторингі (Фаза 19, Flutter 1:1; retry-ден
+     *    ТЫСҚАРЫ тұрғандықтан retry-ден КЕЙІНГІ нәтижені көреді)
+     * 4) Retry      — GET-only, max 2, 800мс экспоненциал
+     * 5) TariffLimit — 403 TARIFF_LIMIT_* → типтелген ерекшелік
+     * 6) Platform   — төлем сұрауларына X-Platform: android (spec §5)
      */
     @Provides
     @Singleton
     fun provideOkHttpClient(
         authInterceptor: AuthInterceptor,
         monitoringInterceptor: MonitoringInterceptor,
+        apiMonitoringInterceptor: ApiMonitoringInterceptor,
         retryInterceptor: RetryInterceptor,
         tariffLimitInterceptor: TariffLimitInterceptor,
         platformInterceptor: PlatformInterceptor,
@@ -53,6 +57,7 @@ object NetworkModule {
         .writeTimeout(Duration.ofSeconds(60))
         .addInterceptor(authInterceptor)
         .addInterceptor(monitoringInterceptor)
+        .addInterceptor(apiMonitoringInterceptor)
         .addInterceptor(retryInterceptor)
         .addInterceptor(tariffLimitInterceptor)
         .addInterceptor(platformInterceptor)

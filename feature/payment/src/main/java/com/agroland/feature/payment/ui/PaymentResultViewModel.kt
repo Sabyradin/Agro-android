@@ -2,6 +2,7 @@ package com.agroland.feature.payment.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.agroland.core.analytics.MonitoringService
 import com.agroland.core.network.ApiResult
 import com.agroland.feature.payment.data.PaymentRepository
 import com.agroland.feature.payment.data.PendingPaymentStore
@@ -32,6 +33,7 @@ sealed interface PaymentResultPhase {
 class PaymentResultViewModel @Inject constructor(
     private val repository: PaymentRepository,
     private val pendingPaymentStore: PendingPaymentStore,
+    private val monitoringService: MonitoringService,
 ) : ViewModel() {
 
     private val _phase = MutableStateFlow<PaymentResultPhase>(PaymentResultPhase.Verifying)
@@ -54,6 +56,13 @@ class PaymentResultViewModel @Inject constructor(
                     }
                     is ApiResult.Success -> {
                         if (result.value.isPaid) {
+                            // Фаза 19 (Flutter payment_result_page parity): TikTok
+                            // `purchase` conversion — төлем расталған сәт.
+                            monitoringService.trackPurchase(
+                                orderId = result.value.orderId.toString(),
+                                amount = result.value.totalAmount,
+                                currency = result.value.currency,
+                            )
                             pendingPaymentStore.clearPendingOrderId()
                             _phase.value = PaymentResultPhase.Success
                             return@launch

@@ -2,6 +2,7 @@ package com.agroland.feature.marketplace.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.agroland.core.analytics.MonitoringService
 import com.agroland.core.network.ApiResult
 import com.agroland.feature.marketplace.data.Category
 import com.agroland.feature.marketplace.data.MarketplaceRepository
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
     private val repository: MarketplaceRepository,
+    private val monitoringService: MonitoringService,
 ) : ViewModel() {
 
     /** Bucket кілті → категориялар. Кілттер: crops/livestock/products/technology/services/other. */
@@ -64,6 +66,10 @@ class CategoriesViewModel @Inject constructor(
     /** Grouped жауаптан категорияны id бойынша табу (сабкатегория бетінің атауы). */
     fun findCategory(categoryId: Int): Category? =
         _grouped.value.values.flatten().firstOrNull { it.id == categoryId }
+
+    /** Фаза 19 (Flutter MainCategoryItemView parity): категория басылды. */
+    fun trackCategoryView(categoryId: Int, categoryName: String?) =
+        monitoringService.trackCategoryView(categoryId.toString(), categoryName)
 
     fun loadSubcategories(categoryId: Int) {
         viewModelScope.launch {

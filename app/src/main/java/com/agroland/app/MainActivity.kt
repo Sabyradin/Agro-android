@@ -7,12 +7,15 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,13 +28,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.agroland.core.analytics.MonitoringService
+import com.agroland.app.appversion.AppVersionViewModel
+import com.agroland.app.appversion.UpdateDialog
 import com.agroland.app.navigation.AddressEditRoute
 import com.agroland.app.navigation.AnnouncementFilterTypeMap
+import com.agroland.app.navigation.decodeFilterResult
+import com.agroland.app.navigation.encodeFilterResult
 import com.agroland.app.navigation.AnnouncementDetailRoute
 import com.agroland.app.navigation.AnnouncementsListRoute
 import com.agroland.app.navigation.AuthRoute
@@ -56,6 +68,9 @@ import com.agroland.app.navigation.ArchivedChatsRoute
 import com.agroland.app.navigation.ChatRoomRoute
 import com.agroland.app.navigation.NotificationsByTypeRoute
 import com.agroland.app.navigation.NotificationsRoute
+import com.agroland.app.navigation.NotificationItemTypeMap
+import com.agroland.app.navigation.SelectedLocationTypeMap
+import com.agroland.app.navigation.StringListTypeMap
 import com.agroland.app.navigation.PinSetupRoute
 import com.agroland.app.navigation.SingleNotificationRoute
 import com.agroland.app.navigation.ProfileAddressesRoute
@@ -107,7 +122,9 @@ import com.agroland.feature.auth.ui.AppLockGate
 import com.agroland.feature.auth.ui.AuthFlowPage
 import com.agroland.feature.auth.ui.PinSetupPage
 import com.agroland.feature.cart.ui.CartPage
+import com.agroland.feature.cart.ui.QuickCartViewModel
 import com.agroland.feature.cart.ui.DetailBuyBar
+import com.agroland.feature.cart.ui.canPurchaseViaCart
 import com.agroland.feature.cart.ui.GuestCartTab
 import com.agroland.feature.chat.domain.ChatSocketService
 import com.agroland.feature.chat.ui.ArchivedChatsPage
@@ -216,15 +233,23 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var storyViewerStateHolder: StoryViewerStateHolder
 
+    /** Фаза 19: мониторинг (route observer parity — әр экран ашылғанда page_view). */
+    @Inject
+    lateinit var monitoringService: MonitoringService
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        // Фаза 20: edge-to-edge — жүйелік баптар түссіз/мөлдір, құраманы
+        // M3 Scaffold өзі ішкі соқпалармен (insets) қаптайды.
+        enableEdgeToEdge()
         // Push хабарламасынан ашылғанда (өлі күй реплейі де осы арқылы):
         // payload pending межеге сақталып, сессия дайын болғанда навигацияланады.
         handlePushIntent(intent)
         setContent {
             val shellViewModel: ShellViewModel = hiltViewModel()
             val appViewModel: AppViewModel = hiltViewModel()
+            val appVersionViewModel: AppVersionViewModel = hiltViewModel()
             val themeMode by shellViewModel.themeMode.collectAsState()
             val localeTag by shellViewModel.localeTag.collectAsState()
             val session by appViewModel.session.collectAsState()
@@ -250,6 +275,8 @@ class MainActivity : AppCompatActivity() {
             LaunchedEffect(session) {
                 when (session) {
                     SessionState.Authorized -> {
+                        // Фаза 19: userId/phone → мониторинг (TikTok identify + Firebase).
+                        appViewModel.bindUserAnalytics()
                         pushController.ensureRegistered(localeTag ?: "kk")
                         // Socket.IO чат қосылымы (Flutter ChatSocketService.initialize).
                         chatSocketService.start()
@@ -257,6 +284,7 @@ class MainActivity : AppCompatActivity() {
                         voiceCallManager.start()
                     }
                     SessionState.Guest -> {
+                        appViewModel.unbindUserAnalytics()
                         pushController.unregister()
                         chatSocketService.stop()
                         voiceCallManager.stop()
@@ -284,10 +312,47 @@ class MainActivity : AppCompatActivity() {
                 locked = session == SessionState.Authorized && appViewModel.pinIsSet
             }
 
-            AgroTheme(
-                darkTheme = themeMode == ThemeMode.DARK ||
-                    (themeMode == ThemeMode.SYSTEM && androidx.compose.foundation.isSystemInDarkTheme()),
-            ) {
+            // Фаза 20 (Flutter root_page parity): force-update тексеруі —
+            // суық старт (ON_RESUME стартта бір рет орындалады) + әр қайта
+            // кіру; екеуі де forceCheck=true (24 сағат throttle-ін өткізеді,
+            // міндетті жаңарту фонда шыққанда бірден көрінеді).
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        // Dev-те өшірілі: dev backend app-version тест дерегінде
+                        // force_update=true тұр — диалог әр қосылғанда мазалайды.
+                        if (com.agroland.app.BuildConfig.IS_PRODUCTION) {
+                            appVersionViewModel.checkForUpdate()
+                        }
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+            }
+            val updateDialog by appVersionViewModel.dialog.collectAsState()
+
+            val darkTheme = themeMode == ThemeMode.DARK ||
+                (themeMode == ThemeMode.SYSTEM && androidx.compose.foundation.isSystemInDarkTheme())
+
+            // Жүйелік жолақтардың иконка түсі қосымшаның өз темасына сай болуы
+            // керек: пайдаланушы жүйе ашық тұрғанда қосымшаны қараңғыға
+            // ауыстырса, әдепкі `enableEdgeToEdge()` жүйенің режимін қарап,
+            // қара фонда қара иконка салатын (сағат/батарея көрінбей қалатын).
+            LaunchedEffect(darkTheme) {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(
+                        android.graphics.Color.TRANSPARENT,
+                        android.graphics.Color.TRANSPARENT,
+                    ) { darkTheme },
+                    navigationBarStyle = SystemBarStyle.auto(
+                        android.graphics.Color.TRANSPARENT,
+                        android.graphics.Color.TRANSPARENT,
+                    ) { darkTheme },
+                )
+            }
+
+            AgroTheme(darkTheme = darkTheme) {
                 Box(Modifier.fillMaxSize()) {
                     if (locked) {
                         AppLockGate(
@@ -305,6 +370,7 @@ class MainActivity : AppCompatActivity() {
                             pushController = pushController,
                             chatSocketService = chatSocketService,
                             voiceCallManager = voiceCallManager,
+                            monitoringService = monitoringService,
                             onThemeChange = { shellViewModel.setThemeMode(it) },
                             onAppRegionSelected = { countryId, regionId ->
                                 shellViewModel.setAppRegion(countryId, regionId)
@@ -335,6 +401,16 @@ class MainActivity : AppCompatActivity() {
                     val viewerSession by storyViewerStateHolder.session.collectAsState()
                     if (viewerSession != null) {
                         StoryViewerScreen(holder = storyViewerStateHolder)
+                    }
+
+                    // Фаза 20: force-update диалогі — ең үстіңгі қабат
+                    // (Flutter showDialog root үстінде; PIN/қоңыраудан да жоғары,
+                    // себебі міндетті жаңарту барлық кіруден бұрын).
+                    updateDialog?.let { decision ->
+                        UpdateDialog(
+                            isForceUpdate = decision.isForceUpdate,
+                            onDismiss = { appVersionViewModel.dismiss() },
+                        )
                     }
                 }
             }
@@ -386,13 +462,53 @@ private fun AppNavHost(
     pushController: PushController,
     chatSocketService: ChatSocketService,
     voiceCallManager: VoiceCallManager,
+    monitoringService: MonitoringService,
     onThemeChange: (ThemeMode) -> Unit,
     onAppRegionSelected: (Int, Int) -> Unit,
 ) {
     val navController = rememberNavController()
 
+    // Фаза 19 (Flutter route observer parity): әр экран ашу/алмастыру/артқа —
+    // page_view monitoring + Firebase screen_view. Route үлгісінен query
+    // бөлігі алынып тасталады (type-safe аргументтар қалады — Flutter да
+    // маршрут атауымен жазады).
+    DisposableEffect(navController) {
+        val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+            destination.route?.substringBefore('?')?.let { monitoringService.trackPageView(it) }
+        }
+        navController.addOnDestinationChangedListener(listener)
+        onDispose { navController.removeOnDestinationChangedListener(listener) }
+    }
+
     // Чат қойындысының бейджі — Socket.IO totalUnread (Flutter bottom_navbar).
     val chatBadge by chatSocketService.totalUnread.collectAsState()
+
+    // Басты беттегі аватар (bindUserAnalytics оқыған профильден — қосымша сұрау жоқ).
+    val avatarUrl by appViewModel.avatarUrl.collectAsState()
+
+    // Лентадағы «Себетке» батырмасы (iOS Agro Market карточкасы).
+    val quickCartViewModel: QuickCartViewModel = hiltViewModel()
+    val quickCartContext = LocalContext.current
+    val addedToCartText = stringResource(com.agroland.core.l10n.R.string.cart_added_to_cart_toast)
+    val noInternetText = stringResource(com.agroland.core.l10n.R.string.error_no_internet)
+    val genericErrorText = stringResource(com.agroland.core.l10n.R.string.error_generic_message)
+    // Себет мазмұны — лента карточкасындағы «+ / −» осы күйден санын алады.
+    val cartEntries by quickCartViewModel.entries.collectAsState()
+    LaunchedEffect(isAuthorized) {
+        if (isAuthorized) quickCartViewModel.sync()
+    }
+    LaunchedEffect(Unit) {
+        quickCartViewModel.events.collect { event ->
+            val message = when (event) {
+                QuickCartViewModel.Event.Added -> addedToCartText
+                is QuickCartViewModel.Event.Failed -> event.error.backendMessage
+                    ?: if (event.error.isNetwork) noInternetText else genericErrorText
+            }
+            android.widget.Toast
+                .makeText(quickCartContext, message, android.widget.Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
 
     // Фаза 18: «Менің пікірлерім» — activity-scoped VM: чат тізімінің бейджі
     // мен MyReviewsPage бір күйді бөліседі (spec §10 клиент агрегациясы).
@@ -495,7 +611,13 @@ private fun AppNavHost(
                 },
             )
         }
-        composable<MainShellRoute> {
+        composable<MainShellRoute> { shellEntry ->
+            // Сүзгі бетінің нәтижесі осы entry-ге жазылады — басты лента
+            // экраннан шықпай, орнында сүзіледі.
+            val homeFilterJson by shellEntry.savedStateHandle
+                .getStateFlow<String?>(FILTER_RESULT_KEY, null)
+                .collectAsState()
+            val homeFilter = decodeFilterResult(homeFilterJson)
             MainShellPage(
                 onCreateClick = {
                     if (isAuthorized) {
@@ -515,9 +637,11 @@ private fun AppNavHost(
                                 ),
                             )
                         },
-                        onOpenFilter = { navController.navigate(FilterRoute(AnnouncementFilter())) },
-                        onOpenFavorites = { navController.navigate(FavoritesRoute) },
-                        onOpenCategories = { navController.navigate(CategoriesRoute) },
+                        onOpenFilter = { current ->
+                            navController.navigate(FilterRoute(current ?: AnnouncementFilter()))
+                        },
+                        appliedFilter = homeFilter,
+                        onClearFilter = { shellEntry.savedStateHandle[FILTER_RESULT_KEY] = null as String? },
                         onOpenNotifications = { navController.navigate(NotificationsRoute) },
                         // Stories статик промо-карточкалары (Фаза 14/15/17):
                         // құру — CreateAd; жарнама — өз жарнамаларынан таңдау
@@ -548,6 +672,21 @@ private fun AppNavHost(
                         // Аватар → профил беті (Фаза 17: SERVICES қойындысы
                         // Сервистерге берілді, профиль осында көшті).
                         onOpenProfile = { navController.navigate(ProfileRoute) },
+                        avatarUrl = avatarUrl,
+                        onAddToCart = { announcement ->
+                            if (isAuthorized) {
+                                quickCartViewModel.add(
+                                    announcement.id,
+                                    announcement.measurementUnit,
+                                )
+                            } else {
+                                navController.navigate(AuthRoute)
+                            }
+                        },
+                        cartQuantities = cartEntries.mapValues { it.value.quantity },
+                        onChangeCartQuantity = { announcement, delta ->
+                            quickCartViewModel.changeQuantity(announcement.id, delta)
+                        },
                         // Фаза 18: QR сканер — іздеу жолағындағы иконка.
                         onOpenQrScanner = { navController.navigate(QrScannerRoute) },
                         // CHINA қойындысы — MercuryX каталогы (Фаза 17).
@@ -617,26 +756,9 @@ private fun AppNavHost(
         // ---- Чат (Фаза 12) ----
         composable<ChatRoomRoute> {
             // Фаза 13: қоңырау шалу — микрофон рұқсаты берілмесе, алдымен
-            // сұралады, содан кейін invite жіберіледі (pending үлгісі).
-            var pendingCall by remember {
-                mutableStateOf<Triple<Long, String?, String?>?>(null)
-            }
-            val callMicLauncher = rememberLauncherForActivityResult(
-                ActivityResultContracts.RequestPermission(),
-            ) { granted ->
-                val pending = pendingCall
-                pendingCall = null
-                if (granted && pending != null) {
-                    voiceCallManager.invite(
-                        peerUserId = pending.first,
-                        peerName = pending.second,
-                        peerAvatarUrl = pending.third,
-                        micGranted = true,
-                    )
-                }
-            }
+            // сұралады, содан кейін invite жіберіледі.
+            val callStarter = rememberVoiceCallStarter(voiceCallManager)
             val callState by voiceCallManager.state.collectAsState()
-            val activityContext = androidx.compose.ui.platform.LocalContext.current
             ChatRoomPage(
                 onBack = { navController.popBackStack() },
                 onOpenAnnouncement = { navController.navigate(AnnouncementDetailRoute(it)) },
@@ -651,18 +773,7 @@ private fun AppNavHost(
                     navController.navigate(PdfViewerRoute(url))
                 },
                 callActive = callState.phase != CallPhase.IDLE,
-                onVoiceCall = { peerId, peerName, peerAvatarUrl ->
-                    val micGranted = androidx.core.content.ContextCompat.checkSelfPermission(
-                        activityContext,
-                        Manifest.permission.RECORD_AUDIO,
-                    ) == PackageManager.PERMISSION_GRANTED
-                    if (micGranted) {
-                        voiceCallManager.invite(peerId, peerName, peerAvatarUrl, micGranted = true)
-                    } else {
-                        pendingCall = Triple(peerId, peerName, peerAvatarUrl)
-                        callMicLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                    }
-                },
+                onVoiceCall = callStarter,
             )
         }
         composable<ArchivedChatsRoute> {
@@ -700,7 +811,7 @@ private fun AppNavHost(
                 },
             )
         }
-        composable<SingleNotificationRoute> { entry ->
+        composable<SingleNotificationRoute>(typeMap = NotificationItemTypeMap) { entry ->
             val route = entry.toRoute<SingleNotificationRoute>()
             SingleNotificationPage(
                 item = route.item,
@@ -783,9 +894,10 @@ private fun AppNavHost(
         composable<AnnouncementsListRoute>(typeMap = AnnouncementFilterTypeMap) { entry ->
             val route = entry.toRoute<AnnouncementsListRoute>()
             // FilterPage нәтижесі осы entry-дің savedStateHandle-ына жазылады.
-            val filter by entry.savedStateHandle
-                .getStateFlow(FILTER_RESULT_KEY, route.filter)
+            val filterJson by entry.savedStateHandle
+                .getStateFlow<String?>(FILTER_RESULT_KEY, null)
                 .collectAsState()
+            val filter = decodeFilterResult(filterJson) ?: route.filter
             AnnouncementsListPage(
                 filter = filter,
                 onBack = { navController.popBackStack() },
@@ -799,13 +911,13 @@ private fun AppNavHost(
                 initialFilter = route.filter,
                 onBack = { navController.popBackStack() },
                 onApply = { newFilter ->
+                    // Кім ашса — нәтиже сол экранға қайтады: лента да, басты
+                    // бет те сүзгіні орнында қолданады (жаңа экран ашылмайды).
                     val previous = navController.previousBackStackEntry
-                    if (previous?.destination?.route?.contains("AnnouncementsListRoute") == true) {
-                        // Лентадан ашылды — нәтижені сол экранға қайтарып, артқа шығамыз.
-                        previous.savedStateHandle[FILTER_RESULT_KEY] = newFilter
+                    if (previous != null) {
+                        previous.savedStateHandle[FILTER_RESULT_KEY] = encodeFilterResult(newFilter)
                         navController.popBackStack()
                     } else {
-                        // Home-дан ашылды — сүзгімен лента экранына тікелей кіреміз.
                         navController.navigate(AnnouncementsListRoute(newFilter)) {
                             popUpTo(FilterRoute::class) { inclusive = true }
                         }
@@ -814,6 +926,7 @@ private fun AppNavHost(
             )
         }
         composable<AnnouncementDetailRoute> { entry ->
+            val detailCallStarter = rememberVoiceCallStarter(voiceCallManager)
             AnnouncementDetailPage(
                 announcementId = entry.toRoute<AnnouncementDetailRoute>().id,
                 onBack = { navController.popBackStack() },
@@ -842,13 +955,19 @@ private fun AppNavHost(
                 onOpenSellerReviews = { userId ->
                     navController.navigate(SellerReviewsRoute(userId))
                 },
-                bottomBar = {
-                    if (isAuthorized) {
-                        DetailBuyBar(
-                            detailViewModel = hiltViewModel(viewModelStoreOwner = entry),
-                            onOpenOrder = { navController.navigate(OrderDetailRoute(it)) },
-                        )
-                    }
+                // «Хабарласу» → қолданба ішіндегі дауыстық қоңырау (қонақ — кіру).
+                onCallInApp = if (isAuthorized) {
+                    detailCallStarter
+                } else {
+                    { _, _, _ -> navController.navigate(AuthRoute) }
+                },
+                // Себет тауары — «Сатып алу / Себетке»; қалғаны — «Жазу / Хабарласу».
+                isPurchasable = { isAuthorized && it.canPurchaseViaCart },
+                purchaseBar = {
+                    DetailBuyBar(
+                        detailViewModel = hiltViewModel(viewModelStoreOwner = entry),
+                        onOpenOrder = { navController.navigate(OrderDetailRoute(it)) },
+                    )
                 },
             )
         }
@@ -991,7 +1110,7 @@ private fun AppNavHost(
                 onSaved = { navController.popBackStack() },
             )
         }
-        composable<LocationSelectionRoute> { entry ->
+        composable<LocationSelectionRoute>(typeMap = SelectedLocationTypeMap) { entry ->
             LocationSelectionPage(
                 prefill = entry.toRoute<LocationSelectionRoute>().prefill,
                 onBack = { navController.popBackStack() },
@@ -1138,6 +1257,7 @@ private fun AppNavHost(
         composable<ProfileRoute> {
             ProfilePage(
                 isAuthorized = isAuthorized,
+                onBack = { navController.popBackStack() },
                 themeMode = themeMode,
                 onThemeChange = onThemeChange,
                 onLoginClick = { navController.navigate(AuthRoute) },
@@ -1145,6 +1265,8 @@ private fun AppNavHost(
                 onAddresses = { navController.navigate(ProfileAddressesRoute) },
                 onCompanySettings = { navController.navigate(CompanySettingsRoute) },
                 onVerification = { navController.navigate(VerificationRoute) },
+                // «Таңдаулылар» — басты беттің жоғарғы жолағынан профильге көшті.
+                onOpenFavorites = { navController.navigate(FavoritesRoute) },
                 onOpenWallet = { navController.navigate(BalanceRoute) },
                 onOpenTransactions = { navController.navigate(TransactionHistoryRoute) },
                 onOpenTopUp = { navController.navigate(TopUpRoute) },
@@ -1288,7 +1410,7 @@ private fun AppNavHost(
         }
 
         // ---- Медиа көрсеткіштері (Фаза 18, ISSUES #27) ----
-        composable<PhotoViewerRoute> { entry ->
+        composable<PhotoViewerRoute>(typeMap = StringListTypeMap) { entry ->
             val route = entry.toRoute<PhotoViewerRoute>()
             PhotoViewerPage(
                 images = route.images,
@@ -1337,3 +1459,36 @@ private const val HALYK_EXIT_HOST = "agroland.kz"
 
 /** FilterPage → AnnouncementsListPage нәтиже кілті. */
 private const val FILTER_RESULT_KEY = "filter"
+
+/**
+ * Дауыстық қоңырау бастаушы: микрофон рұқсаты жоқ болса алдымен сұрайды,
+ * берілгеннен кейін invite жібереді. Чат бөлмесі мен жарнама беті ортақ қолданады.
+ */
+@Composable
+private fun rememberVoiceCallStarter(
+    voiceCallManager: VoiceCallManager,
+): (peerId: Long, peerName: String?, peerAvatarUrl: String?) -> Unit {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var pendingCall by remember { mutableStateOf<Triple<Long, String?, String?>?>(null) }
+    val micLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        val pending = pendingCall
+        pendingCall = null
+        if (granted && pending != null) {
+            voiceCallManager.invite(pending.first, pending.second, pending.third, micGranted = true)
+        }
+    }
+    return { peerId, peerName, peerAvatarUrl ->
+        val micGranted = androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO,
+        ) == PackageManager.PERMISSION_GRANTED
+        if (micGranted) {
+            voiceCallManager.invite(peerId, peerName, peerAvatarUrl, micGranted = true)
+        } else {
+            pendingCall = Triple(peerId, peerName, peerAvatarUrl)
+            micLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
+}

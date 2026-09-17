@@ -1,15 +1,19 @@
 package com.agroland.feature.chat.ui
 
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -17,75 +21,96 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.outlined.Reply
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AttachFile
-import androidx.compose.material.icons.outlined.AudioFile
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.PhotoCamera
-import androidx.compose.material.icons.outlined.Reply
-import androidx.compose.material.icons.outlined.Stop
-import androidx.compose.material.icons.outlined.Videocam
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.agroland.core.l10n.R as L10nR
-import com.agroland.core.ui.theme.extendedColors
 import com.agroland.feature.chat.data.ChatMessage
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 
+/** Жазу күйі: бос / саусақ басулы тұр / бекітілген (қолсыз жазу). */
+private enum class RecordMode { IDLE, HOLDING, LOCKED }
+
 /**
- * Чат енгізу жолағы (Flutter ChatInputBar + recording overlay паритеті):
- *  - reply/edit үстіңгі жолақтары;
- *  - қағаз қайшы — AttachmentPicker ModalBottomSheet;
- *  - бос енгізу кезінде — микрофон (ұстап тұру → жазу, солға → жою,
- *    жоғары → бұғаттау), мәтін болса — жіберу батырмасы;
- *  - delivery «иә» кезінде — Сумма өрісі;
- *  - read-only чаттарда — түсініктеме мәтіні.
+ * Чат енгізу жолағы — WhatsApp (iOS) үлгісі:
+ *  - сол жақта «+» (қосымшалар торы), ортада көпжолды ақ өріс + камера,
+ *    оң жақта жасыл дөңгелек: бос кезде микрофон, мәтін болса — жіберу;
+ *  - микрофонды басып тұру → жазу басталады; солға сырғыту → болдырмау;
+ *    жоғары сырғыту → бекіту (қолды жіберуге болады, астынан жою/жіберу);
+ *  - жауап / өңдеу — өрістің үстінде түсті жолақты цитата.
  */
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatInputBar(
     input: String,
@@ -111,259 +136,287 @@ fun ChatInputBar(
     onSendVoice: (path: String, durationSec: Int) -> Unit,
     onVoiceError: () -> Unit,
     onVoiceTooShort: () -> Unit,
+    /** Микрофон рұқсаты бар ма (жоқ болса [onRequestMicPermission]). */
+    hasMicPermission: () -> Boolean = { true },
+    onRequestMicPermission: () -> Unit = {},
+    /** Қысқа түрту — «басып тұрыңыз» кеңесі. */
+    onHoldHint: () -> Unit = {},
+    /** Жауап берілетін хабарлама авторының аты. */
+    replyAuthor: String? = null,
 ) {
-    val colors = extendedColors()
+    val palette = chatPalette()
     val context = LocalContext.current
-    val writeHint = stringResource(L10nR.string.write)
-    val readOnlyHint = stringResource(L10nR.string.read_only_chat_message)
-    val sumLabel = stringResource(L10nR.string.delivery_sum_label)
-    val priceHint = stringResource(L10nR.string.delivery_price_hint)
+    val haptics = LocalHapticFeedback.current
 
     var attachOpen by remember { mutableStateOf(false) }
     val recorder = remember { VoiceRecorder(context) }
-    var recording by remember { mutableStateOf(false) }
-    var locked by remember { mutableStateOf(false) }
+    var mode by remember { mutableStateOf(RecordMode.IDLE) }
     var seconds by remember { mutableIntStateOf(0) }
+    var dragX by remember { mutableFloatStateOf(0f) }
+    var dragY by remember { mutableFloatStateOf(0f) }
+    val levels = remember { mutableStateListOf<Float>() }
 
-    // Жазба таймері (1с қадам) + амплитуданы жаңарту.
-    LaunchedEffect(recording) {
+    // Таймер + дыбыс деңгейі (толқын-форм үшін).
+    LaunchedEffect(mode != RecordMode.IDLE) {
+        if (mode == RecordMode.IDLE) return@LaunchedEffect
         seconds = 0
-        while (recording) {
-            delay(1000)
-            if (recording) seconds++
+        levels.clear()
+        var tick = 0
+        while (true) {
+            delay(100)
+            tick++
+            if (tick % 10 == 0) seconds++
+            levels.add(recorder.amplitude().coerceIn(0f, 1f))
+            if (levels.size > 60) levels.removeAt(0)
+            // Ең ұзақ шекке жетсе — автоматты жіберу.
+            if (seconds * 1000 >= VoiceRecorder.MAX_DURATION_MS) break
         }
     }
     DisposableEffect(Unit) {
         onDispose { recorder.cancel() }
     }
 
+    fun resetRecording() {
+        mode = RecordMode.IDLE
+        dragX = 0f
+        dragY = 0f
+    }
+
+    fun cancelRecording() {
+        recorder.cancel()
+        resetRecording()
+    }
+
     fun stopAndSend() {
         val result = recorder.stop()
-        recording = false
-        locked = false
+        resetRecording()
         if (result != null) {
             val (file, duration) = result
-            if (duration < 1) onVoiceTooShort() else onSendVoice(file.absolutePath, duration)
+            if (duration < 1) {
+                file.delete()
+                onVoiceTooShort()
+            } else {
+                onSendVoice(file.absolutePath, duration)
+            }
         } else {
             onVoiceError()
         }
     }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        // Upload прогресі.
+    LaunchedEffect(seconds) {
+        if (mode != RecordMode.IDLE && seconds * 1000 >= VoiceRecorder.MAX_DURATION_MS) stopAndSend()
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(palette.inputBar),
+    ) {
+        // Жүктеу прогресі.
         upload?.let { state ->
-            Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
                 val label = when (state.kind) {
-                    UploadKind.IMAGE -> stringResource(L10nR.string.chat_file_uploading)
                     UploadKind.AUDIO -> stringResource(L10nR.string.chat_audio_uploading)
                     else -> stringResource(L10nR.string.chat_file_uploading)
                 }
-                Text(label, fontSize = 12.sp, color = colors.secondaryText)
+                Text("$label ${state.progress}%", fontSize = 12.sp, color = palette.meta)
                 LinearProgressIndicator(
                     progress = { state.progress / 100f },
+                    color = palette.accent,
+                    trackColor = palette.quoteBackground,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 4.dp),
+                        .padding(top = 4.dp)
+                        .clip(RoundedCornerShape(50)),
                 )
             }
         }
 
-        // Reply жолағы.
-        AnimatedVisibility(visible = replyTo != null, enter = fadeIn(), exit = fadeOut()) {
-            replyTo?.let { target ->
-                BarHeader(
-                    icon = Icons.Outlined.Reply,
-                    text = target.displayText(),
-                    onClose = onClearReply,
-                )
-            }
-        }
-        // Edit жолағы.
-        AnimatedVisibility(visible = editing != null, enter = fadeIn(), exit = fadeOut()) {
-            editing?.let { target ->
-                BarHeader(
-                    icon = Icons.Outlined.Edit,
-                    text = target.displayText(),
-                    onClose = onClearEditing,
-                )
-            }
-        }
-        // Delivery «иә» — Сумма өрісі.
-        AnimatedVisibility(visible = showDeliveryPrice, enter = fadeIn(), exit = fadeOut()) {
-            Surface(
+        // Жеткізу «иә» — Сумма өрісі.
+        AnimatedVisibility(visible = showDeliveryPrice, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
+            val sumLabel = stringResource(L10nR.string.delivery_sum_label)
+            val priceHint = stringResource(L10nR.string.delivery_price_hint)
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(palette.inputField)
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text("$sumLabel: ", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                Text("$sumLabel: ", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = palette.text)
+                Box(Modifier.weight(1f)) {
+                    if (deliveryPrice.isBlank()) Text(priceHint, fontSize = 15.sp, color = palette.meta)
                     BasicTextField(
                         value = deliveryPrice,
                         onValueChange = onDeliveryPriceChange,
-                        textStyle = TextStyle(fontSize = 15.sp, color = colors.primaryText),
-                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                        textStyle = TextStyle(fontSize = 15.sp, color = palette.text),
+                        cursorBrush = SolidColor(palette.accent),
+                        modifier = Modifier.fillMaxWidth(),
                     )
-                    priceHint.takeIf { deliveryPrice.isBlank() }?.let {
-                        Text(it, fontSize = 14.sp, color = colors.secondaryText)
-                    }
                 }
             }
         }
 
         if (readOnly) {
-            // Тек оқу чаттары (1001, 1002, 1004, 1005).
-            Surface(
+            Text(
+                stringResource(L10nR.string.read_only_chat_message),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
-                shape = RoundedCornerShape(14.dp),
-                color = colors.grey.copy(alpha = 0.35f),
-            ) {
-                Text(
-                    readOnlyHint,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                    fontSize = 14.sp,
-                    color = colors.secondaryText,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                )
-            }
-        } else {
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                fontSize = 14.sp,
+                color = palette.meta,
+                textAlign = TextAlign.Center,
+            )
+            return@Column
+        }
+
+        Box {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                    .padding(start = 6.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
                 verticalAlignment = Alignment.Bottom,
             ) {
-                // Қағаз қайшы.
-                CircleIconButton(
-                    icon = Icons.Outlined.Add,
-                    contentDescription = null,
-                    onClick = { attachOpen = true },
-                )
-                // Мәтін өрісі.
-                Surface(
+                Box(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(vertical = 2.dp),
-                    shape = RoundedCornerShape(22.dp),
-                    color = colors.grey.copy(alpha = 0.28f),
+                        .heightIn(min = 48.dp),
+                    contentAlignment = Alignment.CenterStart,
                 ) {
-                    BasicTextField(
-                        value = input,
-                        onValueChange = onInputChange,
-                        textStyle = TextStyle(fontSize = 15.5.sp, color = colors.primaryText),
-                        decorationBox = { inner ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                                contentAlignment = Alignment.CenterStart,
-                            ) {
-                                if (input.isEmpty()) {
-                                    Text(writeHint, fontSize = 15.5.sp, color = colors.secondaryText)
-                                }
-                                inner()
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    Crossfade(targetState = mode, animationSpec = tween(160), label = "inputMode") { current ->
+                        when (current) {
+                            RecordMode.HOLDING -> HoldingStrip(
+                                seconds = seconds,
+                                dragX = dragX,
+                                cancelFraction = (abs(dragX) / with(LocalDensity.current) { CancelDistance.toPx() }).coerceIn(0f, 1f),
+                            )
+                            RecordMode.LOCKED -> LockedStrip(
+                                seconds = seconds,
+                                levels = levels,
+                                onDelete = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    cancelRecording()
+                                },
+                            )
+                            RecordMode.IDLE -> ComposeRow(
+                                input = input,
+                                onInputChange = onInputChange,
+                                replyTo = replyTo,
+                                replyAuthor = replyAuthor,
+                                onClearReply = onClearReply,
+                                editing = editing,
+                                onClearEditing = onClearEditing,
+                                onOpenAttach = { attachOpen = true },
+                                onTakePhoto = onTakePhoto,
+                            )
+                        }
+                    }
                 }
-                if (input.isNotEmpty() || editing != null) {
-                    // Жіберу батырмасы.
-                    CircleIconButton(
-                        icon = Icons.AutoMirrored.Outlined.Send,
-                        contentDescription = writeHint,
-                        onClick = onSend,
-                        primary = true,
+                Spacer(Modifier.width(6.dp))
+
+                val showSend = mode == RecordMode.LOCKED ||
+                    (mode == RecordMode.IDLE && (input.isNotBlank() || editing != null))
+                if (showSend) {
+                    RoundActionButton(
+                        icon = Icons.AutoMirrored.Filled.Send,
+                        contentDescription = stringResource(L10nR.string.voice_send_hint),
+                        onClick = {
+                            if (mode == RecordMode.LOCKED) stopAndSend() else onSend()
+                        },
                     )
                 } else if (canRecord) {
-                    // Микрофон — ұстап тұрып жазу.
                     MicButton(
-                        recording = recording,
-                        recorder = recorder,
-                        onRecordingChange = { recording = it },
-                        onLocked = { locked = true },
-                        onSend = { stopAndSend() },
-                        onCancel = {
-                            recorder.cancel()
-                            recording = false
-                            locked = false
+                        holding = mode == RecordMode.HOLDING,
+                        dragX = dragX,
+                        hasPermission = hasMicPermission,
+                        onRequestPermission = onRequestMicPermission,
+                        onStart = {
+                            val started = recorder.start()
+                            if (started) {
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                mode = RecordMode.HOLDING
+                            } else {
+                                onVoiceError()
+                            }
+                            started
                         },
+                        onDrag = { x, y ->
+                            dragX = x
+                            dragY = y
+                        },
+                        onCancel = {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            cancelRecording()
+                        },
+                        onLock = {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            dragX = 0f
+                            dragY = 0f
+                            mode = RecordMode.LOCKED
+                        },
+                        onRelease = {
+                            if (recorder.elapsedMs() < 700) {
+                                // Қысқа түрту — жазба жіберілмейді, кеңес шығады.
+                                cancelRecording()
+                                onHoldHint()
+                            } else {
+                                stopAndSend()
+                            }
+                        },
+                    )
+                } else {
+                    RoundActionButton(
+                        icon = Icons.Filled.Mic,
+                        contentDescription = null,
+                        onClick = {},
+                        enabled = false,
                     )
                 }
             }
-        }
 
-        // Жазу режимі — таймер + амплитуда + басқару.
-        AnimatedVisibility(
-            visible = recording,
-            enter = slideInVertically(tween(160)) { it } + fadeIn(),
-            exit = slideOutVertically(tween(140)) { it } + fadeOut(),
-        ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+            // Бекіту көрсеткіші — микрофонның үстінде, саусақ жоғары жылжыған сайын көтеріледі.
+            if (mode == RecordMode.HOLDING) {
+                val density = LocalDensity.current
+                val lockLiftPx = with(density) { LockDistance.toPx() }
+                val progress = (abs(dragY) / lockLiftPx).coerceIn(0f, 1f)
+                val bob = rememberInfiniteTransition(label = "lockBob")
+                val bobOffset by bob.animateFloat(
+                    initialValue = 0f,
+                    targetValue = -6f,
+                    animationSpec = infiniteRepeatable(tween(600), RepeatMode.Reverse),
+                    label = "lockBobValue",
+                )
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = palette.inputField,
+                    shadowElevation = 4.dp,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 10.dp)
+                        .offset {
+                            IntOffset(0, (-(76.dp.toPx()) + dragY * 0.6f + bobOffset * density.density).roundToInt())
+                        },
                 ) {
-                    // Жою (солға тарту да жояды).
-                    Icon(
-                        Icons.Outlined.Delete,
-                        contentDescription = stringResource(L10nR.string.voice_cancel_hint),
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier
-                            .size(26.dp)
-                            .clip(CircleShape)
-                            .clickable {
-                                recorder.cancel()
-                                recording = false
-                                locked = false
-                            },
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = "%02d:%02d".format(seconds / 60, seconds % 60),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    // «Жазылуда…» + биение амплитудасы.
-                    Text(
-                        stringResource(L10nR.string.voice_recording),
-                        fontSize = 13.sp,
-                        color = colors.secondaryText,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
-                    )
-                    if (locked) {
-                        // Бұғатталған — тоқтату+жіберу батырмасы.
+                    Column(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
                         Icon(
-                            Icons.AutoMirrored.Outlined.Send,
-                            contentDescription = stringResource(L10nR.string.voice_send_hint),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clip(CircleShape)
-                                .clickable { stopAndSend() },
+                            Icons.Filled.Lock,
+                            contentDescription = stringResource(L10nR.string.voice_lock_hint),
+                            tint = if (progress > 0.8f) palette.accent else palette.meta,
+                            modifier = Modifier.size(20.dp),
                         )
-                    } else {
-                        Text(
-                            stringResource(L10nR.string.voice_lock_hint),
-                            fontSize = 11.sp,
-                            color = colors.secondaryText,
-                            maxLines = 1,
+                        Spacer(Modifier.height(4.dp))
+                        Icon(
+                            Icons.Outlined.KeyboardArrowUp,
+                            contentDescription = null,
+                            tint = palette.meta,
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }
@@ -371,209 +424,458 @@ fun ChatInputBar(
         }
     }
 
-    // AttachmentPicker — 4 опция + камера екеуі.
     if (attachOpen) {
-        androidx.compose.material3.ModalBottomSheet(onDismissRequest = { attachOpen = false }) {
-            AttachmentOption(icon = Icons.Outlined.Image, label = stringResource(L10nR.string.attach_gallery)) {
-                attachOpen = false; onPickImage()
+        AttachmentSheet(
+            onDismiss = { attachOpen = false },
+            onPickImage = onPickImage,
+            onTakePhoto = onTakePhoto,
+            onRecordVideo = onRecordVideo,
+            onPickFile = onPickFile,
+            onPickAudio = onPickAudio,
+            onPickLocation = onPickLocation,
+        )
+    }
+}
+
+private val CancelDistance = 110.dp
+private val LockDistance = 90.dp
+
+/** Қалыпты күй: «+» + ақ дөңгелек өріс (жауап/өңдеу цитатасымен) + камера. */
+@Composable
+private fun ComposeRow(
+    input: String,
+    onInputChange: (String) -> Unit,
+    replyTo: ChatMessage?,
+    replyAuthor: String?,
+    onClearReply: () -> Unit,
+    editing: ChatMessage?,
+    onClearEditing: () -> Unit,
+    onOpenAttach: () -> Unit,
+    onTakePhoto: () -> Unit,
+) {
+    val palette = chatPalette()
+    val writeHint = stringResource(L10nR.string.write)
+    Row(verticalAlignment = Alignment.Bottom) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .clickable(onClick = onOpenAttach),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Outlined.Add, contentDescription = null, tint = palette.accent, modifier = Modifier.size(30.dp))
+        }
+        Spacer(Modifier.width(2.dp))
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(22.dp))
+                .background(palette.inputField),
+        ) {
+            val quoteTarget = editing ?: replyTo
+            AnimatedVisibility(
+                visible = quoteTarget != null,
+                enter = expandVertically(spring()) + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                quoteTarget?.let { target ->
+                    ComposerQuote(
+                        icon = if (editing != null) Icons.Outlined.Edit else Icons.AutoMirrored.Outlined.Reply,
+                        title = if (editing != null) stringResource(L10nR.string.edit) else (replyAuthor ?: stringResource(L10nR.string.reply)),
+                        text = target.displayText(),
+                        onClose = if (editing != null) onClearEditing else onClearReply,
+                    )
+                }
             }
-            AttachmentOption(icon = Icons.Outlined.AttachFile, label = stringResource(L10nR.string.attach_file)) {
-                attachOpen = false; onPickFile()
+            Row(verticalAlignment = Alignment.Bottom) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 44.dp)
+                        .padding(start = 14.dp, end = 4.dp, top = 11.dp, bottom = 11.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    if (input.isEmpty()) {
+                        Text(writeHint, fontSize = 16.sp, color = palette.meta)
+                    }
+                    BasicTextField(
+                        value = input,
+                        onValueChange = onInputChange,
+                        maxLines = 6,
+                        textStyle = TextStyle(fontSize = 16.sp, color = palette.text, lineHeight = 21.sp),
+                        cursorBrush = SolidColor(palette.accent),
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                if (input.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .clickable(onClick = onTakePhoto),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            Icons.Outlined.PhotoCamera,
+                            contentDescription = stringResource(L10nR.string.attach_camera),
+                            tint = palette.meta,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                }
             }
-            AttachmentOption(icon = Icons.Outlined.AudioFile, label = stringResource(L10nR.string.attach_audio)) {
-                attachOpen = false; onPickAudio()
-            }
-            AttachmentOption(icon = Icons.Outlined.LocationOn, label = stringResource(L10nR.string.send_location)) {
-                attachOpen = false; onPickLocation()
-            }
-            AttachmentOption(icon = Icons.Outlined.PhotoCamera, label = stringResource(L10nR.string.take_photo)) {
-                attachOpen = false; onTakePhoto()
-            }
-            AttachmentOption(icon = Icons.Outlined.Videocam, label = stringResource(L10nR.string.record_video)) {
-                attachOpen = false; onRecordVideo()
-            }
-            Spacer(Modifier.height(24.dp))
         }
     }
 }
 
-/** Микрофон батырмасы: ұстап тұру → жазу; жіберу — қолды жібер; жою — солға; бұғаттау — жоғары. */
+/** Өрістің ішіндегі жауап/өңдеу цитатасы. */
 @Composable
-private fun MicButton(
-    recording: Boolean,
-    recorder: VoiceRecorder,
-    onRecordingChange: (Boolean) -> Unit,
-    onLocked: () -> Unit,
-    onSend: () -> Unit,
-    onCancel: () -> Unit,
+private fun ComposerQuote(
+    icon: ImageVector,
+    title: String,
+    text: String,
+    onClose: () -> Unit,
 ) {
-    val density = LocalDensity.current
-    val cancelPx = with(density) { 80.dp.toPx() }
-    val lockPx = with(density) { 100.dp.toPx() }
-    val tint = if (recording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+    val palette = chatPalette()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 6.dp, end = 6.dp, top = 6.dp)
+            .height(IntrinsicSize.Min)
+            .clip(RoundedCornerShape(10.dp))
+            .background(palette.quoteBackground),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .width(4.dp)
+                .fillMaxHeight()
+                .background(palette.quoteBar),
+        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 10.dp, vertical = 7.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, contentDescription = null, tint = palette.quoteBar, modifier = Modifier.size(14.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(title, color = palette.quoteBar, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+            }
+            Text(text.ifBlank { "…" }, color = palette.meta, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .clickable(onClick = onClose),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Outlined.Close, contentDescription = stringResource(L10nR.string.cancel), tint = palette.meta, modifier = Modifier.size(18.dp))
+        }
+    }
+}
 
+/** Басып тұрып жазу: жыпылықтайтын қызыл микрофон + таймер + «‹ болдырмау». */
+@Composable
+private fun HoldingStrip(seconds: Int, dragX: Float, cancelFraction: Float) {
+    val palette = chatPalette()
+    val blink = rememberInfiniteTransition(label = "recBlink")
+    val alpha by blink.animateFloat(
+        initialValue = 1f,
+        targetValue = 0.2f,
+        animationSpec = infiniteRepeatable(tween(550), RepeatMode.Reverse),
+        label = "recBlinkAlpha",
+    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(palette.inputField)
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            Icons.Filled.Mic,
+            contentDescription = null,
+            tint = Color(0xFFE53935).copy(alpha = alpha),
+            modifier = Modifier.size(22.dp),
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            formatDuration(seconds),
+            fontSize = 16.sp,
+            color = palette.text,
+            fontWeight = FontWeight.Medium,
+        )
+        Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            Row(
+                modifier = Modifier.graphicsLayer {
+                    translationX = dragX * 0.7f
+                    this.alpha = 1f - cancelFraction * 0.9f
+                },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+                    contentDescription = null,
+                    tint = palette.meta,
+                    modifier = Modifier.size(20.dp),
+                )
+                Text(
+                    stringResource(L10nR.string.voice_slide_to_cancel),
+                    fontSize = 14.sp,
+                    color = palette.meta,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+/** Бекітілген жазу: жою + таймер + тірі толқын-форм (жіберу — оң жақтағы батырма). */
+@Composable
+private fun LockedStrip(seconds: Int, levels: List<Float>, onDelete: () -> Unit) {
+    val palette = chatPalette()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(palette.inputField)
+            .padding(end = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .clickable(onClick = onDelete),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Filled.Delete,
+                contentDescription = stringResource(L10nR.string.voice_cancel_hint),
+                tint = palette.meta,
+                modifier = Modifier.size(24.dp),
+            )
+        }
+        Box(
+            Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFE53935)),
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(formatDuration(seconds), fontSize = 15.sp, color = palette.text, fontWeight = FontWeight.Medium)
+        Spacer(Modifier.width(10.dp))
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .height(28.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.End),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            levels.takeLast(40).forEach { level ->
+                Box(
+                    modifier = Modifier
+                        .width(2.5.dp)
+                        .height((3 + level * 25).dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(palette.meta),
+                )
+            }
+        }
+    }
+}
+
+/** Жасыл дөңгелек батырма (жіберу). */
+@Composable
+private fun RoundActionButton(
+    icon: ImageVector,
+    contentDescription: String?,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+) {
+    val palette = chatPalette()
     Box(
         modifier = Modifier
-            .padding(4.dp)
             .size(48.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(if (enabled) palette.accent else palette.meta.copy(alpha = 0.4f))
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = contentDescription, tint = Color.White, modifier = Modifier.size(22.dp))
+    }
+}
+
+/**
+ * Микрофон: басу → жазу; саусақпен бірге солға жылжиды, ұстап тұрғанда
+ * үлкейеді. Солға [CancelDistance] — болдырмау, жоғары [LockDistance] — бекіту.
+ */
+@Composable
+private fun MicButton(
+    holding: Boolean,
+    dragX: Float,
+    hasPermission: () -> Boolean,
+    onRequestPermission: () -> Unit,
+    onStart: () -> Boolean,
+    onDrag: (x: Float, y: Float) -> Unit,
+    onCancel: () -> Unit,
+    onLock: () -> Unit,
+    onRelease: () -> Unit,
+) {
+    val palette = chatPalette()
+    val density = LocalDensity.current
+    val cancelPx = with(density) { CancelDistance.toPx() }
+    val lockPx = with(density) { LockDistance.toPx() }
+    val scale by animateFloatAsState(if (holding) 1.45f else 1f, spring(dampingRatio = 0.6f), label = "micScale")
+
+    val currentHasPermission by rememberUpdatedState(hasPermission)
+    val currentRequest by rememberUpdatedState(onRequestPermission)
+    val currentStart by rememberUpdatedState(onStart)
+    val currentDrag by rememberUpdatedState(onDrag)
+    val currentCancel by rememberUpdatedState(onCancel)
+    val currentLock by rememberUpdatedState(onLock)
+    val currentRelease by rememberUpdatedState(onRelease)
+
+    // Жест түрленбейтін сыртқы қабатта ұсталады: ішкі дөңгелек саусақпен
+    // бірге жылжып/үлкейгенде координаталар бұрмаланбауы керек.
+    Box(
+        modifier = Modifier
+            .size(48.dp)
             .pointerInput(Unit) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
                     down.consume()
-                    if (recorder.isActive.not()) {
-                        if (recorder.start()) onRecordingChange(true)
+                    if (!currentHasPermission()) {
+                        currentRequest()
+                        return@awaitEachGesture
                     }
-                    var locked = false
+                    if (!currentStart()) return@awaitEachGesture
+                    var result = 0 // 0 — жіберу, 1 — болдырмау, 2 — бекіту
                     while (true) {
                         val event = awaitPointerEvent()
-                        val pressed = event.changes.any { it.pressed }
-                        val pos = event.changes.firstOrNull()?.position
-                        if (pos != null) {
-                            val dx = pos.x - down.position.x
-                            val dy = pos.y - down.position.y
-                            if (dx < -cancelPx) {
-                                // Солға тарту → жою.
-                                onCancel()
-                                event.changes.forEach { it.consume() }
-                                return@awaitEachGesture
-                            }
-                            if (dy < -lockPx) {
-                                // Жоғары тарту → бұғаттау.
-                                locked = true
-                                event.changes.forEach { it.consume() }
-                                break
-                            }
+                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                        if (!change.pressed) break
+                        val dx = (change.position.x - down.position.x).coerceAtMost(0f)
+                        val dy = (change.position.y - down.position.y).coerceAtMost(0f)
+                        // Бір бағытты таңдаймыз: көлденең не тік.
+                        if (abs(dx) > abs(dy)) currentDrag(dx, 0f) else currentDrag(0f, dy)
+                        change.consume()
+                        if (dx < -cancelPx) {
+                            result = 1
+                            break
                         }
-                        event.changes.forEach { it.consume() }
-                        if (!pressed) break
+                        if (dy < -lockPx) {
+                            result = 2
+                            break
+                        }
                     }
-                    // Қол жібергенде: бұғатталмаса → тоқтатып жіберу.
-                    if (!locked && recorder.isActive) {
-                        onSend()
-                    } else if (locked && recorder.isActive) {
-                        onLocked()
+                    when (result) {
+                        1 -> currentCancel()
+                        2 -> currentLock()
+                        else -> currentRelease()
                     }
                 }
             },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            imageVector = Icons.Outlined.Mic,
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(24.dp),
-        )
-    }
-}
-
-/** Қосымшалар парағының бір өрісі. */
-@Composable
-private fun AttachmentOption(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
-    onClick: () -> Unit,
-) {
-    val primary = MaterialTheme.colorScheme.primary
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
         Box(
             modifier = Modifier
-                .size(42.dp)
+                .size(48.dp)
+                .graphicsLayer {
+                    translationX = if (holding) dragX.coerceAtLeast(-cancelPx) * 0.35f else 0f
+                    scaleX = scale
+                    scaleY = scale
+                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.7f, 0.7f)
+                }
                 .clip(CircleShape)
-                .background(primary.copy(alpha = 0.12f)),
+                .background(palette.accent),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(icon, contentDescription = label, tint = primary, modifier = Modifier.size(22.dp))
+            Icon(
+                imageVector = Icons.Filled.Mic,
+                contentDescription = stringResource(L10nR.string.voice_hold_to_record),
+                tint = Color.White,
+                modifier = Modifier.size(24.dp),
+            )
         }
-        Spacer(Modifier.width(14.dp))
-        Text(label, fontSize = 16.sp, fontWeight = FontWeight.Medium)
     }
 }
 
-/** Reply/Edit үстіңгі жолағы. */
+/** WhatsApp-тағыдай қосымшалар торы: түсті дөңгелектер + жазу. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BarHeader(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    text: String,
-    onClose: () -> Unit,
+private fun AttachmentSheet(
+    onDismiss: () -> Unit,
+    onPickImage: () -> Unit,
+    onTakePhoto: () -> Unit,
+    onRecordVideo: () -> Unit,
+    onPickFile: () -> Unit,
+    onPickAudio: () -> Unit,
+    onPickLocation: () -> Unit,
 ) {
-    val colors = extendedColors()
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 2.dp),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    val palette = chatPalette()
+    val items = listOf(
+        AttachItem(Icons.Filled.Image, stringResource(L10nR.string.attach_gallery), Color(0xFF3D8BFD), onPickImage),
+        AttachItem(Icons.Filled.PhotoCamera, stringResource(L10nR.string.attach_camera), Color(0xFFFF2E74), onTakePhoto),
+        AttachItem(Icons.Filled.Videocam, stringResource(L10nR.string.attach_video), Color(0xFFC861FA), onRecordVideo),
+        AttachItem(Icons.Filled.Description, stringResource(L10nR.string.attach_document), Color(0xFF7F66FF), onPickFile),
+        AttachItem(Icons.Filled.Headphones, stringResource(L10nR.string.attach_audio_short), Color(0xFFFF7F2E), onPickAudio),
+        AttachItem(Icons.Filled.LocationOn, stringResource(L10nR.string.attach_location), Color(0xFF1FA855), onPickLocation),
+    )
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = palette.inputField) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(22.dp),
         ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp),
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text,
-                fontSize = 13.sp,
-                color = colors.secondaryText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-            Icon(
-                Icons.Outlined.Close,
-                contentDescription = stringResource(L10nR.string.cancel),
-                tint = colors.secondaryText,
-                modifier = Modifier
-                    .size(20.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onClose)
-                    .padding(2.dp),
-            )
+            items.chunked(3).forEach { row ->
+                Row(Modifier.fillMaxWidth()) {
+                    row.forEach { item ->
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(16.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = androidx.compose.material3.ripple(bounded = true),
+                                ) {
+                                    onDismiss()
+                                    item.onClick()
+                                }
+                                .padding(vertical = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(58.dp)
+                                    .clip(CircleShape)
+                                    .background(item.color),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(item.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(28.dp))
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Text(item.label, fontSize = 13.sp, color = palette.text, maxLines = 1)
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
-/** Дөңгелек мөлдір батырма. */
-@Composable
-private fun CircleIconButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    contentDescription: String?,
-    onClick: () -> Unit,
-    primary: Boolean = false,
-) {
-    Box(
-        modifier = Modifier
-            .padding(4.dp)
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(
-                if (primary) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.surfaceVariant,
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = if (primary) androidx.compose.ui.graphics.Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(22.dp),
-        )
-    }
-}
+private data class AttachItem(
+    val icon: ImageVector,
+    val label: String,
+    val color: Color,
+    val onClick: () -> Unit,
+)

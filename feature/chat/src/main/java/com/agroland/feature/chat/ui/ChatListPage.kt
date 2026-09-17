@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -124,8 +124,16 @@ fun ChatListPage(
     val deleteConfirmTitle = stringResource(L10nR.string.delete_chat)
     val deleteConfirmText = stringResource(L10nR.string.clear_chat_history_confirm)
     val cancelLabel = stringResource(L10nR.string.cancel)
+    val muteOnLabel = stringResource(L10nR.string.chat_swipe_mute)
+    val muteOffLabel = stringResource(L10nR.string.chat_swipe_unmute)
+    val deleteSwipeLabel = stringResource(L10nR.string.chat_swipe_delete)
+    val archiveSwipeLabel = stringResource(L10nR.string.chat_swipe_archive)
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = com.agroland.core.ui.components.shellBottomPadding()),
+    ) {
         ChatSearchAppBar(
             query = searchInput,
             onQueryChange = viewModel::onSearchChange,
@@ -174,21 +182,21 @@ fun ChatListPage(
                             actions = listOf(
                                 SwipeAction(
                                     icon = if (row.muted) Icons.Outlined.VolumeUp else Icons.Outlined.VolumeOff,
-                                    label = "",
-                                    color = MaterialTheme.colorScheme.primary,
+                                    label = if (row.muted) muteOffLabel else muteOnLabel,
+                                    color = Color(0xFF8E8E93),
                                     onClick = { viewModel.toggleMute(row.room) },
                                 ),
                                 SwipeAction(
                                     icon = Icons.Outlined.Delete,
-                                    label = "",
-                                    color = Color(0xFFE53935),
+                                    label = deleteSwipeLabel,
+                                    color = Color(0xFFFF3B30),
                                     destructive = true,
                                     onClick = { pendingDelete = row.room },
                                 ),
                                 SwipeAction(
                                     icon = Icons.Outlined.Archive,
-                                    label = "",
-                                    color = Color(0xFF616161),
+                                    label = archiveSwipeLabel,
+                                    color = Color(0xFF3478F6),
                                     isPrimary = true,
                                     onClick = { viewModel.setArchived(row.room, archived = true) },
                                 ),
@@ -263,6 +271,7 @@ private fun ChatSearchAppBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(extendedColors().card)
+            .statusBarsPadding()
             .padding(horizontal = 8.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -616,35 +625,12 @@ internal fun ChatTile(
 /** Қонақ (кірмеген) үшін чат қойындысы — кіруге шақыру (Flutter guest parity). */
 @Composable
 fun GuestChatTab(onLoginClick: () -> Unit) {
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        androidx.compose.foundation.layout.Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.ChatBubble,
-                contentDescription = null,
-                tint = extendedColors().divider,
-                modifier = Modifier.size(72.dp),
-            )
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = stringResource(L10nR.string.chat_login_prompt),
-                style = MaterialTheme.typography.bodySmall,
-                color = extendedColors().secondaryText,
-            )
-            Spacer(Modifier.height(16.dp))
-            com.agroland.core.ui.components.AgroButton(
-                text = stringResource(L10nR.string.auth_login_title),
-                onClick = onLoginClick,
-                modifier = Modifier
-                    .padding(horizontal = 48.dp)
-                    .fillMaxWidth(),
-            )
-        }
-    }
+    com.agroland.core.ui.components.GuestGate(
+        icon = Icons.Outlined.ChatBubble,
+        message = stringResource(L10nR.string.chat_login_prompt),
+        loginText = stringResource(L10nR.string.auth_login_title),
+        onLoginClick = onLoginClick,
+    )
 }
 
 /** «Менің пікірлерім» кіру жолы (spec §10) — жұлдыз + бейдж + шеврон. */

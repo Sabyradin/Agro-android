@@ -13,32 +13,45 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocalFireDepartment
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.agroland.core.common.formatters.DateFormatter
 import com.agroland.core.common.formatters.PriceFormatter
 import com.agroland.core.l10n.R as L10nR
 import com.agroland.core.ui.components.CachedImage
+import com.agroland.core.ui.theme.AgroRadius
+import com.agroland.core.ui.theme.AgroSpacing
 import com.agroland.core.ui.theme.extendedColors
 import com.agroland.feature.marketplace.data.Announcement
 
+/** Карточка суреті — қалған кеңістік мәтінге қалады. */
+private val ThumbSize = 100.dp
+
 /**
- * AnnouncementCard — Flutter карточкасымен сайткес: сол жақта сурет, оң жақта
- * атау + баға + қала/күн; VIP — алтын жиек, HOT — қызыл белгі; жүрек — сүйікті.
+ * AnnouncementCard — лента карточкасы: сол жақта сурет, оң жақта атау,
+ * баға, белгілер (VIP/HOT) және қала/күн жолы. Жүрек — суреттің үстінде.
+ *
+ * VIP — алтын жиек; HOT/VIP белгілері фоны бар чип түрінде (бұрын жалаң
+ * мәтін болып, жолда жоғалып кететін).
  */
 @Composable
 fun AnnouncementCard(
@@ -48,77 +61,82 @@ fun AnnouncementCard(
     onToggleFavorite: (() -> Unit)? = null,
 ) {
     val ext = extendedColors()
-    val borderModifier = if (item.isVip) {
-        Modifier.border(1.5.dp, ext.accent, RoundedCornerShape(14.dp))
-    } else {
-        Modifier
-    }
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 5.dp)
-            .clip(RoundedCornerShape(14.dp))
+            .padding(horizontal = AgroSpacing.screen, vertical = 6.dp)
+            .shadow(
+                elevation = 2.dp,
+                shape = AgroRadius.card,
+                ambientColor = Color(0x14121212),
+                spotColor = Color(0x14121212),
+            )
+            .clip(AgroRadius.card)
             .background(ext.card)
-            .then(borderModifier)
+            .then(
+                if (item.isVip) {
+                    Modifier.border(1.5.dp, ext.accent, AgroRadius.card)
+                } else {
+                    Modifier
+                },
+            )
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(AgroSpacing.md),
+        horizontalArrangement = Arrangement.spacedBy(AgroSpacing.md),
     ) {
-        Box(
-            modifier = Modifier
-                .size(92.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(ext.grey),
-        ) {
+        Box(modifier = Modifier.size(ThumbSize)) {
             CachedImage(
                 url = item.imageUrl,
                 contentDescription = item.title,
-                modifier = Modifier.size(92.dp),
+                modifier = Modifier
+                    .size(ThumbSize)
+                    .clip(RoundedCornerShape(12.dp)),
             )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = ext.primaryText,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
+            if (onToggleFavorite != null) {
+                FavoriteButton(
+                    isFavorite = item.isFavorite,
+                    onClick = onToggleFavorite,
+                    modifier = Modifier.align(Alignment.TopEnd),
                 )
-                if (onToggleFavorite != null) {
-                    IconButton(onClick = onToggleFavorite, modifier = Modifier.size(32.dp)) {
-                        Icon(
-                            imageVector = if (item.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = stringResource(L10nR.string.favorites_title),
-                            tint = if (item.isFavorite) MaterialTheme.colorScheme.error else ext.secondaryText,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
-                }
             }
-            Spacer(Modifier.height(6.dp))
-            val price = PriceFormatter.format(item.price, item.currency ?: "")
+        }
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .height(ThumbSize),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.bodySmall,
+                color = ext.primaryText,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+
+            val price = PriceFormatter.format(item.price, displayCurrency(item.currency))
             if (price.isNotBlank()) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         text = price,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                        ),
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     item.measurementUnit?.takeIf { it.isNotBlank() }?.let { unit ->
                         Text(
-                            text = " / $unit",
+                            text = " / ${displayUnit(unit)}",
                             style = MaterialTheme.typography.labelMedium,
                             color = ext.secondaryText,
                             maxLines = 1,
                         )
                     }
                     if (item.negotiable) {
-                        Spacer(Modifier.width(6.dp))
+                        Spacer(Modifier.width(AgroSpacing.sm))
                         Text(
                             text = stringResource(L10nR.string.mp_negotiable_short),
                             style = MaterialTheme.typography.labelMedium,
@@ -127,28 +145,31 @@ fun AnnouncementCard(
                         )
                     }
                 }
-                Spacer(Modifier.height(6.dp))
             }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 if (item.isHot) {
-                    Badge(
+                    MarkerChip(
                         icon = Icons.Outlined.LocalFireDepartment,
                         text = stringResource(L10nR.string.mp_hot_badge),
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
                 if (item.isVip) {
-                    Badge(
-                        icon = null,
-                        text = "VIP",
-                        color = ext.accent,
-                    )
+                    MarkerChip(icon = null, text = "VIP", color = ext.accent)
                 }
-                listOfNotNull(item.city, item.district).joinToString(", ").takeIf { it.isNotBlank() }
+                item.placeLabel.takeIf { it.isNotBlank() }
                     ?.let { place ->
+                        Icon(
+                            imageVector = Icons.Outlined.LocationOn,
+                            contentDescription = null,
+                            tint = ext.secondaryText,
+                            modifier = Modifier.size(13.dp),
+                        )
                         Text(
                             text = place,
                             style = MaterialTheme.typography.labelMedium,
@@ -169,14 +190,43 @@ fun AnnouncementCard(
     }
 }
 
-/** Кішкентай белгі (HOT/VIP) — иконкамен немесе жай мәтінмен. */
+/** Суреттің бұрышындағы жүрек — ақ дөңгелек фонда (суретте де көрінеді). */
 @Composable
-private fun Badge(
-    icon: androidx.compose.ui.graphics.vector.ImageVector?,
+private fun FavoriteButton(
+    isFavorite: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .padding(5.dp)
+            .size(26.dp)
+            .clip(CircleShape)
+            .background(extendedColors().card.copy(alpha = 0.92f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+            contentDescription = stringResource(L10nR.string.favorites_title),
+            tint = if (isFavorite) MaterialTheme.colorScheme.error else extendedColors().secondaryText,
+            modifier = Modifier.size(16.dp),
+        )
+    }
+}
+
+/** Кішкентай белгі (HOT/VIP) — түсті жұмсақ фондағы чип. */
+@Composable
+private fun MarkerChip(
+    icon: ImageVector?,
     text: String,
-    color: androidx.compose.ui.graphics.Color,
+    color: Color,
 ) {
     Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(color.copy(alpha = 0.12f))
+            .padding(horizontal = 6.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
@@ -185,14 +235,14 @@ private fun Badge(
                 imageVector = icon,
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(14.dp),
-            )
-        } else {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelSmall,
-                color = color,
+                modifier = Modifier.size(12.dp),
             )
         }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = color,
+            maxLines = 1,
+        )
     }
 }

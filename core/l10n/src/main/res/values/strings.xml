@@ -2,6 +2,7 @@
 <!-- ӘДЕПКІ ТІЛ — ҚАЗАҚША (kk). Барлық пайдаланушыға көрінетін мәтін осында. -->
 <resources>
     <string name="app_name">Agroland</string>
+    <string name="app_tagline">Агромаркетплейс</string>
 
     <!-- Ортақ -->
     <string name="common_retry">Қайталау</string>
@@ -39,14 +40,17 @@
     <string name="tab_chat">Чат</string>
     <string name="tab_cart">Себет</string>
     <string name="tab_services">Қызметтер</string>
-    <string name="tab_create">Құру</string>
+    <string name="tab_create">Қосу</string>
 
     <!-- Басты бет -->
     <string name="home_search_hint">Тауар немесе қызмет іздеу…</string>
     <string name="home_filter">Сүзгі</string>
     <string name="home_tab_announcements">Жарнамалар</string>
-    <string name="home_tab_agro">Agro маркет</string>
+    <string name="home_recommended_title">Ұсынылады</string>
+    <string name="home_tab_agro">Agro Market</string>
     <string name="home_tab_china">Қытай тауарлары</string>
+    <!-- Таб-пиллге сыятын қысқа нұсқа (толығы — home_tab_china). -->
+    <string name="home_tab_china_short">MercuryX</string>
     <string name="home_scan_qr">QR сканерлеу</string>
 
     <!-- Профиль / кіру (Phase 3 кеңейтіледі) -->
@@ -56,6 +60,8 @@
     <string name="auth_login_title">Кіру</string>
     <string name="auth_register_title">Тіркелу</string>
     <string name="auth_phone_hint">Телефон номері</string>
+    <string name="auth_login_subtitle">Телефон нөміріңізді енгізіңіз, SMS-код жібереміз</string>
+    <string name="auth_no_account">Аккаунтыңыз жоқ па?</string>
     <string name="auth_phone_error">Телефон номері дұрыс емес</string>
     <string name="auth_name_hint">Аты-жөніңіз</string>
     <string name="auth_name_error">Атыңызды енгізіңіз</string>
@@ -219,6 +225,16 @@
     <string name="detail_similar">Ұқсас жарнамалар</string>
     <string name="detail_additional">Сатушының басқа жарнамалары</string>
 
+    <!-- Деталь: байланыс — «Хабарласу» екі арнаға бөлінеді -->
+    <string name="detail_contact">Хабарласу</string>
+    <string name="detail_contact_choose">Қалай хабарласасыз?</string>
+    <string name="detail_contact_in_app">Жүйе ішінде жазу</string>
+    <string name="detail_contact_in_app_hint">Agroland чаты — қосымша ішінде сөйлесу</string>
+    <string name="detail_contact_sms">SMS жазу</string>
+    <string name="detail_contact_sms_hint">Телефон нөміріне хабарлама жіберу</string>
+    <string name="detail_contact_whatsapp">WhatsApp</string>
+    <string name="detail_contact_whatsapp_hint">Нөмір бойынша WhatsApp-та жазу</string>
+
     <!-- Маркетплейс: жазу режимі (Phase 6) -->
     <string name="common_change">Өзгерту</string>
     <string name="create_or_offer_title">Не құрамыз?</string>
@@ -342,6 +358,7 @@
     <string name="cart_title">Себет</string>
     <string name="cart_login_prompt">Себетті көру үшін жүйеге кіріңіз</string>
     <string name="chat_login_prompt">Чатты көру үшін жүйеге кіріңіз</string>
+    <string name="profile_login_prompt">Профильді көру үшін жүйеге кіріңіз</string>
     <string name="cart_empty">Себет бос</string>
     <string name="cart_empty_hint">Жарнамалардан тауар қосыңыз</string>
     <string name="cart_select_all">Барлығын таңдау</string>
@@ -585,6 +602,10 @@
     <string name="cannot_open_link">Сілтемені ашу мүмкін болмады</string>
     <string name="story_cta">Толығырақ</string>
     <string name="story_advertise">Жарнаманы көтеру</string>
+    <!-- Сторис жолындағы қысқа промо атаулары (84dp карточкаға сияды). -->
+    <string name="story_create_short">Құру</string>
+    <string name="story_advertise_short">Көтеру</string>
+    <string name="story_promoted_short">Топта</string>
     <string name="story_promoted">Көтерілгендер</string>
     <!-- Фаза 15: Промо v2 -->
     <string name="advertise">Жарнаманы көтеру</string>
@@ -897,4 +918,40 @@
     <string name="demand_deactivated">Сұраныс тоқтатылды</string>
     <string name="demand_validation_title">Тақырыпты енгізіңіз</string>
     <string name="demand_created_at">Жарияланған</string>
+
+    <!-- Force-update диалогі (Фаза 20, Flutter app_version_service parity) -->
+    <string name="update_available">Жаңарту қолжетімді</string>
+    <string name="update_message">Қосымшаның жаңа нұсқасы шықты. Жаңа функциялар мен жақсартулар қосылды. Қосымшаны жаңартуды ұсынамыз.</string>
+    <string name="update_action">Жаңарту</string>
+    <string name="detail_published_at">Жарияланған уақыты: %s</string>
+    <string name="detail_tab_info">Ақпарат</string>
+    <string name="detail_tab_specs">Сипаттама</string>
+    <string name="detail_delivery_pickup">Жеткізу / Өзі алу</string>
+    <string name="detail_vat_chip">ҚҚС қоса</string>
+    <string name="detail_negotiable_chip">Келісімді</string>
+    <string name="detail_seller">Сатушы</string>
+    <string name="detail_seller_all_ads">Пайдаланушының барлық жарнамалары</string>
+    <string name="detail_member_since_short">Agroland-та %s бастап</string>
+    <string name="detail_write">Жазу</string>
+    <string name="detail_call_phone">Телефонмен қоңырау шалу</string>
+    <string name="detail_call_in_app">Қолданба ішінде қоңырау</string>
+    <string name="detail_call_in_app_hint">Интернет арқылы тегін дауыстық қоңырау</string>
+    <string name="detail_no_phone">Сатушы телефон нөмірін көрсетпеген</string>
+    <string name="detail_sku">Артикул</string>
+    <string name="detail_stock">Қоймада</string>
+    <string name="detail_no_delivery_info">Жеткізу туралы ақпарат жоқ</string>
+    <string name="attach_camera">Камера</string>
+    <string name="attach_video">Бейне</string>
+    <string name="attach_document">Құжат</string>
+    <string name="attach_location">Орналасу</string>
+    <string name="attach_audio_short">Аудио</string>
+    <string name="voice_slide_to_cancel">Болдырмау үшін солға сырғытыңыз</string>
+    <string name="voice_hold_to_record">Дауыстық хабарлама үшін басып тұрыңыз</string>
+    <string name="chat_mic_permission_denied">Дауыстық хабарлама үшін микрофонға рұқсат беріңіз</string>
+    <string name="chat_camera_permission_denied">Камераға рұқсат берілмеді</string>
+    <string name="chat_swipe_mute">Дыбыссыз</string>
+    <string name="chat_swipe_unmute">Дыбыс қосу</string>
+    <string name="chat_swipe_delete">Жою</string>
+    <string name="chat_swipe_archive">Мұрағат</string>
+    <string name="chat_day_today">Бүгін</string>
 </resources>

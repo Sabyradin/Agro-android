@@ -1,5 +1,6 @@
 package com.agroland.feature.auth.session
 
+import com.agroland.core.analytics.MonitoringService
 import com.agroland.core.network.auth.AuthInterceptor
 import com.agroland.core.network.auth.TokenStore
 import javax.inject.Inject
@@ -21,6 +22,7 @@ sealed interface SessionState {
 class SessionController @Inject constructor(
     private val tokenStore: TokenStore,
     authInterceptor: AuthInterceptor,
+    private val monitoringService: MonitoringService,
 ) {
     private val _state = MutableStateFlow<SessionState>(SessionState.Loading)
     val state: StateFlow<SessionState> = _state
@@ -40,6 +42,9 @@ class SessionController @Inject constructor(
 
     /** Пайдаланушы шыққанда. */
     fun onLoggedOut() {
+        // Фаза 19: logout мониторинг оқиғасы (Flutter AuthNotifier.signOut/
+        // deleteAccount → trackLogout) — мұнда барлық шығу жолы орталықтанған.
+        monitoringService.trackLogout()
         tokenStore.clear()
         _state.value = SessionState.Guest
     }

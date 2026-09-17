@@ -30,6 +30,8 @@ android {
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:network"))
+    // Фаза 19: login/registration/logout мониторинг оқиғалары.
+    implementation(project(":core:analytics"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)

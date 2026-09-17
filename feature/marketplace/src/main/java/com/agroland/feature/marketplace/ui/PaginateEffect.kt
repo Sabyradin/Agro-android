@@ -26,3 +26,29 @@ fun PaginateEffect(
         if (shouldLoadMore && !exhausted && !loadingMore) onLoadMore()
     }
 }
+/**
+ * [PaginateEffect]-тің тор (LazyVerticalGrid) нұсқасы.
+ *
+ * Торда лентадан бөлек тақырып элементтері де бар, сондықтан көрінетін
+ * индекс лента элементтерінің санымен емес, тордың ЖАЛПЫ элемент санымен
+ * салыстырылады.
+ */
+@Composable
+fun PaginateGridEffect(
+    gridState: androidx.compose.foundation.lazy.grid.LazyGridState,
+    itemCount: Int,
+    exhausted: Boolean,
+    loadingMore: Boolean,
+    onLoadMore: () -> Unit,
+) {
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val info = gridState.layoutInfo
+            val last = info.visibleItemsInfo.lastOrNull()?.index ?: 0
+            itemCount > 0 && last >= info.totalItemsCount - 4
+        }
+    }
+    LaunchedEffect(shouldLoadMore, exhausted, loadingMore) {
+        if (shouldLoadMore && !exhausted && !loadingMore) onLoadMore()
+    }
+}

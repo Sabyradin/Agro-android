@@ -595,7 +595,21 @@ class ChatRoomViewModel @Inject constructor(
 
     /** Мәтіндік хабарлама жіберу (Flutter _sendMessage паритеті). */
     fun sendMessage() {
-        val me = _state.value.me ?: return
+        val me = _state.value.me
+        if (me == null) {
+            // Профиль әлі жүктелмеген: бұрын батырма үнсіз ештеңе істемейтін.
+            // Жүктеп алып, сол мәтінді қайта жібереміз.
+            viewModelScope.launch {
+                val loaded = currentUser.get()
+                if (loaded != null) {
+                    _state.value = _state.value.copy(me = loaded)
+                    sendMessage()
+                } else {
+                    _events.tryEmit(ChatRoomEvent.Toast.SEND_ERROR)
+                }
+            }
+            return
+        }
         var msg = _state.value.input.trim()
         if (msg.isEmpty()) return
         val receiverId = receiverIdFor()
@@ -809,6 +823,7 @@ class ChatRoomViewModel @Inject constructor(
                         messageType = "audio",
                         fileUrl = result.value,
                         fileName = null,
+                        audioDurationSec = durationSec,
                     )
                 }
                 is ApiResult.Error -> {
@@ -858,7 +873,13 @@ class ChatRoomViewModel @Inject constructor(
     }
 
     /** Медиа upload сәтті — chat_message emit (Flutter payload паритеті). */
-    private fun emitMediaMessage(message: String, messageType: String, fileUrl: String, fileName: String?) {
+    private fun emitMediaMessage(
+        message: String,
+        messageType: String,
+        fileUrl: String,
+        fileName: String?,
+        audioDurationSec: Int? = null,
+    ) {
         if (roomName == null || !manager.connected) {
             _events.tryEmit(ChatRoomEvent.Toast.CONNECTION_LOST)
             return
@@ -879,7 +900,7 @@ class ChatRoomViewModel @Inject constructor(
             fileUrl = fileUrl,
             fileName = fileName,
             audioUrl = if (messageType == "audio") fileUrl else null,
-            audioDuration = null,
+            audioDuration = audioDurationSec,
             latitude = null,
             longitude = null,
             locationName = null,
@@ -1212,11 +1233,9 @@ class ChatRoomViewModel @Inject constructor(
             message.announcement?.id?.let { id ->
                 if (id !in known) prefetchAnnouncement(id)
             }
-            Regex("\\[announcement_id:(\\d+)]").find(message.message)?.groupValues?.get(1)
-                ?.toLongOrNull()
-                ?.let { id ->
-                    if (id !in known) prefetchAnnouncement(id)
-                }
+            announcementIdIn(message.message)?.let { id ->
+                if (id !in known) prefetchAnnouncement(id)
+            }
         }
     }
 
@@ -1252,11 +1271,20 @@ class ChatRoomViewModel @Inject constructor(
         message.announcement?.let { ann ->
             return AnnouncementCard(ann.id, ann.title, ann.price, ann.mainImageUrl)
         }
-        val id = Regex("\\[announcement_id:(\\d+)]").find(message.message)?.groupValues?.get(1)
-            ?.toLongOrNull() ?: return null
+        val id = announcementIdIn(message.message) ?: return null
         return _state.value.announcements[id] ?: _state.value.initialAnnouncementId
             ?.takeIf { it == id }
             ?.let { annId -> _state.value.announcements[annId] }
+    }
+
+    /**
+     * Хабарламадағы жарнама id-і: [announcement_id:N] тегі НЕМЕСЕ
+     * agroland.kz/announcement/<slug>-N сілтемесі (WhatsApp-тағыдай превью үшін).
+     */
+    private fun announcementIdIn(text: String): Long? {
+        Regex("\\[announcement_id:(\\d+)]").find(text)?.groupValues?.get(1)?.toLongOrNull()?.let { return it }
+        return Regex("agroland\\.kz/announcement/(?:[^\\s/?#]*-)?(\\d+)(?![\\w-])")
+            .find(text)?.groupValues?.get(1)?.toLongOrNull()
     }
 
     /** Delivery request хабарламасы ма? */

@@ -23,6 +23,11 @@ class JsonParserTest {
         put("items", kotlinx.serialization.json.buildJsonArray { add(kotlinx.serialization.json.JsonPrimitive(1)); add(kotlinx.serialization.json.JsonPrimitive(2)) })
         put("single_item", buildJsonObject { put("x", 1) })
         put("nested", buildJsonObject { put("deep", "value") })
+        // Backend бүтін өрістерді бөлшекпен де жібереді: "rating": 4.0.
+        put("rating", 4.0)
+        put("rating_str", "5.0")
+        put("rating_half", 4.6)
+        put("big", 9007199254.0)
     }
 
     @Test
@@ -33,6 +38,18 @@ class JsonParserTest {
     @Test
     fun `int from string`() {
         assertEquals(777, JsonParser.int(obj, "id_str"))
+    }
+
+    @Test
+    fun `int from float number and float string`() {
+        assertEquals(4, JsonParser.int(obj, "rating"))
+        assertEquals(5, JsonParser.int(obj, "rating_str"))
+        assertEquals(5, JsonParser.int(obj, "rating_half"))
+    }
+
+    @Test
+    fun `long from float number`() {
+        assertEquals(9007199254L, JsonParser.long(obj, "big"))
     }
 
     @Test

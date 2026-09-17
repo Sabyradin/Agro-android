@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Badge
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.Headset
 import androidx.compose.material.icons.outlined.Inventory2
@@ -60,6 +60,8 @@ import com.agroland.core.ui.components.AgroScaffold
 import com.agroland.core.ui.components.AgroSwitch
 import com.agroland.core.ui.components.CachedImage
 import com.agroland.core.ui.components.CenteredContent
+import com.agroland.core.ui.components.ErrorWithRetry
+import com.agroland.core.ui.components.GuestGate
 import com.agroland.core.ui.components.LoadingWidget
 import com.agroland.core.ui.theme.extendedColors
 import com.agroland.feature.profile.data.UserProfile
@@ -72,6 +74,8 @@ import com.agroland.feature.profile.data.UserProfile
 @Composable
 fun ProfilePage(
     isAuthorized: Boolean,
+    /** Артқа қайту — бет басты беттің аватарынан ашылады. */
+    onBack: (() -> Unit)? = null,
     themeMode: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
     onLoginClick: () -> Unit,
@@ -87,6 +91,8 @@ fun ProfilePage(
     onMyDemands: () -> Unit = {},
     /** «Менің пікірлерім» — spec §10 (Фаза 18). */
     onOpenMyReviews: () -> Unit = {},
+    /** «Таңдаулылар» — басты беттің жоғарғы жолағы жеңілдетілгенде осында көшті. */
+    onOpenFavorites: () -> Unit = {},
     onOpenSupportChat: () -> Unit = {},
     onDealerProducts: (Int) -> Unit = {},
     onDealerOrders: (Int) -> Unit = {},
@@ -121,6 +127,7 @@ fun ProfilePage(
         topBar = {
             AgroAppBar(
                 title = stringResource(L10nR.string.profile_title),
+                onBack = onBack,
                 actions = {
                     if (isAuthorized) {
                         AgroIconButton(
@@ -136,12 +143,9 @@ fun ProfilePage(
         Box(modifier = modifier) {
             when {
                 !isAuthorized -> GuestProfile(onLoginClick = onLoginClick)
-                loading && profile == null -> LoadingWidget()
+                loading && profile == null -> LoadingWidget(Modifier.fillMaxSize())
                 profile == null -> CenteredContent {
-                    AgroButton(
-                        text = stringResource(L10nR.string.common_retry),
-                        onClick = { viewModel.refresh() },
-                    )
+                    ErrorWithRetry(onRetry = { viewModel.refresh() })
                 }
                 else -> AuthorizedProfileContent(
                     profile = profile!!,
@@ -152,6 +156,7 @@ fun ProfilePage(
                     onAddresses = onAddresses,
                     onCompanySettings = onCompanySettings,
                     onVerification = onVerification,
+                    onOpenFavorites = onOpenFavorites,
                     onOpenWallet = onOpenWallet,
                     onOpenTransactions = onOpenTransactions,
                     onOpenTopUp = onOpenTopUp,
@@ -169,25 +174,15 @@ fun ProfilePage(
     }
 }
 
-/** Қонақ күйі — кіруге ұсыныс. */
+/** Қонақ күйі — кіруге ұсыныс (себет/чат қойындыларымен бірдей көрініс). */
 @Composable
 private fun GuestProfile(onLoginClick: () -> Unit) {
-    CenteredContent {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Outlined.Person,
-                contentDescription = null,
-                tint = extendedColors().secondaryText,
-                modifier = Modifier.size(56.dp),
-            )
-            Box(modifier = Modifier.height(16.dp))
-            AgroButton(
-                text = stringResource(L10nR.string.auth_login_title),
-                onClick = onLoginClick,
-                modifier = Modifier.padding(horizontal = 48.dp).fillMaxWidth(),
-            )
-        }
-    }
+    GuestGate(
+        icon = Icons.Outlined.Person,
+        message = stringResource(L10nR.string.profile_login_prompt),
+        loginText = stringResource(L10nR.string.auth_login_title),
+        onLoginClick = onLoginClick,
+    )
 }
 
 @Composable
@@ -200,6 +195,7 @@ private fun AuthorizedProfileContent(
     onAddresses: () -> Unit,
     onCompanySettings: () -> Unit,
     onVerification: () -> Unit,
+    onOpenFavorites: () -> Unit,
     onOpenWallet: () -> Unit,
     onOpenTransactions: () -> Unit,
     onOpenTopUp: () -> Unit,
@@ -278,6 +274,12 @@ private fun AuthorizedProfileContent(
                     title = stringResource(L10nR.string.profile_verification),
                     leading = { SectionIcon(Icons.Outlined.Verified) },
                     onClick = onVerification,
+                )
+                // «Таңдаулылар» — Flutter-дегідей профильден ашылады.
+                AgroListTile(
+                    title = stringResource(L10nR.string.favorites_title),
+                    leading = { SectionIcon(Icons.Outlined.FavoriteBorder) },
+                    onClick = onOpenFavorites,
                 )
                 // «Сұраныстарым» — өз сұраныстарын басқару (Фаза 17).
                 AgroListTile(

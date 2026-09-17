@@ -8,15 +8,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -52,8 +51,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.agroland.core.l10n.R as L10nR
+import com.agroland.core.ui.components.AgroIconCircle
 import com.agroland.core.ui.components.AgroSearchField
+import com.agroland.core.ui.components.shellBottomPadding
+import com.agroland.core.ui.theme.AgroSpacing
 import com.agroland.core.ui.theme.extendedColors
 
 /** Сервистер бетінің жолы: иконка + атау (+ сипаттама). */
@@ -118,16 +121,31 @@ fun ServicesPage(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = shellBottomPadding()),
     ) {
-        AgroSearchField(
-            value = query,
-            onValueChange = { query = it },
-            hint = stringResource(L10nR.string.search_hint),
+        // Жоғарғы жолақ: бет атауы + іздеу (статус-барға кірмейді).
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp),
-        )
+                .background(ext.card)
+                .statusBarsPadding()
+                .padding(horizontal = AgroSpacing.screen, vertical = AgroSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(AgroSpacing.md),
+        ) {
+            Text(
+                text = stringResource(L10nR.string.tab_services),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = ext.primaryText,
+            )
+            AgroSearchField(
+                value = query,
+                onValueChange = { query = it },
+                hint = stringResource(L10nR.string.search_hint),
+            )
+        }
+        Spacer(Modifier.height(AgroSpacing.screen))
 
         if (filtered.isEmpty()) {
             Text(
@@ -140,14 +158,15 @@ fun ServicesPage(
                 textAlign = TextAlign.Center,
             )
         } else {
-            // 4-бақаналы grid (Flutter GridView, childAspectRatio 0.82)
+            // 3-бақаналы grid: 4 бақанада плитка ені ~80dp болып, ұзын
+            // атаулар («Агро-консалтинг») сөздің ортасынан үзілетін.
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                filtered.chunked(4).forEach { rowItems ->
+                filtered.chunked(ServiceGridColumns).forEach { rowItems ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -158,10 +177,10 @@ fun ServicesPage(
                                 onClick = { if (service.isEgov) onOpenEgov() },
                                 modifier = Modifier
                                     .weight(1f)
-                                    .aspectRatio(0.82f),
+                                    .height(ServiceTileHeight),
                             )
                         }
-                        repeat(4 - rowItems.size) { Spacer(Modifier.weight(1f)) }
+                        repeat(ServiceGridColumns - rowItems.size) { Spacer(Modifier.weight(1f)) }
                     }
                 }
             }
@@ -207,7 +226,13 @@ fun ServicesPage(
     }
 }
 
-/** Сервис плиткасы — дөңгелек иконка + атау + сипаттама. */
+/** Grid бақандарының саны. */
+private const val ServiceGridColumns = 3
+
+/** Барлық плитка бірдей биіктікте — жолдар «сатылап» кетпейді. */
+private val ServiceTileHeight = 108.dp
+
+/** Сервис плиткасы — дөңгелек иконка + атау. */
 @Composable
 private fun ServiceTile(
     service: ServiceItem,
@@ -219,42 +244,27 @@ private fun ServiceTile(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(4.dp),
+            .padding(horizontal = 2.dp, vertical = AgroSpacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = service.icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(26.dp),
-            )
-        }
-        Spacer(Modifier.height(8.dp))
+        AgroIconCircle(
+            icon = service.icon,
+            size = 52.dp,
+            iconSize = 26.dp,
+            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+        )
+        Spacer(Modifier.height(AgroSpacing.sm))
+        // Тек атау: 4 бақанада сипаттама бәрібір «...» болып қиылатын,
+        // ал биіктік жетпей мәтіннің асты кесілетін.
         Text(
             text = stringResource(service.titleRes),
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
             color = ext.primaryText,
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = stringResource(service.descriptionRes),
-            style = MaterialTheme.typography.labelSmall,
-            color = ext.secondaryText,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
+            lineHeight = 14.sp,
         )
     }
 }

@@ -31,7 +31,9 @@ fun AgroAppBar(
         title = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                ),
                 color = extendedColors().primaryText,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

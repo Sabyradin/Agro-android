@@ -99,7 +99,10 @@ fun ChinaCatalogContent(
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 24.dp),
+            // Қалқымалы төменгі навигация соңғы карточканы жаппауы үшін.
+            contentPadding = PaddingValues(
+                bottom = com.agroland.core.ui.components.shellBottomPadding(extra = 24.dp),
+            ),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item { ChinaHeroCard() }

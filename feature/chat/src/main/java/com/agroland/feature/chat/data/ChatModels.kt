@@ -153,7 +153,10 @@ object ChatParser {
 
     private fun strOrNull(obj: JsonObject, key: String): String? {
         val el = obj[key] ?: return null
-        return (el as? JsonPrimitive)?.content
+        // JSON null → JsonNull, оның content-і "null" жолы: UI-да «null» болып
+        // шықпас үшін нақты null қайтарамыз (reply_to_message т.б.).
+        if (el is kotlinx.serialization.json.JsonNull) return null
+        return (el as? JsonPrimitive)?.content?.takeIf { it != "null" }
     }
 
     private fun longOrNull(obj: JsonObject, key: String): Long? =

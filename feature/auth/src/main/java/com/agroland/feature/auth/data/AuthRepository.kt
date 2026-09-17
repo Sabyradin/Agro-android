@@ -102,19 +102,8 @@ class AuthRepository @Inject constructor(
      *  - тура «task_id» өрісінен, болмаса
      *  - links ішіндегі /auth/mfa/{task_id} href-інен.
      */
-    internal fun extractTaskId(root: JsonObject?): String? {
-        JsonParser.string(root, "task_id")?.let { return it }
-        val links = root?.get("links") as? JsonObject ?: return null
-        links.values.forEach { value ->
-            val href = (value as? JsonObject)?.let { JsonParser.string(it, "href") } ?: return@forEach
-            val idx = href.indexOf("mfa/")
-            if (idx >= 0) {
-                val candidate = href.substring(idx + 4).substringBefore('?').substringBefore('/')
-                if (candidate.isNotBlank()) return candidate
-            }
-        }
-        return null
-    }
+    internal fun extractTaskId(root: JsonObject?): String? =
+        AuthTaskIdParser.extract(root)
 
     /** {access_token, refresh_token, biometric_token} — кешірімді парсинг. */
     internal fun parseTokens(root: JsonObject?): SessionTokens {

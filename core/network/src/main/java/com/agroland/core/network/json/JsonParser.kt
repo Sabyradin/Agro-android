@@ -54,17 +54,28 @@ object JsonParser {
         return (el as? JsonPrimitive)?.contentOrNull
     }
 
+    /**
+     * Бүтін сан. Backend бүтін өрістерді бөлшек санмен де жібереді
+     * (мыс. `"rating": 4.0`) — ондай мән дөңгелектеніп оқылады, әйтпесе
+     * өріс мүлдем жоғалып, әдепкі 0 қалып қоятын.
+     */
     fun int(root: JsonObject?, key: String): Int? {
         val el = root?.get(key) ?: return null
         return (el as? JsonPrimitive)?.let {
-            it.intOrNull ?: it.contentOrNull?.toIntOrNull()
+            it.intOrNull
+                ?: it.contentOrNull?.toIntOrNull()
+                ?: it.doubleOrNull?.let { value -> Math.round(value).toInt() }
+                ?: it.contentOrNull?.toDoubleOrNull()?.let { value -> Math.round(value).toInt() }
         }
     }
 
     fun long(root: JsonObject?, key: String): Long? {
         val el = root?.get(key) ?: return null
         return (el as? JsonPrimitive)?.let {
-            it.longOrNull ?: it.contentOrNull?.toLongOrNull()
+            it.longOrNull
+                ?: it.contentOrNull?.toLongOrNull()
+                ?: it.doubleOrNull?.let { value -> Math.round(value) }
+                ?: it.contentOrNull?.toDoubleOrNull()?.let { value -> Math.round(value) }
         }
     }
 

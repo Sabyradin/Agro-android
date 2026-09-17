@@ -36,11 +36,14 @@ fun AgroListTile(
     subtitle: String? = null,
     leading: (@Composable () -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
+    /** Жол жеке карточка болып тұрсын (топталмаған тізімдерде). */
+    containerColor: Color? = null,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
+            .then(if (containerColor != null) Modifier.background(containerColor) else Modifier)
             .then(
                 if (onClick != null) {
                     Modifier.clickable(onClick = onClick)
@@ -56,7 +59,7 @@ fun AgroListTile(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = extendedColors().primaryText,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

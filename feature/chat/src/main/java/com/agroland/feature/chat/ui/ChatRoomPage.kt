@@ -69,6 +69,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.material.icons.outlined.Call
+import androidx.compose.material.icons.automirrored.outlined.ArrowBackIos
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -227,6 +238,9 @@ fun ChatRoomPage(
         }
     }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
+    val micDeniedMsg = stringResource(L10nR.string.chat_mic_permission_denied)
+    val cameraDeniedMsg = stringResource(L10nR.string.chat_camera_permission_denied)
+    val holdHintMsg = stringResource(L10nR.string.voice_hold_to_record)
     val takePhoto = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture(),
     ) { ok ->
@@ -246,6 +260,47 @@ fun ChatRoomPage(
         }
     }
 
+    // Камера: манифестте CAMERA рұқсаты жарияланғандықтан, ACTION_IMAGE_CAPTURE
+    // рұқсатсыз SecurityException лақтырады — алдымен рұқсат сұраймыз.
+    var pendingCameraVideo by remember { mutableStateOf<Boolean?>(null) }
+    fun launchCamera(video: Boolean) {
+        try {
+            val uri = context.newCameraUri(video = video)
+            cameraUri = uri
+            if (video) recordVideo.launch(uri) else takePhoto.launch(uri)
+        } catch (_: Exception) {
+            scope.launch { snackbar.showSnackbar(cameraUnavailableMsg) }
+        }
+    }
+    val cameraPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        val video = pendingCameraVideo
+        pendingCameraVideo = null
+        if (granted && video != null) {
+            launchCamera(video)
+        } else if (!granted) {
+            scope.launch { snackbar.showSnackbar(cameraDeniedMsg) }
+        }
+    }
+    fun openCamera(video: Boolean) {
+        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA,
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (granted) {
+            launchCamera(video)
+        } else {
+            pendingCameraVideo = video
+            cameraPermission.launch(Manifest.permission.CAMERA)
+        }
+    }
+    val micPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        scope.launch { snackbar.showSnackbar(if (granted) holdHintMsg else micDeniedMsg) }
+    }
+
     @SuppressLint("MissingPermission")
     fun fetchLocation() {
         try {
@@ -256,7 +311,19 @@ fun ChatRoomPage(
                     if (loc != null) {
                         viewModel.sendLocation(loc.latitude, loc.longitude)
                     } else {
-                        scope.launch { snackbar.showSnackbar(locationErrorMsg) }
+                        // Кеште соңғы орын жоқ — нақты орынды сұраймыз.
+                        client.getCurrentLocation(
+                            com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+                            null,
+                        ).addOnSuccessListener { current ->
+                            if (current != null) {
+                                viewModel.sendLocation(current.latitude, current.longitude)
+                            } else {
+                                scope.launch { snackbar.showSnackbar(locationErrorMsg) }
+                            }
+                        }.addOnFailureListener {
+                            scope.launch { snackbar.showSnackbar(locationErrorMsg) }
+                        }
                     }
                 }
                 .addOnFailureListener {
@@ -291,35 +358,41 @@ fun ChatRoomPage(
 
     // --- Тізім модельі: күн ажыратқыштарымен ---
     val yesterdayLabel = stringResource(L10nR.string.yesterday)
+    val todayLabel = stringResource(L10nR.string.chat_day_today)
     val rows: List<RoomRow> = remember(state.messages) {
-        buildRows(state.messages, yesterdayLabel)
+        buildRows(state.messages, todayLabel, yesterdayLabel)
     }
 
+    // WhatsApp-тағыдай тізім астынан басталады: reverseLayout + кері реттегі
+    // қатарлар. Ашылғанда соңғы хабарлама бірден көрінеді, пернетақта
+    // ашылғанда тізім бірге көтеріледі, ескі хабарламалар жоғарыдан
+    // қосылғанда орын секірмейді.
+    val reversedRows = remember(rows) { rows.asReversed() }
     val listState = rememberLazyListState()
-    // prepend → визуалды позицияны сақтау (Flutter scroll-delta паритеті).
-    var lastPrepend by remember { mutableStateOf(0) }
-    LaunchedEffect(state.prependCount) {
-        if (state.prependCount > 0 && lastPrepend > 0) {
-            listState.scrollToItem(state.prependCount)
-        }
-        lastPrepend = state.prependCount
-    }
     // Жаңа хабарлама → төменге жылжу.
     LaunchedEffect(state.scrollToBottom) {
-        if (state.scrollToBottom > 0 && rows.isNotEmpty()) {
-            listState.animateScrollToItem(rows.lastIndex)
+        if (state.scrollToBottom > 0 && reversedRows.isNotEmpty()) {
+            if (listState.firstVisibleItemIndex <= 3) {
+                listState.animateScrollToItem(0)
+            } else {
+                listState.scrollToItem(0)
+            }
         }
     }
-    // Төбеге жақындағанда — ескі хабарламаларды жүктеу.
+    // Жоғарғы шетке (тізімнің соңына) жақындағанда — ескі хабарламаларды жүктеу.
     LaunchedEffect(state.roomId) {
-        snapshotFlow { listState.firstVisibleItemIndex }
+        snapshotFlow {
+            val info = listState.layoutInfo
+            val last = info.visibleItemsInfo.lastOrNull()?.index ?: 0
+            info.totalItemsCount > 0 && last >= info.totalItemsCount - 3
+        }
             .distinctUntilChanged()
-            .collect { index ->
-                if (index <= 2) viewModel.loadOlderMessages()
+            .collect { nearTop ->
+                if (nearTop) viewModel.loadOlderMessages()
             }
     }
     val showScrollDown by remember {
-        derivedStateOf { listState.firstVisibleItemIndex > 5 }
+        derivedStateOf { listState.firstVisibleItemIndex > 2 }
     }
 
     // --- Header деректері ---
@@ -358,14 +431,23 @@ fun ChatRoomPage(
         (!connected && !state.loadTimedOut && state.messages.isNotEmpty())
 
     // ================= UI =================
+    val palette = chatPalette()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colors.backgroundLight),
+            .background(palette.background)
+            // Пернетақта ашылса — енгізу жолағы оның үстіне көтеріледі;
+            // жабық кезде — жүйелік навигация жолағының үстінде тұрады.
+            .windowInsetsPadding(
+                androidx.compose.foundation.layout.WindowInsets.ime
+                    .union(androidx.compose.foundation.layout.WindowInsets.navigationBars)
+                    .only(androidx.compose.foundation.layout.WindowInsetsSides.Bottom),
+            ),
     ) {
         ChatRoomAppBar(
             title = roomTitle,
             subtitle = subtitle,
+            typing = state.peerTyping,
             avatarUrl = peerRoom?.otherUserAvatarUrl,
             isOnline = peerRoom?.isOnline == true,
             isSystemChat = peerRoom?.announcementAuthorId == 0L,
@@ -405,13 +487,14 @@ fun ChatRoomPage(
                 else -> {
                     LazyColumn(
                         state = listState,
+                        reverseLayout = true,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                            horizontal = 12.dp,
+                            horizontal = 10.dp,
                             vertical = 8.dp,
                         ),
                     ) {
-                        itemsIndexed(rows, key = { index, row -> rowKey(row, index) }) { _, row ->
+                        itemsIndexed(reversedRows, key = { index, row -> rowKey(row, index) }) { _, row ->
                             when (row) {
                                 is RoomRow.Day -> DaySeparator(row.label)
                                 is RoomRow.Msg -> MessageRow(
@@ -421,6 +504,7 @@ fun ChatRoomPage(
                                     viewModel = viewModel,
                                     meId = meId,
                                     onLongPress = { menuMessage = row.message },
+                                    onSwipeReply = { viewModel.setReplyTo(row.message) },
                                     onOpenImage = { url ->
                                         val openPhoto = onOpenPhotoViewer
                                         if (openPhoto != null) {
@@ -486,7 +570,7 @@ fun ChatRoomPage(
                                     .clip(CircleShape)
                                     .clickable {
                                         scope.launch {
-                                            if (rows.isNotEmpty()) listState.animateScrollToItem(rows.lastIndex)
+                                            if (reversedRows.isNotEmpty()) listState.animateScrollToItem(0)
                                         }
                                     }
                                     .padding(8.dp),
@@ -540,15 +624,18 @@ fun ChatRoomPage(
             onPickFile = { filePicker.launch(arrayOf("*/*")) },
             onPickAudio = { audioPicker.launch(arrayOf("audio/*")) },
             onPickLocation = { pickLocation() },
-            onTakePhoto = {
-                val uri = context.newCameraUri(video = false)
-                cameraUri = uri
-                takePhoto.launch(uri)
+            onTakePhoto = { openCamera(video = false) },
+            onRecordVideo = { openCamera(video = true) },
+            hasMicPermission = {
+                androidx.core.content.ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.RECORD_AUDIO,
+                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
             },
-            onRecordVideo = {
-                val uri = context.newCameraUri(video = true)
-                cameraUri = uri
-                recordVideo.launch(uri)
+            onRequestMicPermission = { micPermission.launch(Manifest.permission.RECORD_AUDIO) },
+            onHoldHint = { scope.launch { snackbar.showSnackbar(holdHintMsg) } },
+            replyAuthor = state.replyTo?.let { target ->
+                if (target.senderId == meId) target.senderName else roomTitle
             },
             onSendVoice = { path, duration -> viewModel.sendAudioRecording(path, duration) },
             onVoiceError = { scope.launch { snackbar.showSnackbar(recordErrorMsg) } },
@@ -677,19 +764,32 @@ fun ChatRoomPage(
 // ================= Бөлшектер =================
 
 /** Күн ажыратқыштарымен тізім қатарлары. */
-private fun buildRows(messages: List<ChatMessage>, yesterdayLabel: String): List<RoomRow> {
+private fun buildRows(messages: List<ChatMessage>, todayLabel: String, yesterdayLabel: String): List<RoomRow> {
+    val todayStart = java.util.Calendar.getInstance().apply {
+        set(java.util.Calendar.HOUR_OF_DAY, 0)
+        clear(java.util.Calendar.MINUTE)
+        clear(java.util.Calendar.SECOND)
+        clear(java.util.Calendar.MILLISECOND)
+    }.timeInMillis
+    val yesterdayStart = todayStart - 24L * 60 * 60 * 1000
     val result = mutableListOf<RoomRow>()
     var lastDay = -1L
     for (message in messages) {
         val day = java.util.Calendar.getInstance().apply {
             timeInMillis = message.timestamp
-            clear(java.util.Calendar.HOUR_OF_DAY)
+            set(java.util.Calendar.HOUR_OF_DAY, 0)
             clear(java.util.Calendar.MINUTE)
             clear(java.util.Calendar.SECOND)
             clear(java.util.Calendar.MILLISECOND)
         }.timeInMillis
         if (day != lastDay) {
-            result.add(RoomRow.Day(day, FormatLastSeen.formatRelative(day, yesterdayLabel, day)))
+            // Күн чипі: «Бүгін» / «Кеше» / күні (бұрын әр күнге уақыт жазылатын).
+            val label = when {
+                day >= todayStart -> todayLabel
+                day >= yesterdayStart -> yesterdayLabel
+                else -> FormatLastSeen.formatDate(day)
+            }
+            result.add(RoomRow.Day(day, label))
             lastDay = day
         }
         result.add(RoomRow.Msg(message))
@@ -704,11 +804,12 @@ private fun rowKey(row: RoomRow, index: Int): String = when (row) {
         ?: "idx_$index"
 }
 
-/** Бөлме тақырып жолағы: кері + аватар + атау + last seen/typing + меню. */
+/** Бөлме тақырып жолағы (WhatsApp): ‹ + аватар + атау/күй + қоңырау + мәзір. */
 @Composable
 private fun ChatRoomAppBar(
     title: String,
     subtitle: String,
+    typing: Boolean,
     avatarUrl: String?,
     isOnline: Boolean,
     isSystemChat: Boolean,
@@ -722,29 +823,30 @@ private fun ChatRoomAppBar(
     onArchive: () -> Unit,
     onBack: () -> Unit,
 ) {
-    val colors = extendedColors()
-    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 2.dp) {
+    val palette = chatPalette()
+    Surface(color = palette.inputBar, shadowElevation = 1.dp) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 4.dp, vertical = 6.dp),
+                .padding(end = 4.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
                 Icon(
-                    Icons.AutoMirrored.Outlined.ArrowBack,
+                    Icons.AutoMirrored.Outlined.ArrowBackIos,
                     contentDescription = stringResource(L10nR.string.common_cancel),
-                    tint = colors.primaryText,
+                    tint = palette.accent,
+                    modifier = Modifier.size(22.dp),
                 )
             }
             ChatAvatar(
                 avatarUrl = avatarUrl,
                 name = title,
-                isOnline = isOnline,
+                isOnline = false,
                 isSystemChat = isSystemChat,
                 peerId = peerId,
-                size = 38,
+                size = 40,
             )
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
@@ -752,38 +854,30 @@ private fun ChatRoomAppBar(
                     title,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = colors.primaryText,
+                    color = palette.text,
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
                 if (subtitle.isNotBlank()) {
                     Text(
                         subtitle,
-                        fontSize = 12.sp,
-                        color = if (subtitle == stringResource(L10nR.string.typing)) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            colors.secondaryText
-                        },
+                        fontSize = 12.5.sp,
+                        color = if (typing || isOnline) palette.accent else palette.meta,
                         maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     )
                 }
             }
-            // Фаза 13: дауыстық қоңырау (жүйелік чатта жоқ; қоңырау жүріп
-            // жатқанда disabled — сұр, басуға келмейді).
             if (onVoiceCall != null) {
                 IconButton(
                     onClick = onVoiceCall,
                     enabled = !callActive,
                 ) {
                     Icon(
-                        Icons.Filled.Phone,
+                        Icons.Outlined.Call,
                         contentDescription = stringResource(L10nR.string.call_incoming_title),
-                        tint = if (callActive) {
-                            colors.secondaryText.copy(alpha = 0.45f)
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        },
+                        tint = if (callActive) palette.meta.copy(alpha = 0.45f) else palette.accent,
+                        modifier = Modifier.size(25.dp),
                     )
                 }
             }
@@ -792,7 +886,7 @@ private fun ChatRoomAppBar(
                     Icon(
                         Icons.Outlined.MoreVert,
                         contentDescription = null,
-                        tint = colors.primaryText,
+                        tint = palette.accent,
                     )
                 }
                 DropdownMenu(
@@ -824,54 +918,54 @@ private fun ChatRoomAppBar(
 /** Байланыс банері: connecting → spinner; timeout → retry. */
 @Composable
 private fun ConnectionBanner(connecting: Boolean, onRetry: () -> Unit) {
-    val colors = extendedColors()
+    val palette = chatPalette()
     Surface(
         modifier = Modifier.padding(8.dp),
-        shape = RoundedCornerShape(12.dp),
-        color = colors.card,
+        shape = RoundedCornerShape(50),
+        color = palette.dayChip,
         shadowElevation = 2.dp,
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (connecting) {
                 androidx.compose.material3.CircularProgressIndicator(
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(14.dp),
                     strokeWidth = 2.dp,
+                    color = palette.accent,
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     stringResource(L10nR.string.chat_connecting),
                     fontSize = 13.sp,
-                    color = colors.secondaryText,
+                    color = palette.meta,
                 )
             } else {
                 Icon(
                     Icons.Outlined.Wifi,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(16.dp),
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     stringResource(L10nR.string.chat_connection_lost_short),
                     fontSize = 13.sp,
-                    color = colors.primaryText,
+                    color = palette.text,
                 )
-                Spacer(Modifier.width(8.dp))
                 TextButton(onClick = onRetry) {
-                    Text(stringResource(L10nR.string.retry))
+                    Text(stringResource(L10nR.string.retry), color = palette.accent)
                 }
             }
         }
     }
 }
 
-/** Күн ажыратқышы. */
+/** Күн чипі — WhatsApp-тағыдай ақ, жұмсақ көлеңкелі. */
 @Composable
 private fun DaySeparator(label: String) {
-    val colors = extendedColors()
+    val palette = chatPalette()
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -879,21 +973,27 @@ private fun DaySeparator(label: String) {
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            shape = RoundedCornerShape(10.dp),
-            color = colors.grey.copy(alpha = 0.4f),
+            shape = RoundedCornerShape(8.dp),
+            color = palette.dayChip,
+            shadowElevation = 0.5.dp,
         ) {
             Text(
                 label,
-                fontSize = 12.sp,
-                color = colors.secondaryText,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.Medium,
+                color = palette.meta,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
             )
         }
     }
 }
 
-/** Бір хабарлама қатары — тип бойынша көпіршек + жарнама карточкасы. */
+/**
+ * Бір хабарлама қатары: тип бойынша көпіршек + (болса) жарнама карточкасы.
+ * WhatsApp мінезі: оңға сырғыту → жауап беру (жебе иконкасы шығып, діріл),
+ * ұзақ басу → әрекеттер парағы.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MessageRow(
@@ -903,6 +1003,7 @@ private fun MessageRow(
     viewModel: ChatRoomViewModel,
     meId: Long?,
     onLongPress: () -> Unit,
+    onSwipeReply: () -> Unit,
     onOpenImage: (String) -> Unit,
     onPlayVideo: (String) -> Unit,
     onOpenFile: (url: String, name: String) -> Unit,
@@ -910,91 +1011,217 @@ private fun MessageRow(
     onOpenAnnouncement: (Long) -> Unit,
     onAudioError: () -> Unit,
 ) {
-    val colors = extendedColors()
-    Column(
+    val palette = chatPalette()
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val triggerPx = with(density) { 64.dp.toPx() }
+    val swipe = remember { androidx.compose.animation.core.Animatable(0f) }
+    val dragValue = remember { floatArrayOf(0f) }
+    val armed = remember { booleanArrayOf(false) }
+    val rowScope = rememberCoroutineScope()
+    val currentReply by androidx.compose.runtime.rememberUpdatedState(onSwipeReply)
+
+    fun release() {
+        if (armed[0]) currentReply()
+        armed[0] = false
+        dragValue[0] = 0f
+        rowScope.launch {
+            swipe.animateTo(0f, androidx.compose.animation.core.spring(dampingRatio = 0.7f, stiffness = 500f))
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .combinedClickable(onClick = {}, onLongClick = onLongPress)
-            .padding(vertical = 2.dp),
-        horizontalAlignment = if (isMine) Alignment.End else Alignment.Start,
-    ) {
-        val display = message.displayText()
-        val deliveryRequest = viewModel.isDeliveryRequestMessage(message)
-        val isCall = com.agroland.feature.chat.domain.CallMessage.isCallMessage(message.message)
-        when {
-            isCall -> CallBubble(message = message, isMine = isMine)
-            deliveryRequest && !isMine -> DeliveryRequestCard(
-                message = message,
-                answered = viewModel.isAnsweredDeliveryRequest(message),
-                isDealer = true,
-                onQuickReply = { yes -> viewModel.onDeliveryQuickReply(message, yes) },
-            )
-            deliveryRequest && isMine -> {
-                if (viewModel.shouldShowDeliveryAnswer(message)) {
-                    DeliveryAnswerCard(
-                        requestMessage = message,
-                        chosen = state.buyerChosenIds.contains(message.id),
-                        onChoose = { choice -> viewModel.onBuyerChoiceForRequest(message, choice) },
-                    )
-                } else {
-                    DeliveryRequestCard(
-                        message = message,
-                        answered = false,
-                        isDealer = false,
-                        onQuickReply = {},
-                    )
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onDragEnd = { release() },
+                    onDragCancel = { release() },
+                ) { change, dragAmount ->
+                    val next = (dragValue[0] + dragAmount * 0.6f).coerceIn(0f, triggerPx * 1.3f)
+                    if (next > 0f || dragValue[0] > 0f) change.consume()
+                    dragValue[0] = next
+                    rowScope.launch { swipe.snapTo(next) }
+                    val nowArmed = next >= triggerPx
+                    if (nowArmed && !armed[0]) {
+                        haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    }
+                    armed[0] = nowArmed
                 }
+            },
+    ) {
+        // Сырғытқанда сол жақта шығатын жауап иконкасы.
+        val progress = (swipe.value / triggerPx).coerceIn(0f, 1f)
+        if (progress > 0f) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 4.dp)
+                    .size(34.dp)
+                    .graphicsLayer {
+                        alpha = progress
+                        scaleX = 0.6f + 0.4f * progress
+                        scaleY = 0.6f + 0.4f * progress
+                    }
+                    .clip(CircleShape)
+                    .background(palette.dayChip),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Outlined.Reply,
+                    contentDescription = null,
+                    tint = palette.meta,
+                    modifier = Modifier.size(20.dp),
+                )
             }
-            else -> when (InferMessageType.infer(message, display)) {
-                InferredMessageType.IMAGE -> ImageBubble(
-                    url = InferMessageType.mediaUrlFor(message),
-                    timestamp = message.timestamp,
-                    isMine = isMine,
-                    onOpenImage = onOpenImage,
-                )
-                InferredMessageType.VIDEO -> VideoBubble(
-                    url = InferMessageType.mediaUrlFor(message),
-                    timestamp = message.timestamp,
-                    isMine = isMine,
-                    onPlayVideo = onPlayVideo,
-                )
-                InferredMessageType.AUDIO -> VoiceBubble(
-                    audioUrl = message.audioUrl ?: InferMessageType.mediaUrlFor(message),
-                    durationSec = message.audioDuration,
-                    isMine = isMine,
-                    onError = onAudioError,
-                )
-                InferredMessageType.FILE -> FileBubble(
-                    fileName = message.fileName ?: "Файл",
-                    url = InferMessageType.mediaUrlFor(message),
-                    isMine = isMine,
-                    onOpen = {
-                        val url = InferMessageType.mediaUrlFor(message)
-                        if (url != null) onOpenFile(url, message.fileName ?: "file")
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer { translationX = swipe.value }
+                .combinedClickable(
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null,
+                    onClick = {},
+                    onLongClick = {
+                        haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                        onLongPress()
                     },
                 )
-                InferredMessageType.LOCATION -> LocationBubble(
-                    message = message,
-                    isMine = isMine,
-                    onOpenMap = {
-                        val lat = message.latitude
-                        val lng = message.longitude
-                        if (lat != null && lng != null) onOpenMap(lat, lng)
-                    },
+                .padding(
+                    start = if (isMine) 48.dp else 0.dp,
+                    end = if (isMine) 0.dp else 48.dp,
+                    top = 2.dp,
+                    bottom = 2.dp,
+                ),
+            horizontalAlignment = if (isMine) Alignment.End else Alignment.Start,
+        ) {
+            MessageContent(
+                message = message,
+                isMine = isMine,
+                state = state,
+                viewModel = viewModel,
+                onOpenImage = onOpenImage,
+                onPlayVideo = onPlayVideo,
+                onOpenFile = onOpenFile,
+                onOpenMap = onOpenMap,
+                onOpenAnnouncement = onOpenAnnouncement,
+                onAudioError = onAudioError,
+            )
+        }
+    }
+}
+
+/** Хабарлама типі бойынша көпіршек. */
+@Composable
+private fun MessageContent(
+    message: ChatMessage,
+    isMine: Boolean,
+    state: ChatRoomUiState,
+    viewModel: ChatRoomViewModel,
+    onOpenImage: (String) -> Unit,
+    onPlayVideo: (String) -> Unit,
+    onOpenFile: (url: String, name: String) -> Unit,
+    onOpenMap: (Double, Double) -> Unit,
+    onOpenAnnouncement: (Long) -> Unit,
+    onAudioError: () -> Unit,
+) {
+    val display = message.displayText()
+    val deliveryRequest = viewModel.isDeliveryRequestMessage(message)
+    val isCall = com.agroland.feature.chat.domain.CallMessage.isCallMessage(message.message)
+    var cardShownInline = false
+    when {
+        isCall -> CallBubble(message = message, isMine = isMine)
+        deliveryRequest && !isMine -> DeliveryRequestCard(
+            message = message,
+            answered = viewModel.isAnsweredDeliveryRequest(message),
+            isDealer = true,
+            onQuickReply = { yes -> viewModel.onDeliveryQuickReply(message, yes) },
+        )
+        deliveryRequest && isMine -> {
+            if (viewModel.shouldShowDeliveryAnswer(message)) {
+                DeliveryAnswerCard(
+                    requestMessage = message,
+                    chosen = state.buyerChosenIds.contains(message.id),
+                    onChoose = { choice -> viewModel.onBuyerChoiceForRequest(message, choice) },
                 )
-                else -> TextBubble(
+            } else {
+                DeliveryRequestCard(
+                    message = message,
+                    answered = false,
+                    isDealer = false,
+                    onQuickReply = {},
+                )
+            }
+        }
+        else -> when (InferMessageType.infer(message, display)) {
+            InferredMessageType.IMAGE -> ImageBubble(
+                url = InferMessageType.mediaUrlFor(message),
+                timestamp = message.timestamp,
+                isMine = isMine,
+                message = message,
+                onOpenImage = onOpenImage,
+            )
+            InferredMessageType.VIDEO -> VideoBubble(
+                url = InferMessageType.mediaUrlFor(message),
+                timestamp = message.timestamp,
+                isMine = isMine,
+                message = message,
+                onPlayVideo = onPlayVideo,
+            )
+            InferredMessageType.AUDIO -> VoiceBubble(
+                audioUrl = message.audioUrl ?: InferMessageType.mediaUrlFor(message),
+                durationSec = message.audioDuration,
+                isMine = isMine,
+                message = message,
+                onError = onAudioError,
+            )
+            InferredMessageType.FILE -> FileBubble(
+                fileName = message.fileName ?: "Файл",
+                url = InferMessageType.mediaUrlFor(message),
+                isMine = isMine,
+                message = message,
+                onOpen = {
+                    val url = InferMessageType.mediaUrlFor(message)
+                    if (url != null) onOpenFile(url, message.fileName ?: "file")
+                },
+            )
+            InferredMessageType.LOCATION -> LocationBubble(
+                message = message,
+                isMine = isMine,
+                onOpenMap = {
+                    val lat = message.latitude
+                    val lng = message.longitude
+                    if (lat != null && lng != null) onOpenMap(lat, lng)
+                },
+            )
+            else -> {
+                // Хабарламада жарнама сілтемесі болса — превью көпіршек ішінде.
+                val card = viewModel.announcementFor(message)
+                cardShownInline = card != null && display.contains("agroland.kz/announcement", ignoreCase = true)
+                TextBubble(
                     message = message,
                     isMine = isMine,
+                    replyAuthor = null,
+                    linkPreview = if (cardShownInline) card else null,
+                    onOpenLinkPreview = onOpenAnnouncement,
                     onResend = { viewModel.resendMessage(message) },
                 )
             }
         }
-        // Жарнама карточкасы — хабарлама астында бөлек элемент.
-        if (!deliveryRequest && !isCall) {
-            viewModel.announcementFor(message)?.let { card ->
-                Spacer(Modifier.height(4.dp))
-                AnnouncementBanner(card = card) { onOpenAnnouncement(card.id) }
+    }
+    // Жарнама карточкасы — хабарлама астында бөлек элемент (тег арқылы келгенде).
+    if (!deliveryRequest && !isCall && !cardShownInline) {
+        viewModel.announcementFor(message)?.takeIf { card ->
+            // Сол жарнаманың сілтеме-превьюі чатта бар болса — қайталамаймыз.
+            state.messages.none { other ->
+                other !== message &&
+                    other.message.contains("agroland.kz/announcement", ignoreCase = true) &&
+                    viewModel.announcementFor(other)?.id == card.id
             }
+        }?.let { card ->
+            Spacer(Modifier.height(4.dp))
+            AnnouncementBanner(card = card) { onOpenAnnouncement(card.id) }
         }
     }
 }

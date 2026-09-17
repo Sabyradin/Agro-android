@@ -113,6 +113,9 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
+# TikTok Business SDK (jitpack) — Flutter android/app/build.gradle 1.5.0 parity.
+tiktok-business-sdk = { group = "com.github.tiktok", name = "tiktok-business-android-sdk", version = "1.5.0" }
+
 # Charts
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 

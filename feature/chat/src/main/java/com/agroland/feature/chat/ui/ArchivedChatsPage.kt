@@ -96,21 +96,21 @@ fun ArchivedChatsPage(
                             actions = listOf(
                                 SwipeAction(
                                     icon = if (row.muted) Icons.Outlined.VolumeUp else Icons.Outlined.VolumeOff,
-                                    label = "",
-                                    color = MaterialTheme.colorScheme.primary,
+                                    label = stringResource(if (row.muted) L10nR.string.chat_swipe_unmute else L10nR.string.chat_swipe_mute),
+                                    color = Color(0xFF8E8E93),
                                     onClick = { viewModel.toggleMute(row.room) },
                                 ),
                                 SwipeAction(
                                     icon = Icons.Outlined.Delete,
-                                    label = "",
-                                    color = Color(0xFFE53935),
+                                    label = stringResource(L10nR.string.chat_swipe_delete),
+                                    color = Color(0xFFFF3B30),
                                     destructive = true,
                                     onClick = { pendingDelete = row.room },
                                 ),
                                 SwipeAction(
                                     icon = Icons.Outlined.Unarchive,
-                                    label = "",
-                                    color = Color(0xFF616161),
+                                    label = stringResource(L10nR.string.chat_swipe_archive),
+                                    color = Color(0xFF3478F6),
                                     isPrimary = true,
                                     onClick = { viewModel.setArchived(row.room, archived = false) },
                                 ),

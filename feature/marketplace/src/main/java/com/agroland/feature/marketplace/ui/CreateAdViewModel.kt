@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.agroland.core.analytics.MonitoringService
 import com.agroland.core.network.ApiResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,6 +35,7 @@ import com.agroland.feature.profile.data.UserLocation
 class CreateAdViewModel @Inject constructor(
     private val repository: MarketplaceRepository,
     private val profileRepository: ProfileRepository,
+    private val monitoringService: MonitoringService,
     @ApplicationContext private val appContext: Context,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -208,6 +210,29 @@ class CreateAdViewModel @Inject constructor(
                 repository.createAnnouncement(draft, imageParts, videoPart, skipTariffDialog = true)
             } else {
                 repository.updateAnnouncement(editId!!, draft, imageParts, videoPart)
+            }
+            // Фаза 19 (Flutter CreateAdNotifier parity): тек ЖАСАУ жолы —
+            // trackAdvertise('new'); өңдеу оқиға емес.
+            if (editId == null) {
+                when (result) {
+                    is ApiResult.Success -> monitoringService.trackAdvertise(
+                        adId = "new",
+                        success = true,
+                        data = buildMap {
+                            draft.categoryId?.let {
+                                put("categoryId", kotlinx.serialization.json.JsonPrimitive(it))
+                            }
+                            draft.subcategoryId?.let {
+                                put("subcategoryId", kotlinx.serialization.json.JsonPrimitive(it))
+                            }
+                        },
+                    )
+                    is ApiResult.Error -> monitoringService.trackAdvertise(
+                        adId = "new",
+                        success = false,
+                        errorMessage = result.failure.toString(),
+                    )
+                }
             }
             when (result) {
                 is ApiResult.Success ->

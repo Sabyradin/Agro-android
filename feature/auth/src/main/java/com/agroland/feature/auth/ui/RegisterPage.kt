@@ -5,6 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +27,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.agroland.core.common.validators.Validators
 import com.agroland.core.l10n.R as L10nR
+import com.agroland.core.common.phone.CountryPhoneMask
 import com.agroland.core.ui.components.AgroButton
+import com.agroland.core.ui.components.AgroPhoneField
 import com.agroland.core.ui.components.AgroChip
 import com.agroland.core.ui.components.AgroTextField
 import com.agroland.core.ui.components.AgroTextButton
@@ -46,7 +53,19 @@ fun RegisterPage(
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    var phone by remember { mutableStateOf(initialPhone) }
+    // Кіру бетінен толық нөмір (+7…) келеді — оны ел коды мен ұлттық
+    // бөлікке жіктеп аламыз (Flutter/iOS паритеті, ISSUES #66).
+    var country by remember {
+        mutableStateOf(CountryPhoneMask.fromE164(initialPhone) ?: CountryPhoneMask.KZ)
+    }
+    var digits by remember {
+        mutableStateOf(
+            CountryPhoneMask.nationalDigits(
+                initialPhone,
+                CountryPhoneMask.fromE164(initialPhone) ?: CountryPhoneMask.KZ,
+            ),
+        )
+    }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var isBusiness by remember { mutableStateOf(false) }
@@ -61,7 +80,13 @@ fun RegisterPage(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 48.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 32.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text(
@@ -69,13 +94,13 @@ fun RegisterPage(
             style = MaterialTheme.typography.displayMedium,
             color = extendedColors().primaryText,
         )
-        AgroTextField(
-            value = phone,
-            onValueChange = { phone = it; phoneError = false },
-            label = stringResource(L10nR.string.auth_phone_hint),
+        AgroPhoneField(
+            digits = digits,
+            onDigitsChange = { digits = it; phoneError = false },
+            country = country,
+            onCountryChange = { country = it },
             isError = phoneError,
             errorText = stringResource(L10nR.string.auth_phone_error),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         )
         AgroTextField(
             value = name,
@@ -134,7 +159,7 @@ fun RegisterPage(
             text = stringResource(L10nR.string.auth_register_title),
             onClick = {
                 var valid = true
-                if (!Validators.isValidContactPhone(phone)) {
+                if (!country.isComplete(digits)) {
                     phoneError = true; valid = false
                 }
                 if (name.isBlank()) {
@@ -145,7 +170,7 @@ fun RegisterPage(
                 }
                 if (valid) {
                     viewModel.startRegister(
-                        phone = phone,
+                        phone = country.toE164(digits),
                         name = name,
                         userType = if (isBusiness) USER_TYPE_BUSINESS else USER_TYPE_INDIVIDUAL,
                         companyBin = bin.takeIf { isBusiness },

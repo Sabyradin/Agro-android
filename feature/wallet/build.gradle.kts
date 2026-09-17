@@ -33,6 +33,8 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))
     implementation(project(":core:network"))
+    // Фаза 19: мониторинг оқигалары.
+    implementation(project(":core:analytics"))
     // Баланс толтыру HTML формасы — PaymentRepository.generateBalanceTopUp.
     implementation(project(":feature:payment"))
     // Ағымдағы қолданушы балансы — ProfileRepository.getProfile().

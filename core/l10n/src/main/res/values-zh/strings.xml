@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Agroland</string>
+    <string name="app_tagline">农业市场</string>
 
     <string name="common_retry">重试</string>
     <string name="common_cancel">取消</string>
@@ -34,13 +35,16 @@
     <string name="tab_chat">聊天</string>
     <string name="tab_cart">购物车</string>
     <string name="tab_services">服务</string>
-    <string name="tab_create">发布</string>
+    <string name="tab_create">添加</string>
 
     <string name="home_search_hint">搜索商品或服务…</string>
     <string name="home_filter">筛选</string>
     <string name="home_tab_announcements">公告</string>
-    <string name="home_tab_agro">Agro市场</string>
+    <string name="home_recommended_title">推荐</string>
+    <string name="home_tab_agro">Agro Market</string>
     <string name="home_tab_china">中国商品</string>
+    <!-- Таб-пиллге сыятын қысқа нұсқа (толығы — home_tab_china). -->
+    <string name="home_tab_china_short">MercuryX</string>
     <string name="home_scan_qr">扫描二维码</string>
 
     <string name="guest">访客</string>
@@ -49,6 +53,8 @@
     <string name="auth_login_title">登录</string>
     <string name="auth_register_title">注册</string>
     <string name="auth_phone_hint">手机号码</string>
+    <string name="auth_login_subtitle">请输入手机号，我们将发送短信验证码</string>
+    <string name="auth_no_account">还没有账号？</string>
     <string name="auth_phone_error">手机号码不正确</string>
     <string name="auth_name_hint">您的姓名</string>
     <string name="auth_name_error">请输入您的姓名</string>
@@ -212,6 +218,16 @@
     <string name="detail_similar">相似广告</string>
     <string name="detail_additional">卖家的其他广告</string>
 
+    <!-- 详情：联系 — “发消息”分为两个渠道 -->
+    <string name="detail_contact">发消息</string>
+    <string name="detail_contact_choose">您想如何联系？</string>
+    <string name="detail_contact_in_app">在应用内发消息</string>
+    <string name="detail_contact_in_app_hint">Agroland 聊天 — 在应用内与卖家沟通</string>
+    <string name="detail_contact_sms">发送短信</string>
+    <string name="detail_contact_sms_hint">向手机号码发送消息</string>
+    <string name="detail_contact_whatsapp">WhatsApp</string>
+    <string name="detail_contact_whatsapp_hint">通过号码在 WhatsApp 上联系</string>
+
     <!-- 市场：发布模式 (Phase 6) -->
     <string name="common_change">更换</string>
     <string name="create_or_offer_title">要创建什么？</string>
@@ -334,6 +350,7 @@
     <string name="cart_title">购物车</string>
     <string name="cart_login_prompt">登录以查看购物车</string>
     <string name="chat_login_prompt">登录以查看聊天</string>
+    <string name="profile_login_prompt">登录后查看个人资料</string>
     <string name="cart_empty">购物车为空</string>
     <string name="cart_empty_hint">从广告添加商品</string>
     <string name="cart_select_all">全选</string>
@@ -574,6 +591,10 @@
     <string name="cannot_open_link">无法打开链接</string>
     <string name="story_cta">了解更多</string>
     <string name="story_advertise">广告公告</string>
+    <!-- Сторис жолындағы қысқа промо атаулары (84dp карточкаға сияды). -->
+    <string name="story_create_short">发布</string>
+    <string name="story_advertise_short">推广</string>
+    <string name="story_promoted_short">热门</string>
     <string name="story_promoted">推广</string>
     <!-- Phase 15: Promo v2 -->
     <string name="advertise">广告推广</string>
@@ -886,4 +907,40 @@
     <string name="demand_deactivated">需求已停用</string>
     <string name="demand_validation_title">请输入标题</string>
     <string name="demand_created_at">发布日期</string>
+
+    <!-- 强制更新对话框（阶段 20，与 Flutter app_version_service 一致） -->
+    <string name="update_available">有可用更新</string>
+    <string name="update_message">应用程序的新版本已发布。已添加新功能和改进。我们建议更新应用程序。</string>
+    <string name="update_action">更新</string>
+    <string name="detail_published_at">发布时间：%s</string>
+    <string name="detail_tab_info">信息</string>
+    <string name="detail_tab_specs">规格</string>
+    <string name="detail_delivery_pickup">配送 / 自提</string>
+    <string name="detail_vat_chip">含增值税</string>
+    <string name="detail_negotiable_chip">可议价</string>
+    <string name="detail_seller">卖家</string>
+    <string name="detail_seller_all_ads">该用户的所有广告</string>
+    <string name="detail_member_since_short">%s 起加入 Agroland</string>
+    <string name="detail_write">发消息</string>
+    <string name="detail_call_phone">电话拨打</string>
+    <string name="detail_call_in_app">应用内通话</string>
+    <string name="detail_call_in_app_hint">通过网络免费语音通话</string>
+    <string name="detail_no_phone">卖家未提供电话号码</string>
+    <string name="detail_sku">货号</string>
+    <string name="detail_stock">库存</string>
+    <string name="detail_no_delivery_info">暂无配送信息</string>
+    <string name="attach_camera">相机</string>
+    <string name="attach_video">视频</string>
+    <string name="attach_document">文件</string>
+    <string name="attach_location">位置</string>
+    <string name="attach_audio_short">音频</string>
+    <string name="voice_slide_to_cancel">向左滑动取消</string>
+    <string name="voice_hold_to_record">按住录制语音消息</string>
+    <string name="chat_mic_permission_denied">请允许麦克风权限以发送语音消息</string>
+    <string name="chat_camera_permission_denied">未获得相机权限</string>
+    <string name="chat_swipe_mute">静音</string>
+    <string name="chat_swipe_unmute">取消静音</string>
+    <string name="chat_swipe_delete">删除</string>
+    <string name="chat_swipe_archive">归档</string>
+    <string name="chat_day_today">今天</string>
 </resources>

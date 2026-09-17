@@ -51,47 +51,25 @@ import com.agroland.feature.stories.domain.ViewerStory
 
 /**
  * Басты беттің баннер-каруселі (Flutter MainBannerCarousel, 1:1):
- * Instagram-сторис үлгісіндегі 96×96 шаршы карточкалар жолы.
+ * Instagram-сторис үлгісіндегі шаршы карточкалар жолы.
  * Көрінбегендері — жасыл жиек, көрінгендері — сұр (DataStore-та тұрақтайды).
- * Backend баннерлері алдымен; бос болса — Wikimedia fallback суреттері;
- * соңынан 4 статик промо-карточка (құру/жарнама/Қытай/көтерілгендер)
- * қосылады, сондықтан жол ешқашан бос қалмайды.
+ *
+ * Backend баннерлері алдымен, соңынан 4 статик промо-карточка
+ * (құру/жарнама/MercuryX/көтерілгендер) — сондықтан жол ешқашан бос қалмайды.
+ * Backend бос болса — APK-ға кіріктірілген агро фото-стористер (iOS паритеті);
+ * бұрын олар желіден жүктелетін де, құрылғыда бос/қара қалатын (ISSUES #67).
  */
-private const val CARD_SIZE = 96
+// iOS-та экранға 4 карточка сияды (жиек соқпасын тордың өзі береді).
+private const val CARD_SIZE = 84
 private val CardTitleWhite = Color(0xFFFFFFFF)
 
-/** Backend тізімі бос болғанда көрсетілетін fallback суреттері (CC0, Wikimedia). */
-private data class FallbackBanner(val id: String, val imageUrl: String)
-
-private val FALLBACK_BANNERS = listOf(
-    FallbackBanner(
-        id = "fb_wheat",
-        imageUrl = "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/" +
-            "Tree_and_wheat_field_in_R%C3%B6e_1.jpg/1280px-Tree_and_wheat_field_in_R%C3%B6e_1.jpg",
-    ),
-    FallbackBanner(
-        id = "fb_tractor",
-        imageUrl = "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d6/" +
-            "Tractor_cultivating_a_field_in_Brittany.jpg/" +
-            "1280px-Tractor_cultivating_a_field_in_Brittany.jpg",
-    ),
-    FallbackBanner(
-        id = "fb_sunflower",
-        imageUrl = "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/" +
-            "Sunflower_field_at_sunset.jpg/1280px-Sunflower_field_at_sunset.jpg",
-    ),
-    FallbackBanner(
-        id = "fb_apple",
-        imageUrl = "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/" +
-            "Apple_harvest_in_South_Tyrol_2015.jpg/" +
-            "1280px-Apple_harvest_in_South_Tyrol_2015.jpg",
-    ),
-    FallbackBanner(
-        id = "fb_cows",
-        imageUrl = "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/" +
-            "Cows_at_the_Preval%28a%29_pasture.jpg/" +
-            "1280px-Cows_at_the_Preval%28a%29_pasture.jpg",
-    ),
+/** Кіріктірілген агро-стористер (Wikimedia Commons, еркін лицензия). */
+private val LOCAL_AGRO_STORIES = listOf(
+    "local_wheat" to com.agroland.feature.stories.R.drawable.story_wheat,
+    "local_tractor" to com.agroland.feature.stories.R.drawable.story_tractor,
+    "local_sunflower" to com.agroland.feature.stories.R.drawable.story_sunflower,
+    "local_apple" to com.agroland.feature.stories.R.drawable.story_apple,
+    "local_cows" to com.agroland.feature.stories.R.drawable.story_cows,
 )
 
 /** Статик промо карточкасының метасы (viewer-де бірдей көрінеді). */
@@ -114,16 +92,13 @@ fun MainBannerCarousel(
 ) {
     val context = LocalContext.current
     val cannotOpenLink = stringResource(L10nR.string.cannot_open_link)
-    val createLabel = stringResource(L10nR.string.create_ad_title)
-    val advertiseLabel = stringResource(L10nR.string.story_advertise)
-    val chinaLabel = stringResource(L10nR.string.home_tab_china)
-    val promotedLabel = stringResource(L10nR.string.story_promoted)
+    val createLabel = stringResource(L10nR.string.story_create_short)
+    val advertiseLabel = stringResource(L10nR.string.story_advertise_short)
+    val chinaLabel = stringResource(L10nR.string.home_tab_china_short)
+    val promotedLabel = stringResource(L10nR.string.story_promoted_short)
 
     val bannersState by viewModel.banners.collectAsState()
     val viewed by viewModel.viewedIds.collectAsState()
-
-    // Backend баннерлері жоқ болса ғана fallback суреттерін қосамыз.
-    val fallbacks = if (bannersState.banners.isEmpty()) FALLBACK_BANNERS else emptyList()
 
     val statics = remember(createLabel, advertiseLabel, chinaLabel, promotedLabel) {
         listOf(
@@ -135,7 +110,7 @@ fun MainBannerCarousel(
     }
 
     // Viewer-ге берілетін тізім: backend баннерлері → fallback суреттері → статик промо.
-    val stories = remember(bannersState.banners, fallbacks, statics) {
+    val stories = remember(bannersState.banners, statics) {
         buildList {
             for (banner in bannersState.banners) {
                 add(
@@ -155,9 +130,12 @@ fun MainBannerCarousel(
                     ),
                 )
             }
-            for (fb in fallbacks) {
-                // Тек сурет: «Толығырақ» батырмасы жоқ.
-                add(ViewerStory(id = fb.id, imageUrl = fb.imageUrl))
+            // Backend баннерлері жоқ болса — iOS-тағыдай агро фото-стористер.
+            // Суреттер APK ішінде, сондықтан желі нашар болса да бос қалмайды.
+            if (bannersState.banners.isEmpty()) {
+                LOCAL_AGRO_STORIES.forEach { (id, res) ->
+                    add(ViewerStory(id = id, imageRes = res))
+                }
             }
             for (promo in statics) {
                 add(
@@ -186,16 +164,22 @@ fun MainBannerCarousel(
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .height((CARD_SIZE + 16).dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .height(CARD_SIZE.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         itemsIndexedCompat(stories) { index, story ->
             StoryCard(
                 viewed = viewed.contains(story.id),
                 onClick = { openViewer(index) },
             ) {
-                if (!story.imageUrl.isNullOrBlank()) {
+                if (story.imageRes != null) {
+                    androidx.compose.foundation.Image(
+                        painter = androidx.compose.ui.res.painterResource(story.imageRes),
+                        contentDescription = null,
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else if (!story.imageUrl.isNullOrBlank()) {
                     ImageCard(imageUrl = story.imageUrl!!, title = story.title)
                 } else {
                     StaticCard(icon = story.staticIcon!!, label = story.title!!)

@@ -94,9 +94,8 @@ fun StoriesRow(
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .height(110.dp),
-        contentPadding = PaddingValues(horizontal = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .height(108.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(stories.size) { index ->
             val story = stories[index]

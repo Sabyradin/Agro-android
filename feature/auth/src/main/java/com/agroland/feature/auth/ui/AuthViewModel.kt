@@ -2,6 +2,7 @@ package com.agroland.feature.auth.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.agroland.core.analytics.MonitoringService
 import com.agroland.core.network.ApiResult
 import com.agroland.core.network.auth.TokenStore
 import com.agroland.core.network.error.Failure
@@ -37,6 +38,7 @@ class AuthViewModel @Inject constructor(
     private val repository: AuthRepository,
     private val sessionController: SessionController,
     private val tokenStore: TokenStore,
+    private val monitoringService: MonitoringService,
     private val biometricAuthenticator: com.agroland.feature.auth.security.BiometricAuthenticator,
     val pinManager: com.agroland.feature.auth.security.PinManager,
 ) : ViewModel() {
@@ -123,10 +125,33 @@ class AuthViewModel @Inject constructor(
             }
             when (result) {
                 is ApiResult.Success -> {
+                    // Фаза 19 (Flutter SignInNotifier.submitCode parity):
+                    // тіркелу/кіру сәтті — мониторинг + TikTok conversion.
+                    if (isRegisterFlow) {
+                        monitoringService.trackRegistration(otp.phone, success = true)
+                    } else {
+                        monitoringService.trackLogin(otp.phone, success = true)
+                    }
                     sessionController.onLoggedIn()
                     _state.value = AuthUiState.Done
                 }
-                is ApiResult.Error -> _error.value = result.toAuthError()
+                is ApiResult.Error -> {
+                    val authError = result.toAuthError()
+                    if (isRegisterFlow) {
+                        monitoringService.trackRegistration(
+                            otp.phone,
+                            success = false,
+                            errorMessage = authError.backendMessage,
+                        )
+                    } else {
+                        monitoringService.trackLogin(
+                            otp.phone,
+                            success = false,
+                            errorMessage = authError.backendMessage,
+                        )
+                    }
+                    _error.value = authError
+                }
             }
         }
     }
@@ -191,14 +216,25 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Backend хабарламасын UI-ға шығаруға жарамдылығын тексереді: серверде
+     * көп жауап ағылшынша техникалық мәтін («User not found», «Invalid code»)
+     * — олар пайдаланушыға көрсетілмейді, орнына локализацияланған мәтін
+     * шығады (MASTER_PLAN тығыздық-ережесі №2).
+     */
+    private fun String?.localizedOrNull(): String? =
+        this?.takeIf { text -> text.any { it.code > 0x7F } }
+
     private fun ApiResult.Error.toAuthError(): AuthError {
         val httpFailure = failure as? Failure.Http
         return when (failure) {
             is Failure.Network -> AuthError(isNetwork = true)
             is Failure.Http -> when (httpFailure?.error?.code) {
                 "USER_NOT_FOUND", "user_not_found" ->
-                    AuthError(backendMessage = httpFailure.error.message, isUserNotFound = true)
-                else -> AuthError(backendMessage = httpFailure?.error?.message)
+                    // Мәтін локализацияланған: backend «User not found» деп
+                    // ағылшынша қайтарады (MASTER_PLAN тығыздық-ережесі №2).
+                    AuthError(isUserNotFound = true)
+                else -> AuthError(backendMessage = httpFailure?.error?.message.localizedOrNull())
             }
             else -> AuthError()
         }

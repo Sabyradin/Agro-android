@@ -306,7 +306,14 @@ private fun StoryPage(
     val ctaLabel = stringResource(L10nR.string.story_cta)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (story.imageUrl != null) {
+        if (story.imageRes != null) {
+            androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(story.imageRes),
+                contentDescription = story.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else if (story.imageUrl != null) {
             StoryImage(imageUrl = story.imageUrl, title = story.title)
         } else {
             StaticStoryContent(
@@ -368,7 +375,7 @@ private fun StoryPage(
                 .padding(top = 140.dp, bottom = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (story.imageUrl != null && !story.title.isNullOrBlank()) {
+            if ((story.imageUrl != null || story.imageRes != null) && !story.title.isNullOrBlank()) {
                 Text(
                     text = story.title,
                     color = ViewerWhite,

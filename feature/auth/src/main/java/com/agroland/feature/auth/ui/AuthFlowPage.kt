@@ -27,6 +27,7 @@ fun AuthFlowPage(
                 viewModel = viewModel,
                 onNavigateToOtp = { /* күй өзгереді — экран осы жерде қайта сызылады */ },
                 onNavigateToRegister = { phone -> viewModel.openRegister(phone) },
+                onClose = onClosed,
             )
             is AuthUiState.OtpEntry -> OtpPage(
                 viewModel = viewModel,

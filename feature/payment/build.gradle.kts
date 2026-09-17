@@ -32,6 +32,8 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))
     implementation(project(":core:network"))
+    // Фаза 19: мониторинг оқигалары.
+    implementation(project(":core:analytics"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)

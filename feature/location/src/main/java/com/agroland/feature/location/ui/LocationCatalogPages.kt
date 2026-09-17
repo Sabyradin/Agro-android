@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -62,7 +62,14 @@ class CatalogPageViewModel @Inject constructor(
     private val _state = MutableStateFlow(State())
     val state = _state.asStateFlow()
 
-    private val countryId: Int? = savedStateHandle.get<Int>("country_id")
+    /**
+     * RegionListRoute аргументі. Type-safe навигацияда кілт — Kotlin қасиетінің
+     * АТЫ (`countryId`); бұрын мұнда snake_case («country_id») тұрған да, мән
+     * әрқашан null болып, өңір тізімінің орнына ЕЛДЕР тізімі қайта ашылатын.
+     * Екі жазылу да оқылады — маршрут аты өзгерсе де сынбайды.
+     */
+    private val countryId: Int? = savedStateHandle.get<Int>("countryId")
+        ?: savedStateHandle.get<Int>("country_id")
 
     init {
         // RegionListRoute country_id жібереді; болмаса — елдер тізімі.
@@ -114,14 +121,18 @@ fun CountryListPage(
                 modifier = Modifier.padding(vertical = 12.dp),
             )
             when {
-                state.loading -> LoadingWidget()
-                state.error -> ErrorWithRetry(onRetry = viewModel::retry)
+                state.loading -> LoadingWidget(Modifier.fillMaxSize())
+                state.error -> ErrorWithRetry(
+                    onRetry = viewModel::retry,
+                    modifier = Modifier.fillMaxSize(),
+                )
                 else -> LazyColumn(
                     contentPadding = PaddingValues(bottom = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     items(state.items, key = { it.id }) { country ->
                         AgroListTile(
+                            containerColor = extendedColors().card,
                             title = country.localizedName(localeTag),
                             onClick = { onPickCountry(country) },
                             leading = {
@@ -172,21 +183,27 @@ fun RegionListPage(
                 modifier = Modifier.padding(vertical = 12.dp),
             )
             when {
-                state.loading -> LoadingWidget()
-                state.error -> ErrorWithRetry(onRetry = viewModel::retry)
+                state.loading -> LoadingWidget(Modifier.fillMaxSize())
+                state.error -> ErrorWithRetry(
+                    onRetry = viewModel::retry,
+                    modifier = Modifier.fillMaxSize(),
+                )
                 else -> LazyColumn(
                     contentPadding = PaddingValues(bottom = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     items(state.items, key = { it.id }) { region ->
                         AgroListTile(
+                            containerColor = extendedColors().card,
                             title = region.localizedName(localeTag),
                             onClick = { onPickRegion(region) },
                             leading = {
+                                // Облыстар үшін — орын белгісі (глобус бір елдің
+                                // ішінде әр жолда қайталанып, шуыл жасайтын).
                                 Icon(
-                                    imageVector = Icons.Outlined.Public,
+                                    imageVector = Icons.Outlined.LocationOn,
                                     contentDescription = null,
-                                    tint = extendedColors().secondaryText,
+                                    tint = MaterialTheme.colorScheme.primary,
                                 )
                             },
                         )

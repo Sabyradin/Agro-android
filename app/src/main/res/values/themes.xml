@@ -9,8 +9,8 @@
 
     <!-- Жүйелік splash (core-splashscreen) — Theme.Agroland-қа өтеді. -->
     <style name="Theme.Agroland.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/agroland_primary</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="windowSplashScreenBackground">@color/agroland_white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo_image</item>
         <item name="postSplashScreenTheme">@style/Theme.Agroland</item>
     </style>
 </resources>

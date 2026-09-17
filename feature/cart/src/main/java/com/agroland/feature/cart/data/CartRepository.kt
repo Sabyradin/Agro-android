@@ -16,6 +16,7 @@ import kotlinx.coroutines.delay
 class CartRepository @Inject constructor(
     private val cartApi: CartApi,
     private val marketplaceRepository: MarketplaceRepository,
+    private val cartState: CartStateHolder,
 ) {
 
     /**
@@ -38,17 +39,41 @@ class CartRepository @Inject constructor(
                 ),
             )
         }
+        cartState.replaceAll(enriched)
         return ApiResult.Success(enriched)
     }
 
-    suspend fun addToCart(announcementId: Long, quantity: Double, measurementUnit: String?): ApiResult<Unit> =
-        safeCall { cartApi.addToCart(CartRequests.addToCart(announcementId, quantity, measurementUnit)); Unit }
+    /**
+     * Себет күйін жеңіл жаңарту — байытусыз бір ғана сұрау. Лентадағы «+ / −»
+     * басқарғышы себетте не бар екенін білу үшін шақырады.
+     */
+    suspend fun syncCartState(): ApiResult<Unit> {
+        val result = safeCall { CartParser.parseCart(cartApi.getCart()) }
+        if (result is ApiResult.Success) cartState.replaceAll(result.value)
+        return when (result) {
+            is ApiResult.Success -> ApiResult.Success(Unit)
+            is ApiResult.Error -> result
+        }
+    }
 
-    suspend fun updateQuantity(itemId: Long, quantity: Double): ApiResult<Unit> =
-        safeCall { cartApi.updateCartItem(itemId, CartRequests.updateQuantity(quantity)); Unit }
+    suspend fun addToCart(announcementId: Long, quantity: Double, measurementUnit: String?): ApiResult<Unit> {
+        val result = safeCall { cartApi.addToCart(CartRequests.addToCart(announcementId, quantity, measurementUnit)); Unit }
+        // itemId жауапта келмейді — қосылғаннан кейін күй қайта оқылады.
+        if (result is ApiResult.Success) syncCartState()
+        return result
+    }
 
-    suspend fun deleteCartItem(itemId: Long): ApiResult<Unit> =
-        safeCall { cartApi.deleteCartItem(itemId); Unit }
+    suspend fun updateQuantity(itemId: Long, quantity: Double): ApiResult<Unit> {
+        val result = safeCall { cartApi.updateCartItem(itemId, CartRequests.updateQuantity(quantity)); Unit }
+        if (result is ApiResult.Success) cartState.setQuantityByItemId(itemId, quantity)
+        return result
+    }
+
+    suspend fun deleteCartItem(itemId: Long): ApiResult<Unit> {
+        val result = safeCall { cartApi.deleteCartItem(itemId); Unit }
+        if (result is ApiResult.Success) cartState.removeByItemId(itemId)
+        return result
+    }
 
     /** Smart Calculator: preview — аудан (0 = pickup/таңдалмады) өзгерсе қайта оқиды caller. */
     suspend fun getCartPreview(deliveryDistrictId: Int? = null): ApiResult<CartPreview> =

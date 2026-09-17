@@ -39,7 +39,21 @@ data class Announcement(
     val deliveryAvailable: Boolean,
     val pickupAvailable: Boolean,
     val pickupAddress: String?,
-)
+    /**
+     * Лента жауабы қала атауын жібермейді — тек `location` ішіндегі каталог
+     * ID-лері келеді. Атау LocationNameResolver арқылы шешіледі; шешілмесе
+     * карточкада локация жолы мүлдем көрсетілмейді (иесіз пин болмас үшін).
+     */
+    val regionId: Int? = null,
+    val districtId: Int? = null,
+) {
+    /** Карточкада көрсетілетін орын — бос болса жол жасырылады. */
+    val placeLabel: String
+        get() = listOfNotNull(
+            city?.takeIf { it.isNotBlank() },
+            district?.takeIf { it.isNotBlank() },
+        ).distinct().joinToString(", ")
+}
 
 /**
  * Жарнаманың жеткізу зонасы — AnnouncementDeliveryZoneInfo (Flutter):
@@ -202,6 +216,20 @@ data class AnnouncementFilter(
         put("limit", limit.toString())
     }
 
+    /** Басты беттегі «Сүзгі» жолағында көрсетілетін белсенді шарттар саны. */
+    fun activeCount(): Int = listOfNotNull(
+        query?.takeIf { it.isNotBlank() },
+        categoryId,
+        subcategoryId,
+        minPrice,
+        maxPrice,
+        negotiable,
+        isVip,
+        typeAd,
+        location?.takeIf { it.isNotEmpty },
+        sort.takeIf { it != FilterSort.DEFAULT },
+    ).size
+
     fun isDefault(): Boolean =
         query.isNullOrBlank() && categoryId == null && subcategoryId == null &&
             minPrice == null && maxPrice == null && negotiable == null &&
@@ -226,6 +254,7 @@ object MarketplaceParser {
     fun parseAnnouncement(obj: JsonObject?): Announcement? {
         if (obj == null) return null
         val id = JsonParser.long(obj, "id") ?: return null
+        val location = JsonParser.obj(obj, "location")
         val images = JsonParser.arrayOrSingle(obj, "image_urls")
             .mapNotNull { (it as? kotlinx.serialization.json.JsonPrimitive)?.content }
             .filter { it.isNotBlank() }
@@ -237,13 +266,19 @@ object MarketplaceParser {
             city = JsonParser.string(obj, "city") ?: JsonParser.string(obj, "city_name"),
             district = JsonParser.string(obj, "district") ?: JsonParser.string(obj, "district_name"),
             createdAt = JsonParser.string(obj, "created_at") ?: JsonParser.string(obj, "createdAt"),
-            imageUrl = JsonParser.string(obj, "image_url") ?: images.firstOrNull(),
+            // Бэк негізгі суретті main_image_url деп жібереді (Flutter
+            // @JsonKey('main_image_url')); image_url — толық деталь жауабында.
+            imageUrl = JsonParser.string(obj, "main_image_url")
+                ?: JsonParser.string(obj, "image_url")
+                ?: images.firstOrNull(),
             imageUrls = images,
             isFavorite = JsonParser.bool(obj, "is_favorite") ?: JsonParser.bool(obj, "isFavorite") ?: false,
             authorId = JsonParser.long(obj, "author_id") ?: JsonParser.long(obj, "user_id"),
             status = JsonParser.string(obj, "status"),
             measurementUnit = JsonParser.string(obj, "measurement_unit"),
-            viewsCount = JsonParser.int(obj, "views_count") ?: 0,
+            // Лентада views_count, толық деталь жауабында views (Flutter
+            // AnnouncementModel vs FullAnnouncementModel @JsonKey айырмасы).
+            viewsCount = JsonParser.int(obj, "views_count") ?: JsonParser.int(obj, "views") ?: 0,
             callsCount = JsonParser.int(obj, "calls_count") ?: 0,
             favoritesCount = JsonParser.int(obj, "favorites_count") ?: 0,
             messagesCount = JsonParser.int(obj, "messages_count") ?: 0,
@@ -261,17 +296,29 @@ object MarketplaceParser {
             deliveryAvailable = JsonParser.bool(obj, "delivery_available") ?: false,
             pickupAvailable = JsonParser.bool(obj, "pickup_available") ?: false,
             pickupAddress = JsonParser.string(obj, "pickup_address"),
+            regionId = JsonParser.int(obj, "region_id") ?: JsonParser.int(location, "region_id"),
+            districtId = JsonParser.int(obj, "district_id") ?: JsonParser.int(location, "district_id"),
         )
     }
 
-    fun parseFullAnnouncement(root: JsonObject?): FullAnnouncement? {
-        val base = parseAnnouncement(root) ?: return null
+    /**
+     * Бэк деталь жауабын `{"announcement": {...}}` деп орайды (Flutter
+     * announcements_repository.getAnnouncement: `(r as Map)['announcement']`).
+     * Орам болмаса — түбірдің өзін оқимыз (тесттер/кеш үшін кешірімді).
+     */
+    fun parseFullAnnouncement(response: JsonObject?): FullAnnouncement? {
+        val root = JsonParser.obj(response, "announcement") ?: response
+        val parsed = parseAnnouncement(root) ?: return null
+        val seller = parseSeller(JsonParser.obj(root, "seller"))
+        // Деталь жауабында author_id жоқ — сатушы тек `seller` нысанында келеді.
+        // Чат пен «сатушының пікірлері» осы id-ге сүйенеді, сондықтан толтырамыз.
+        val base = if (parsed.authorId == null) parsed.copy(authorId = seller?.id) else parsed
         return FullAnnouncement(
             base = base,
             description = JsonParser.string(root, "description"),
             priceIncludesVat = JsonParser.bool(root, "price_includes_vat") ?: false,
             videoUrl = JsonParser.string(root, "video_url"),
-            seller = parseSeller(JsonParser.obj(root, "seller")),
+            seller = seller,
             contactNumbers = JsonParser.arrayOrSingle(root, "contact_numbers").mapNotNull { el ->
                 when (el) {
                     is kotlinx.serialization.json.JsonPrimitive -> el.content

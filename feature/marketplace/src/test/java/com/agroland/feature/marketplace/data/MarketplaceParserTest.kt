@@ -122,6 +122,37 @@ class MarketplaceParserTest {
     }
 
     @Test
+    fun `деталь жауабы announcement орамымен келеді`() {
+        val response = obj(
+            """
+            {
+              "announcement": {
+                "id": 1832,
+                "title": "Плуг 5-корпусный",
+                "description": "Навесной плуг для МТЗ",
+                "price": "1500000.0",
+                "currency": "KZT",
+                "views": 297,
+                "main_image_url": "https://example.com/a.jpg",
+                "seller": {"id": 1010, "name": "Тест Диллер"},
+                "contact_numbers": [{"phone_number": "+77001112203"}],
+                "similar_announcements": [{"id": 1820, "title": "пшеница"}]
+              }
+            }
+            """.trimIndent(),
+        )
+        val detail = MarketplaceParser.parseFullAnnouncement(response)!!
+
+        assertEquals(1832L, detail.base.id)
+        assertEquals("Плуг 5-корпусный", detail.base.title)
+        assertEquals(1_500_000.0, detail.base.price!!, 0.001)
+        assertEquals(297, detail.base.viewsCount)
+        assertEquals("Тест Диллер", detail.seller?.name)
+        assertEquals(listOf("+77001112203"), detail.contactNumbers)
+        assertEquals(1, detail.similar.size)
+    }
+
+    @Test
     fun `категория локализацияланған атаулары мен fallbacks`() {
         val category = MarketplaceParser.parseCategory(
             obj(

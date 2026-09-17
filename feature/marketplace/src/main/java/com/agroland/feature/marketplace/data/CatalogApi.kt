@@ -11,8 +11,8 @@ import retrofit2.Response
 import retrofit2.Retrofit
 
 /**
- * Маркетплейс API (spec: GET /announcements, /announcements/recommended,
- * /announcement/{id}, /search-suggestions, /categories[+/grouped], /subcategories,
+ * Маркетплейс API (spec: GET /announcements, /announcement/{id},
+ * /search-suggestions, /categories[+/grouped], /subcategories,
  * /favorites CRUD). Жауаптар JsonObject — кешірімді парсинг MarketplaceModels-те.
  */
 interface CatalogApi {
@@ -25,8 +25,13 @@ interface CatalogApi {
     @retrofit2.http.GET("announcements")
     suspend fun getAnnouncements(@retrofit2.http.QueryMap filters: Map<String, String>): JsonObject
 
-    /** Ұсынылатын лента: Flutter сияқты type_ad=rec, order_random=true, country_id=4 жібереді. */
-    @retrofit2.http.GET("announcements/recommended")
+    /**
+     * Ұсынылатын лента — Flutter RecommendedAnnouncementsNotifier паритеті:
+     * GET /announcements (type_ad=rec, order_random=true, country_id=4).
+     * /announcements/recommended бэктегі жоқ — ол /announcements/{user_id}
+     * маршрутымен 422 (user_id="recommended") болып түседі.
+     */
+    @retrofit2.http.GET("announcements")
     suspend fun getRecommended(
         @retrofit2.http.Query("page") page: Int,
         @retrofit2.http.Query("limit") limit: Int,
@@ -46,6 +51,15 @@ interface CatalogApi {
         @retrofit2.http.Query("page") page: Int,
         @retrofit2.http.Query("limit") limit: Int,
     ): JsonObject
+
+    /**
+     * Фаза 19: іздеу сұрауын логтау (SearchQueryLogRequest: query міндетті,
+     * category_id опционал; auth optional — гость іздеулері де логталады).
+     * Flutter бұл endpoint-ті ешқашан шақырмайды — MASTER_PLAN Фаза 19
+     * талабы бойынша қосылды (ISSUES #48).
+     */
+    @retrofit2.http.POST("search/log")
+    suspend fun logSearchQuery(@retrofit2.http.Body body: JsonObject): Response<ResponseBody>
 
     /** Жазық категория ағашы + subcategories + announcement_count. */
     @retrofit2.http.GET("categories")

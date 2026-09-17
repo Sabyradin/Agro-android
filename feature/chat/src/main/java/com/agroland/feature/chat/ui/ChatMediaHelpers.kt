@@ -79,6 +79,9 @@ class VoiceRecorder(private val context: Context) {
 
     val isActive: Boolean get() = recorder != null
 
+    /** Жазу басталғаннан бері өткен уақыт (мс). */
+    fun elapsedMs(): Long = if (recorder != null) System.currentTimeMillis() - startedAt else 0L
+
     /** Жазуды бастау — сәтсіз болса false. */
     fun start(): Boolean {
         if (recorder != null) return true

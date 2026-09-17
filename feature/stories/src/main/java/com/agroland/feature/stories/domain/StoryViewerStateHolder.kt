@@ -21,6 +21,8 @@ data class ViewerStory(
     val id: String,
     /** Backend баннерінің/сторидің сурет URL-і (статик промо үшін null). */
     val imageUrl: String? = null,
+    /** Қолданбаға кіріктірілген сурет (backend баннері жоқ кездегі агро-стористер). */
+    val imageRes: Int? = null,
     /** Стори тақырыбы (viewer төменгі бөлігінде көрінеді). */
     val title: String? = null,
     /** Статик промо иконкасы (imageUrl == null кезде көрінеді). */

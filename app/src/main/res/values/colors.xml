@@ -3,5 +3,6 @@
     <color name="agroland_primary">#147F26</color>
     <color name="agroland_background">#F9F9F9</color>
     <color name="agroland_white">#FFFFFF</color>
-    <color name="agroland_launcher_bg">#147F26</color>
+    <!-- Лончер фоны — ақ: AGROLAND логотипі түрлі-түсті. -->
+    <color name="agroland_launcher_bg">#FFFFFF</color>
 </resources>

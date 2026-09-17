@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -158,7 +159,11 @@ fun CartPage(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = com.agroland.core.ui.components.shellBottomPadding()),
+        ) {
             SectionSelector(
                 section = section,
                 basketCount = items.size + chinaItems.size,
@@ -320,27 +325,40 @@ private fun SectionSelector(
     onSelect: (CartSection) -> Unit,
 ) {
     val ext = extendedColors()
-    LazyRow(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(ext.card)
-            .padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+            .statusBarsPadding(),
     ) {
-        item { Spacer(Modifier.width(16.dp)) }
-        items(CartSection.entries) { entry ->
-            val count = when (entry) {
-                CartSection.BASKET_ITEMS -> basketCount
-                else -> sectionOrders[entry]?.size ?: 0
+        Text(
+            text = stringResource(L10nR.string.tab_cart),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            color = ext.primaryText,
+            modifier = Modifier.padding(start = 16.dp, top = 12.dp),
+        )
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            item { Spacer(Modifier.width(16.dp)) }
+            items(CartSection.entries) { entry ->
+                val count = when (entry) {
+                    CartSection.BASKET_ITEMS -> basketCount
+                    else -> sectionOrders[entry]?.size ?: 0
+                }
+                SectionChip(
+                    label = stringResource(sectionLabelRes(entry)),
+                    count = count,
+                    selected = entry == section,
+                    onClick = { onSelect(entry) },
+                )
             }
-            SectionChip(
-                label = stringResource(sectionLabelRes(entry)),
-                count = count,
-                selected = entry == section,
-                onClick = { onSelect(entry) },
-            )
+            item { Spacer(Modifier.width(16.dp)) }
         }
-        item { Spacer(Modifier.width(16.dp)) }
     }
 }
 
@@ -811,26 +829,10 @@ private fun OrderTile(
 /** Қонақ күйі — кіру үшін түйме (Flutter guest prompt). */
 @Composable
 fun GuestCartTab(onLoginClick: () -> Unit) {
-    CenteredContent {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Outlined.ShoppingCart,
-                contentDescription = null,
-                tint = extendedColors().divider,
-                modifier = Modifier.size(72.dp),
-            )
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = stringResource(L10nR.string.cart_login_prompt),
-                style = MaterialTheme.typography.bodySmall,
-                color = extendedColors().secondaryText,
-            )
-            Spacer(Modifier.height(16.dp))
-            AgroButton(
-                text = stringResource(L10nR.string.auth_login_title),
-                onClick = onLoginClick,
-                modifier = Modifier.padding(horizontal = 48.dp).fillMaxWidth(),
-            )
-        }
-    }
+    com.agroland.core.ui.components.GuestGate(
+        icon = Icons.Outlined.ShoppingCart,
+        message = stringResource(L10nR.string.cart_login_prompt),
+        loginText = stringResource(L10nR.string.auth_login_title),
+        onLoginClick = onLoginClick,
+    )
 }

@@ -32,6 +32,8 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:l10n"))
     implementation(project(":core:network"))
+    // Фаза 19: мониторинг оқигалары.
+    implementation(project(":core:analytics"))
     implementation(project(":feature:auth"))
     // Жазу ағыны: профиль мекенжайлары (user_location_id) және MultipartHelper.
     implementation(project(":feature:profile"))

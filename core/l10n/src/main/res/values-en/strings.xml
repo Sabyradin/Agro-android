@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Agroland</string>
+    <string name="app_tagline">Agro marketplace</string>
 
     <string name="common_retry">Retry</string>
     <string name="common_cancel">Cancel</string>
@@ -34,13 +35,16 @@
     <string name="tab_chat">Chat</string>
     <string name="tab_cart">Cart</string>
     <string name="tab_services">Services</string>
-    <string name="tab_create">Create</string>
+    <string name="tab_create">Add</string>
 
     <string name="home_search_hint">Search products or services…</string>
     <string name="home_filter">Filter</string>
     <string name="home_tab_announcements">Announcements</string>
-    <string name="home_tab_agro">Agro market</string>
+    <string name="home_recommended_title">Recommended</string>
+    <string name="home_tab_agro">Agro Market</string>
     <string name="home_tab_china">China goods</string>
+    <!-- Таб-пиллге сыятын қысқа нұсқа (толығы — home_tab_china). -->
+    <string name="home_tab_china_short">MercuryX</string>
     <string name="home_scan_qr">Scan QR code</string>
 
     <string name="guest">Guest</string>
@@ -49,6 +53,8 @@
     <string name="auth_login_title">Sign in</string>
     <string name="auth_register_title">Sign up</string>
     <string name="auth_phone_hint">Phone number</string>
+    <string name="auth_login_subtitle">Enter your phone number — we will send an SMS code</string>
+    <string name="auth_no_account">No account?</string>
     <string name="auth_phone_error">Invalid phone number</string>
     <string name="auth_name_hint">Your name</string>
     <string name="auth_name_error">Enter your name</string>
@@ -212,6 +218,16 @@
     <string name="detail_similar">Similar announcements</string>
     <string name="detail_additional">Other announcements by the seller</string>
 
+    <!-- Detail: contact — "Message" splits into two channels -->
+    <string name="detail_contact">Message</string>
+    <string name="detail_contact_choose">How would you like to get in touch?</string>
+    <string name="detail_contact_in_app">Message in app</string>
+    <string name="detail_contact_in_app_hint">Agroland chat — talk to the seller in the app</string>
+    <string name="detail_contact_sms">Send SMS</string>
+    <string name="detail_contact_sms_hint">Send a message to the phone number</string>
+    <string name="detail_contact_whatsapp">WhatsApp</string>
+    <string name="detail_contact_whatsapp_hint">Message the number on WhatsApp</string>
+
     <!-- Marketplace: write mode (Phase 6) -->
     <string name="common_change">Change</string>
     <string name="create_or_offer_title">What would you like to create?</string>
@@ -334,6 +350,7 @@
     <string name="cart_title">Cart</string>
     <string name="cart_login_prompt">Sign in to view your basket</string>
     <string name="chat_login_prompt">Log in to view your chats</string>
+    <string name="profile_login_prompt">Sign in to view your profile</string>
     <string name="cart_empty">Basket is empty</string>
     <string name="cart_empty_hint">Add items from ads</string>
     <string name="cart_select_all">Select All</string>
@@ -575,6 +592,10 @@
     <string name="cannot_open_link">Couldn\'t open the link</string>
     <string name="story_cta">More details</string>
     <string name="story_advertise">Advertise</string>
+    <!-- Сторис жолындағы қысқа промо атаулары (84dp карточкаға сияды). -->
+    <string name="story_create_short">Create</string>
+    <string name="story_advertise_short">Promote</string>
+    <string name="story_promoted_short">Top</string>
     <string name="story_promoted">Promoted</string>
     <!-- Phase 15: Promo v2 -->
     <string name="advertise">Advertise</string>
@@ -887,4 +908,40 @@
     <string name="demand_deactivated">Demand deactivated</string>
     <string name="demand_validation_title">Enter a title</string>
     <string name="demand_created_at">Published</string>
+
+    <!-- Force-update dialog (Phase 20, Flutter app_version_service parity) -->
+    <string name="update_available">Update Available</string>
+    <string name="update_message">A new version of the app is available. New features and improvements have been added. We recommend updating the app.</string>
+    <string name="update_action">Update</string>
+    <string name="detail_published_at">Published: %s</string>
+    <string name="detail_tab_info">Info</string>
+    <string name="detail_tab_specs">Specifications</string>
+    <string name="detail_delivery_pickup">Delivery / Pickup</string>
+    <string name="detail_vat_chip">VAT incl.</string>
+    <string name="detail_negotiable_chip">Negotiable</string>
+    <string name="detail_seller">Seller</string>
+    <string name="detail_seller_all_ads">All listings by this seller</string>
+    <string name="detail_member_since_short">On Agroland since %s</string>
+    <string name="detail_write">Message</string>
+    <string name="detail_call_phone">Call by phone</string>
+    <string name="detail_call_in_app">In-app call</string>
+    <string name="detail_call_in_app_hint">Free voice call over the internet</string>
+    <string name="detail_no_phone">The seller has not provided a phone number</string>
+    <string name="detail_sku">SKU</string>
+    <string name="detail_stock">In stock</string>
+    <string name="detail_no_delivery_info">No delivery information</string>
+    <string name="attach_camera">Camera</string>
+    <string name="attach_video">Video</string>
+    <string name="attach_document">Document</string>
+    <string name="attach_location">Location</string>
+    <string name="attach_audio_short">Audio</string>
+    <string name="voice_slide_to_cancel">Slide left to cancel</string>
+    <string name="voice_hold_to_record">Hold to record a voice message</string>
+    <string name="chat_mic_permission_denied">Allow microphone access to send voice messages</string>
+    <string name="chat_camera_permission_denied">Camera access denied</string>
+    <string name="chat_swipe_mute">Mute</string>
+    <string name="chat_swipe_unmute">Unmute</string>
+    <string name="chat_swipe_delete">Delete</string>
+    <string name="chat_swipe_archive">Archive</string>
+    <string name="chat_day_today">Today</string>
 </resources>

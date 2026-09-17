@@ -16,6 +16,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalMall
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material3.AlertDialog
@@ -37,6 +39,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -90,23 +94,30 @@ fun DetailBuyBar(
     val current = detail
     if (current == null || !current.canPurchaseViaCart) return
 
-    Surface(color = extendedColors().card) {
+    val primary = androidx.compose.material3.MaterialTheme.colorScheme.primary
+    Surface(color = extendedColors().card, shadowElevation = 8.dp) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .navigationBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            AgroButton(
-                text = stringResource(L10nR.string.cart_add_to_cart_short),
-                onClick = { viewModel.addToCart(current) },
-                containerColor = extendedColors().grey,
-                contentColor = extendedColors().primaryText,
+            // iOS: сол жақта толық жасыл «Сатып алу», оң жақта ашық «Себетке».
+            BuyBarButton(
+                text = stringResource(L10nR.string.cart_buy),
+                icon = Icons.Filled.LocalMall,
+                container = primary,
+                content = androidx.compose.ui.graphics.Color.White,
+                onClick = { viewModel.openSheet(current) },
                 modifier = Modifier.weight(1f),
             )
-            AgroButton(
-                text = stringResource(L10nR.string.cart_buy),
-                onClick = { viewModel.openSheet(current) },
+            BuyBarButton(
+                text = stringResource(L10nR.string.cart_add_to_cart_short),
+                icon = Icons.Outlined.ShoppingCart,
+                container = primary.copy(alpha = 0.16f),
+                content = primary,
+                onClick = { viewModel.addToCart(current) },
                 modifier = Modifier.weight(1f),
             )
         }
@@ -348,5 +359,36 @@ private fun BuySheet(
             )
             Spacer(Modifier.height(8.dp))
         }
+    }
+}
+
+/** Төменгі панельдің ірі батырмасы: иконка + мәтін, 16dp бұрыш. */
+@Composable
+private fun BuyBarButton(
+    text: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    container: androidx.compose.ui.graphics.Color,
+    content: androidx.compose.ui.graphics.Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .height(54.dp)
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+            .background(container)
+            .clickable(onClick = onClick),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        androidx.compose.material3.Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(22.dp))
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text,
+            color = content,
+            fontSize = androidx.compose.ui.unit.TextUnit(17f, androidx.compose.ui.unit.TextUnitType.Sp),
+            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+            maxLines = 1,
+        )
     }
 }

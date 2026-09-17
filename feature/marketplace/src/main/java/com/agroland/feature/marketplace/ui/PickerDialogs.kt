@@ -101,3 +101,14 @@ internal fun unitLabel(unit: MeasurementUnit): String = stringResource(
         MeasurementUnit.BOX -> L10nR.string.measurement_unit_box
     },
 )
+
+/** Backend өлшем кілті (piece, kilogram…) → локализацияланған атау; белгісіз болса — сол күйі. */
+@Composable
+internal fun displayUnit(raw: String): String =
+    MeasurementUnit.fromKey(raw)?.let { unitLabel(it) } ?: raw
+
+/** Валюта белгісі: KZT (немесе бос) → ₸, қалғаны — өзгеріссіз (iOS-тағыдай). */
+internal fun displayCurrency(raw: String?): String = when (raw?.trim()?.uppercase()) {
+    null, "", "KZT", "₸" -> "₸"
+    else -> raw.trim()
+}

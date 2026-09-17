@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Қараңғы тема: жүйелік жолақ иконкалары ашық, терезе фоны қара.
+         (Ашық нұсқасы values/themes.xml-де.) -->
+    <style name="Theme.Agroland" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/agroland_background</item>
+    </style>
+</resources>

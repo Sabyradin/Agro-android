@@ -2,6 +2,7 @@ package com.agroland.feature.wallet.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.agroland.core.analytics.MonitoringService
 import com.agroland.core.network.ApiResult
 import com.agroland.feature.payment.data.PaymentRepository
 import com.agroland.feature.profile.data.ProfileRepository
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 class TopUpViewModel @Inject constructor(
     private val paymentRepository: PaymentRepository,
     private val profileRepository: ProfileRepository,
+    private val monitoringService: MonitoringService,
 ) : ViewModel() {
 
     private val _balance = MutableStateFlow(0.0)
@@ -49,10 +51,24 @@ class TopUpViewModel @Inject constructor(
         _loading.value = true
         viewModelScope.launch {
             when (val result = paymentRepository.generateBalanceTopUp(amount)) {
-                is ApiResult.Error ->
+                is ApiResult.Error -> {
+                    // Фаза 19 (Flutter PaymentNotifier.makePayment parity).
+                    monitoringService.trackBalanceTopUp(
+                        amount = amount,
+                        currency = "KZT",
+                        success = false,
+                        errorMessage = result.failure.toString(),
+                    )
                     _events.emit(WalletEvent.ShowError(result.failure.toWalletError()))
-                is ApiResult.Success ->
+                }
+                is ApiResult.Success -> {
+                    monitoringService.trackBalanceTopUp(
+                        amount = amount,
+                        currency = "KZT",
+                        success = true,
+                    )
                     _events.emit(WalletEvent.TopUpHtmlReady(result.value))
+                }
             }
             _loading.value = false
         }

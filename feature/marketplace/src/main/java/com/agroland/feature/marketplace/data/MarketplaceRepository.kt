@@ -3,6 +3,7 @@ package com.agroland.feature.marketplace.data
 import com.agroland.core.network.ApiResult
 import com.agroland.core.network.NetworkModule
 import com.agroland.core.network.error.Failure
+import com.agroland.feature.location.data.LocationNameResolver
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.serialization.json.JsonObject
@@ -19,6 +20,7 @@ import okhttp3.MultipartBody
 class MarketplaceRepository @Inject constructor(
     private val catalogApi: CatalogApi,
     private val writeApi: WriteApi,
+    private val locationNames: LocationNameResolver,
 ) {
 
     /** FullAnnouncementNotifier-дің FIFO кеші (50) — сәтсіз fetch кезде fallback. */
@@ -29,16 +31,18 @@ class MarketplaceRepository @Inject constructor(
 
     suspend fun getAnnouncements(filter: AnnouncementFilter, page: Int, limit: Int = PAGE_SIZE): ApiResult<AnnouncementsPage> =
         safeCall { MarketplaceParser.parseAnnouncementPage(catalogApi.getAnnouncements(filter.toQueryMap(page, limit))) }
+            .withPlaceNames()
 
     suspend fun getRecommended(page: Int, limit: Int = PAGE_SIZE): ApiResult<AnnouncementsPage> =
         safeCall { MarketplaceParser.parseAnnouncementPage(catalogApi.getRecommended(page, limit)) }
+            .withPlaceNames()
 
     /** Деталь: сәтсіз болса кештегі соңғы нұсқа қайтарылады. */
     suspend fun getAnnouncement(id: Long): ApiResult<FullAnnouncement> {
         val result = safeCall {
             MarketplaceParser.parseFullAnnouncement(catalogApi.getAnnouncement(id))
                 ?: throw IllegalStateException("Пустой ответ")
-        }
+        }.withPlaceName()
         if (result is ApiResult.Success) {
             synchronized(detailCache) { detailCache[id] = result.value }
         }
@@ -53,6 +57,22 @@ class MarketplaceRepository @Inject constructor(
     suspend fun searchSuggestions(query: String, page: Int = 1, limit: Int = 10): ApiResult<List<Suggestion>> =
         safeCall { MarketplaceParser.parseSuggestions(catalogApi.searchSuggestions(query, page, limit)) }
 
+    /**
+     * Фаза 19: POST /search/log — fire-and-forget, қате ешқашан шақырушыға
+     * жетпейді ( Flutter бұл endpoint-ті қолданбайды — MASTER_PLAN талабы).
+     */
+    suspend fun logSearchQuery(query: String, categoryId: Int? = null) {
+        try {
+            catalogApi.logSearchQuery(
+                buildJsonObject {
+                    put("query", query)
+                    categoryId?.let { put("category_id", it) }
+                },
+            )
+        } catch (_: Exception) {
+        }
+    }
+
     suspend fun getCategories(): ApiResult<List<Category>> =
         safeCall { MarketplaceParser.parseCategoryList(catalogApi.getCategories()) }
 
@@ -64,6 +84,7 @@ class MarketplaceRepository @Inject constructor(
 
     suspend fun getFavorites(page: Int, limit: Int = PAGE_SIZE): ApiResult<AnnouncementsPage> =
         safeCall { MarketplaceParser.parseAnnouncementPage(catalogApi.getFavorites(page, limit)) }
+            .withPlaceNames()
 
     suspend fun toggleFavorite(id: Long, add: Boolean): ApiResult<Unit> = safeCall {
         if (add) {
@@ -116,6 +137,7 @@ class MarketplaceRepository @Inject constructor(
     /** Менің жарнамаларым — status: active|inactive|pending|rejected. */
     suspend fun getMyAnnouncements(status: String, page: Int, limit: Int = PAGE_SIZE): ApiResult<AnnouncementsPage> =
         safeCall { MarketplaceParser.parseAnnouncementPage(writeApi.getMyAnnouncements(status, page, limit)) }
+            .withPlaceNames()
 
     /** AI мазмұн — {ad_title, lang_code}; DEV-те AI сервисі қазір 500 береді (ISSUES #12). */
     suspend fun generateAdContent(title: String, langCode: String): ApiResult<AdContent?> {
@@ -163,6 +185,33 @@ class MarketplaceRepository @Inject constructor(
 
     private suspend fun <T> safeCall(block: suspend () -> T): ApiResult<T> =
         NetworkModule.safeCall(block)
+
+    /** Деталь бетіндегі орын атауы — лентадағы [withPlaceNames] баламасы. */
+    private suspend fun ApiResult<FullAnnouncement>.withPlaceName(): ApiResult<FullAnnouncement> {
+        val detail = (this as? ApiResult.Success)?.value ?: return this
+        if (detail.base.placeLabel.isNotBlank()) return this
+        val label = locationNames.label(detail.base.regionId, detail.base.districtId, short = false) ?: return this
+        return ApiResult.Success(detail.copy(base = detail.base.copy(city = label)))
+    }
+
+    /**
+     * Лентадағы жарнамаларға каталогтан алынған орын атауын қосады — бэк
+     * `city`/`district` жібермей, тек `location` ID-лерін беретіндіктен.
+     * Каталог қолжетімсіз болса тізім өзгеріссіз қалады.
+     */
+    private suspend fun ApiResult<AnnouncementsPage>.withPlaceNames(): ApiResult<AnnouncementsPage> {
+        val page = (this as? ApiResult.Success)?.value ?: return this
+        if (page.items.none { it.placeLabel.isBlank() && (it.regionId != null || it.districtId != null) }) return this
+        val enriched = page.items.map { item ->
+            if (item.placeLabel.isNotBlank()) {
+                item
+            } else {
+                locationNames.label(item.regionId, item.districtId)
+                    ?.let { item.copy(city = it) } ?: item
+            }
+        }
+        return ApiResult.Success(page.copy(items = enriched))
+    }
 
     private companion object {
         const val PAGE_SIZE = 20

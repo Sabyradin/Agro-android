@@ -88,16 +88,27 @@ fun CategoriesPage(
                     item(key = "header_$bucket") {
                         Text(
                             text = stringResource(titleRes),
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                            ),
                             color = extendedColors().primaryText,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = 8.dp,
+                                bottom = 2.dp,
+                            ),
                         )
                     }
                     items(categories, key = { it.id }) { category ->
                         CategoryRow(
                             category = category,
                             localeTag = localeTag,
-                            onClick = { onOpenSubcategories(category.id) },
+                            onClick = {
+                                // Фаза 19: категория көру оқиғасы (Flutter MainCategoryItemView).
+                                viewModel.trackCategoryView(category.id, category.localizedName(localeTag))
+                                onOpenSubcategories(category.id)
+                            },
                         )
                     }
                 }
@@ -124,23 +135,17 @@ private fun CategoryRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(
+        CachedImage(
+            url = category.iconUrl,
+            contentDescription = category.localizedName(localeTag),
             modifier = Modifier
                 .size(44.dp)
-                .clip(CircleShape)
-                .background(ext.grey),
-            contentAlignment = Alignment.Center,
-        ) {
-            CachedImage(
-                url = category.iconUrl,
-                contentDescription = category.localizedName(localeTag),
-                modifier = Modifier.size(44.dp),
-            )
-        }
+                .clip(RoundedCornerShape(12.dp)),
+        )
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = category.localizedName(localeTag),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = ext.primaryText,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

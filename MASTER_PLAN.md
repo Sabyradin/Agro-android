@@ -30,10 +30,28 @@
 | 16 | Дилер консолі | Products/Orders табтары, delivery-zones CRUD, қызметкертер, TeamPool claim, аналитика (timeseries, Vico) | ✅ (трекинг өлі маршруты тіркелді — ISSUES #35; promotion TODO stub → нақты деректер, ISSUES #36) |
 | 17 | Қытай + сұраныс + EGOV | MercuryX каталог/себет/тапсырыс (consent, phone 11д 77…, BIN 12д, Int64), Demand CRUD, VIN `^[A-HJ-NPR-Z0-9]{17}$` | ✅ (қытай себеті CartPage-ке біріктірілді, аралас таңдау блокталады; сұраныс CRUD Flutter-де жоқ — Profile кіру нүктесі; EGOV каталог статик 83 жазба + VIN generic көрсетілім, ISSUES #39–41) |
 | 18 | Пікірлер, медиа, QR | «Менің пікірлерім» (клиент жағынан, 2 қойынды+бейдж), seller/announcement пікірлері, Photo/Video/PDF/WebView/YouTube viewer, QR сканер | ✅ (iOS MyReviewsStore агрегация үлгісі — ISSUES #43; in-app PDF — #27 жабылды, #44; profileReviews өлі маршрут паритеті — #45; QR parser JVM-таза — #47; пікір жауап пішіндері эмуляторлық тексеріске — #42) |
-| 19 | Аналитика | Firebase Analytics/Crashlytics, TikTok Business SDK (Android нұсқасы), мониторинг оқиғалары, search/log | ⬜ |
-| 20 | Полиш + релиз | Force-update (GET /app-version), рұқсаттар, edge-to-edge, Play Console дайындық (AAB, signing), соңғы тексеру | ⬜ |
+| 19 | Аналитика | Firebase Analytics/Crashlytics, TikTok Business SDK (Android нұсқасы), мониторинг оқиғалары, search/log | ✅ (core:analytics — MonitoringService fan-out 1:1 Flutter monitoring_service: 12 eventType, pending кеш ≤100, phone_number snake_case JSON; TikTok Android SDK 1.5.0 jitpack, eventMap iOS-айна, dev-те өшірулі — ISSUES #50; Firebase плейсхолдер конфигте қауіпсіз ыдырайды — #51; OkHttp ApiMonitoringInterceptor — әр API сәтсіздік/сәттілік; call-site hooks: bootstrap app_open, route observer page_view, confirmOtp login/registration, onLoggedOut logout, profile bind setUserId/phone, TopUp balance_top_up, PaymentResult purchase, CreateAd advertise, категория, іздеу; POST /search/log curl-мен нақтыланған — #48; /stories/analytics/* sales-manager — өткізілді, #49; trackAppClose өлі әдіс паритеті — #52; 401 logout оқиғасыз — #53) |
+| 20 | Полиш + релиз | Force-update (GET /app-version), рұқсаттар, edge-to-edge, Play Console дайындық (AAB, signing), соңғы тексеру | ✅ (app/appversion пакеті: AppVersionApi + кешірімді парсер + AppVersionChecker (24с throttle DataStore, last_shown_version дедуп) + decideUpdate таза логикасы — Flutter app_version_service 1:1, AppVersionLogicTest 15 кейс; curl DEV: жауап конверті нақтыланды — ISSUES #54; UpdateDialog — Material 3 (градиент шеңбер, 24dp, BackHandler+DialogProperties міндетті күйде құлып), root қабатта (PIN/қоңырау/стори үстінен), Play Store Intent + cannot_open_link toast; enableEdgeToEdge() — ISSUES #57; рұқсаттар аудиті — #55; AAB bundleProdRelease R8+proguard — #56, signing кілті команданың күтуінде) |
 
 ---
+
+## UI полиш (фазалардан кейін)
+
+Барлық фаза аяқталғаннан кейін бөлек **дизайн өткелі** жасалды — эталон
+ретінде команда берген **iOS скриншоттары** алынды (бұрын тек Flutter).
+
+**Не өзгерді:** төменгі навигация (жиекке бекітілген 5 слот, ортасында
+«Қосу»), басты беттің жоғарғы аймағы (QR/қоңырау/аватар → ірі тақырып →
+толық енді іздеу), үш сегментті iOS-ауыстырғышы + дөңгелек фильтр, лента —
+2 бағанды тік карточкалы тор, нақты Agroland логотипі (splash/launcher/auth),
+статус-бар/навигация соқпалары (edge-to-edge), қараңғы темадағы жүйелік
+жолақ түстері, ортақ дизайн токендері мен бос/қате/қонақ күйлері.
+
+**Түзетілген ақаулар:** өңір тізімі елдерді ашатын (маршрут кілті),
+іздеу өрісі мәтінді қиятын, splash индикаторы, суреттер жүктелмегенде
+карточкалардың «сынып» көрінуі.
+
+Толығы: ISSUES.md #58–#65.
 
 ## Фаза аяқталғанда толтырылатын журнал (кезекте)
 

@@ -17,6 +17,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // TikTok Business SDK (com.github.tiktok:…) — jitpack қана ғана таратады.
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
@@ -26,6 +28,7 @@ include(":app")
 include(":core:ui")
 include(":core:common")
 include(":core:l10n")
+include(":core:analytics")
 include(":core:network")
 include(":feature:shell")
 include(":feature:auth")
