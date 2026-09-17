@@ -44,6 +44,8 @@ data class AdDraft(
     val location: SelectedLocation? = null,
     /** Тек өңдеу режимінде: қолданылған суреттерді сақтау (жою үшін). */
     val images: List<String> = emptyList(),
+    /** YouTube бейне сілтемесі (Flutter/iOS: video_url) — бос болуы мүмкін. */
+    val videoLink: String = "",
 ) {
     val priceValue: Double? get() = price.toDoubleOrNull()
 
@@ -60,6 +62,7 @@ data class AdDraft(
         contactNumbers.none { it.isNotBlank() } -> FIELD_PHONES
         userLocationId == null && location?.countryId == null -> FIELD_LOCATION
         pickupAvailable && pickupAddress.isBlank() -> FIELD_PICKUP_ADDRESS
+        videoLink.isNotBlank() && !isYouTubeLink(videoLink) -> FIELD_VIDEO
         else -> null
     }
 
@@ -75,6 +78,15 @@ data class AdDraft(
         const val FIELD_PHONES = "phones"
         const val FIELD_LOCATION = "location"
         const val FIELD_PICKUP_ADDRESS = "pickup_address"
+        const val FIELD_VIDEO = "video"
+
+        private val YOUTUBE_REGEX = Regex(
+            "^(https?://)?(www\\.|m\\.)?(youtube\\.com/(watch\\?v=|shorts/|embed/)|youtu\\.be/)[\\w-]{6,}.*$",
+            RegexOption.IGNORE_CASE,
+        )
+
+        /** Flutter `isYouTubeVideoLink` баламасы: watch / shorts / embed / youtu.be. */
+        fun isYouTubeLink(link: String): Boolean = YOUTUBE_REGEX.matches(link.trim())
     }
 }
 
@@ -119,6 +131,8 @@ data class DemandDraft(
     val measurementUnit: MeasurementUnit? = null,
     val quantity: String = "",
     val userLocationId: Long? = null,
+    /** Кілт сөздер (iOS «Кілт сөздерді енгізіңіз») — бос болса жіберілмейді. */
+    val keywords: List<String> = emptyList(),
 ) {
     val maxPriceValue: Double? get() = maxPrice.toDoubleOrNull()
 
@@ -140,6 +154,9 @@ data class DemandDraft(
         measurementUnit?.let { put("measurement_unit", it.queryKey) }
         quantity.toDoubleOrNull()?.let { put("quantity", it) }
         userLocationId?.let { put("user_location_id", it) }
+        if (keywords.isNotEmpty()) {
+            put("keywords", kotlinx.serialization.json.JsonArray(keywords.map { kotlinx.serialization.json.JsonPrimitive(it) }))
+        }
     }
 
     fun toPartMap(): Map<String, RequestBody> = buildMap {
@@ -221,6 +238,7 @@ object AdRequests {
             draft.stockQuantity.toIntOrNull()?.let { put("stock_quantity", text(it.toString())) }
             // Қолданылған (өңдеу режиміндегі) суреттерді backend URL арқылы сақтайды.
             if (draft.images.isNotEmpty()) put("existing_images", text(draft.images.joinToString(",")))
+            if (draft.videoLink.isNotBlank()) put("video_url", text(draft.videoLink.trim()))
             if (skipTariffDialog) put("skipTariffDialog", text("true"))
         }
         val parts = buildList {

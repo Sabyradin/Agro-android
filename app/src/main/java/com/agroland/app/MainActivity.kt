@@ -146,7 +146,7 @@ import com.agroland.feature.marketplace.ui.AnnouncementsListPage
 import com.agroland.feature.marketplace.ui.BulkUploadPage
 import com.agroland.feature.marketplace.ui.CategoriesPage
 import com.agroland.feature.marketplace.ui.CreateAdPage
-import com.agroland.feature.marketplace.ui.CreateOrOfferPage
+import com.agroland.feature.marketplace.ui.CreateHubPage
 import com.agroland.feature.marketplace.ui.FavoritesPage
 import com.agroland.feature.marketplace.ui.FilterPage
 import com.agroland.feature.marketplace.ui.HomeFeedPage
@@ -1015,22 +1015,28 @@ private fun AppNavHost(
         }
 
         // ---- Маркетплейс: жазу режимі (Phase 6) ----
-        composable<CreateOrOfferRoute> {
-            CreateOrOfferPage(
-                onBack = { navController.popBackStack() },
-                onCreateAd = { navController.navigate(CreateAdRoute) },
-                onMakeOffer = { navController.navigate(MakeOfferRoute) },
-                onOpenBulkUpload = { navController.navigate(BulkUploadRoute) },
+        // «Қосу» — iOS макеті: бір бетте «Жарнама жасау | Ұсыныс жасау | Жаппай жүктеу».
+        composable<CreateOrOfferRoute> { entry ->
+            val mapSelection by entry.savedStateHandle
+                .getStateFlow<SelectedLocation?>(LOCATION_RESULT_KEY, null)
+                .collectAsState()
+            CreateHubPage(
+                onClose = { navController.popBackStack() },
+                onSubmitted = { navController.popBackStack() },
+                mapSelection = mapSelection,
+                onMapSelectionConsumed = { entry.savedStateHandle[LOCATION_RESULT_KEY] = null },
+                onOpenMapPicker = { prefill ->
+                    navController.navigate(LocationSelectionRoute(prefill))
+                },
             )
         }
         composable<CreateAdRoute> { entry ->
             val mapSelection by entry.savedStateHandle
                 .getStateFlow<SelectedLocation?>(LOCATION_RESULT_KEY, null)
                 .collectAsState()
-            CreateAdPage(
-                onBack = { navController.popBackStack() },
+            CreateHubPage(
+                onClose = { navController.popBackStack() },
                 onSubmitted = { navController.popBackStack() },
-                onOpenBulkUpload = { navController.navigate(BulkUploadRoute) },
                 mapSelection = mapSelection,
                 onMapSelectionConsumed = { entry.savedStateHandle[LOCATION_RESULT_KEY] = null },
                 onOpenMapPicker = { prefill ->

@@ -10,6 +10,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- Кіріс қоңырау дірілі (VoiceCallScreen). Бұрын жоқ болатын: vibrate() үнсіз
+         сәтсіз болып, қабылдағанда cancel() SecurityException-мен қолданбаны құлататын. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application>
         <!-- Self-managed қоңырау: жүйе қоңырау күйін біледі (дыбыс фокусы,

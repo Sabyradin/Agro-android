@@ -3,18 +3,27 @@ package com.agroland.feature.marketplace.ui
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.NoteAdd
+import androidx.compose.material.icons.outlined.CloudUpload
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.outlined.TableChart
+import androidx.compose.material.icons.outlined.UploadFile
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -27,18 +36,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.agroland.core.l10n.R as L10nR
-import com.agroland.core.ui.components.AgroAppBar
-import com.agroland.core.ui.components.AgroButton
 import com.agroland.core.ui.components.AgroScaffold
-import com.agroland.core.ui.components.AgroTextButton
 import com.agroland.core.ui.theme.extendedColors
 import java.io.File
 
@@ -50,6 +59,7 @@ import java.io.File
 @Composable
 fun BulkUploadPage(
     onBack: () -> Unit,
+    header: (@Composable () -> Unit)? = null,
     viewModel: BulkUploadViewModel = hiltViewModel(),
 ) {
     val templateLoading by viewModel.templateLoading.collectAsState()
@@ -104,89 +114,125 @@ fun BulkUploadPage(
 
     AgroScaffold(
         topBar = {
-            AgroAppBar(title = stringResource(L10nR.string.bulk_upload_title), onBack = onBack)
+            if (header != null) {
+                header()
+            } else {
+                CreateHeader(
+                    title = stringResource(L10nR.string.create_tab_bulk),
+                    closeLabel = stringResource(L10nR.string.common_close),
+                    onClose = onBack,
+                )
+            }
         },
     ) { inner ->
         Box(modifier = inner.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Text(
-                    text = stringResource(L10nR.string.bulk_upload_message),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = extendedColors().secondaryText,
-                )
-
-                // 1-қадам — үлгіні жүктеу.
-                Text(
-                    text = stringResource(L10nR.string.bulk_step_template),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = extendedColors().primaryText,
-                )
-                AgroButton(
-                    text = stringResource(L10nR.string.bulk_template_download),
-                    onClick = { viewModel.downloadTemplate(localeTag ?: "ru") },
-                    loading = templateLoading,
-                )
-
-                // 2-қадам — кестелі файлды таңдау.
-                Text(
-                    text = stringResource(L10nR.string.bulk_step_pick),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = extendedColors().primaryText,
-                )
-                if (pickedFile == null) {
-                    AgroButton(
-                        text = stringResource(L10nR.string.bulk_pick_file),
-                        onClick = { launchPicker() },
-                        containerColor = extendedColors().grey,
-                        contentColor = extendedColors().primaryText,
-                    )
-                } else {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Description,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+            Column(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                ) {
+                    // 1 — Excel шаблонын жүктеп алу.
+                    FormCard {
+                        BulkCardHeader(
+                            icon = Icons.Outlined.TableChart,
+                            title = stringResource(L10nR.string.bulk_template_title),
+                            subtitle = stringResource(L10nR.string.bulk_template_subtitle),
                         )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = fileName
-                                    ?: stringResource(L10nR.string.bulk_file_picked),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = extendedColors().primaryText,
+                        FormDivider(start = 54.dp)
+                        FormActionRow(
+                            icon = Icons.Outlined.FileDownload,
+                            text = stringResource(L10nR.string.bulk_template_action),
+                            loading = templateLoading,
+                            onClick = { viewModel.downloadTemplate(localeTag ?: "ru") },
+                        )
+                    }
+
+                    // 2 — толтырылған файлды таңдау.
+                    FormCard {
+                        BulkCardHeader(
+                            icon = Icons.Outlined.UploadFile,
+                            title = stringResource(L10nR.string.bulk_file_title),
+                            subtitle = stringResource(L10nR.string.bulk_file_subtitle),
+                        )
+                        FormDivider(start = 54.dp)
+                        if (pickedFile == null) {
+                            FormActionRow(
+                                icon = Icons.AutoMirrored.Outlined.NoteAdd,
+                                text = stringResource(L10nR.string.bulk_file_action),
+                                onClick = { launchPicker() },
                             )
+                        } else {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { launchPicker() }
+                                    .padding(horizontal = FormRowPadding, vertical = 14.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Description,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                                Spacer(Modifier.width(14.dp))
+                                Text(
+                                    text = fileName ?: stringResource(L10nR.string.bulk_file_picked),
+                                    fontSize = 16.sp,
+                                    color = extendedColors().primaryText,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                Text(
+                                    text = stringResource(L10nR.string.common_change),
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
                         }
-                        AgroTextButton(
-                            text = stringResource(L10nR.string.common_change),
-                            onClick = { launchPicker() },
-                        )
                     }
                 }
 
-                // 3-қадам — жүктеу.
-                AgroButton(
-                    text = stringResource(L10nR.string.bulk_upload_button),
-                    onClick = viewModel::upload,
-                    enabled = pickedFile != null,
-                    loading = uploading,
-                )
+                CreateBottomBar {
+                    CreateBarButton(
+                        text = stringResource(L10nR.string.bulk_upload_server),
+                        icon = Icons.Outlined.CloudUpload,
+                        enabled = pickedFile != null,
+                        loading = uploading,
+                        onClick = viewModel::upload,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
             SnackbarHost(
                 hostState = snackbar,
-                modifier = Modifier.align(Alignment.BottomCenter),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 80.dp),
             )
+        }
+    }
+}
+
+/** Жаппай жүктеу карточкасының басы: жасыл иконка + атау + сұр түсініктеме. */
+@Composable
+private fun BulkCardHeader(icon: ImageVector, title: String, subtitle: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = FormRowPadding, vertical = 16.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+        Spacer(Modifier.width(14.dp))
+        Column {
+            Text(text = title, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = extendedColors().primaryText)
+            Spacer(Modifier.height(4.dp))
+            Text(text = subtitle, fontSize = 14.sp, color = extendedColors().secondaryText)
         }
     }
 }

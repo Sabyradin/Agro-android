@@ -134,6 +134,8 @@ fun CartPage(
     var paymentLaunch by remember { mutableStateOf<PaymentLaunch?>(null) }
     // Баланспен төлеу сәтті — қысқа растау диалогі.
     var balancePaidDialog by remember { mutableStateOf(false) }
+    // Қойынды ашылған сайын себет серверден үнсіз жаңарады (басқа беттен қосылған тауарлар).
+    LaunchedEffect(Unit) { viewModel.onShown() }
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {

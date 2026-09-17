@@ -8,35 +8,40 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.Straighten
-import androidx.compose.material.icons.outlined.UploadFile
-import androidx.compose.material.icons.outlined.Videocam
+import androidx.compose.material.icons.outlined.PinDrop
+import androidx.compose.material.icons.outlined.RemoveCircleOutline
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -46,49 +51,62 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.agroland.core.l10n.AppLocale
 import com.agroland.core.l10n.R as L10nR
-import com.agroland.feature.location.data.SelectedLocation
-import com.agroland.core.ui.components.AgroAppBar
-import com.agroland.core.ui.components.AgroButton
 import com.agroland.core.ui.components.AgroCheckbox
-import com.agroland.core.ui.components.AgroIconButton
 import com.agroland.core.ui.components.AgroScaffold
-import com.agroland.core.ui.components.AgroTextField
 import com.agroland.core.ui.components.CachedImage
 import com.agroland.core.ui.components.LoadingWidget
 import com.agroland.core.ui.theme.extendedColors
+import com.agroland.feature.location.data.SelectedLocation
 import com.agroland.feature.marketplace.data.AdDraft
 import com.agroland.feature.marketplace.data.Announcement
 import com.agroland.feature.marketplace.data.Category
 import com.agroland.feature.marketplace.data.MeasurementUnit
-import com.agroland.feature.profile.data.UserLocation
 import kotlinx.coroutines.launch
 
+/** Жарнамаға қосылатын суреттердің шегі (iOS «0/10»). */
+private const val MaxPhotos = 10
+
+/** Сипаттаманың шегі (iOS «0/1 000»). */
+private const val MaxDescription = 1000
+
 /**
- * CreateAdPage — жарнама жасау/өңдеу формасы (create_main_info_view + image_view +
- * client_info_view + measurement_view + create_preview_page).
- * CreateAdRoute → жасау; EditAdRoute(id) → FullAnnouncement prefill (бір VM).
- * Форма толтырылған соң — ішкі «Алдын ала қарау» қадамы, сосын жіберу.
+ * CreateAdPage — жарнама жасау/өңдеу формасы, iOS макеті бойынша топталған
+ * карточкалар: байланыс ақпараты → фото + YouTube → негізгі ақпарат → сипаттама →
+ * тегтер → баға (Бағасы | Келісімді) → өлшем бірлігі → (бизнес) жеткізу және сату.
+ * Төменде «Алдын ала қарау» + «Жариялау».
+ *
+ * [header] берілсе (CreateHubPage — қойындылары бар тақырып) — сол көрсетіледі,
+ * әйтпесе «Жабу» + атау тақырыбы (өңдеу режимі).
  */
 @Composable
 fun CreateAdPage(
     onBack: () -> Unit,
     onSubmitted: () -> Unit,
-    onOpenBulkUpload: () -> Unit,
+    onOpenBulkUpload: () -> Unit = {},
     mapSelection: SelectedLocation? = null,
     onMapSelectionConsumed: () -> Unit = {},
     onOpenMapPicker: (SelectedLocation?) -> Unit = {},
+    header: (@Composable () -> Unit)? = null,
     viewModel: CreateAdViewModel = hiltViewModel(),
     categoriesViewModel: CategoriesViewModel = rememberCategoriesViewModel(),
 ) {
@@ -109,14 +127,15 @@ fun CreateAdPage(
     val subLoading by categoriesViewModel.subLoading.collectAsState()
 
     val snackbar = remember { SnackbarHostState() }
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val noInternetText = stringResource(L10nR.string.error_no_internet)
     val genericErrorText = stringResource(L10nR.string.error_generic_message)
     val createdToast = stringResource(L10nR.string.ad_created_toast)
     val updatedToast = stringResource(L10nR.string.ad_updated_toast)
     var showPreview by remember { mutableStateOf(false) }
+    // Қате өрісі тек «Жариялау»/«Алдын ала қарау» басылғаннан кейін қызыл болады.
+    var showErrors by remember { mutableStateOf(false) }
 
-    // Қате өріс кілті → адам тіліндегі хабарлама (композиция кезінде дайындалады).
     val validationMessages = mapOf(
         AdDraft.FIELD_TITLE to stringResource(L10nR.string.validation_title),
         AdDraft.FIELD_DESCRIPTION to stringResource(L10nR.string.validation_description),
@@ -126,6 +145,7 @@ fun CreateAdPage(
         AdDraft.FIELD_PHONES to stringResource(L10nR.string.validation_phones),
         AdDraft.FIELD_LOCATION to stringResource(L10nR.string.validation_location),
         AdDraft.FIELD_PICKUP_ADDRESS to stringResource(L10nR.string.validation_pickup_address),
+        AdDraft.FIELD_VIDEO to stringResource(L10nR.string.validation_video_link),
     )
 
     LaunchedEffect(Unit) {
@@ -141,18 +161,13 @@ fun CreateAdPage(
         }
     }
 
-    // Фото таңдау — көп сурет; бейне — бір файл (backend ≤10MB, MultipartHelper шектейді).
     val imagePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia(maxItems = 10),
+        ActivityResultContracts.PickMultipleVisualMedia(maxItems = MaxPhotos),
     ) { uris -> if (uris.isNotEmpty()) viewModel.addImages(uris) }
-    val videoPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia(),
-    ) { uri -> viewModel.setVideo(uri) }
 
-    // Категория диалогының күйі.
     var categoryPickerVisible by remember { mutableStateOf(false) }
     var unitPickerVisible by remember { mutableStateOf(false) }
-    var locationPickerVisible by remember { mutableStateOf(false) }
+    var addressPickerVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(draft.categoryId) {
         if (draft.categoryId != null) categoriesViewModel.loadSubcategories(draft.categoryId!!)
@@ -166,308 +181,233 @@ fun CreateAdPage(
         }
     }
 
-    val invalidField = draft.validate()
+    val invalidField = if (showErrors) draft.validate() else null
+
+    /** Тексеріп, жарамды болса [onValid]; әйтпесе қате өрісті көрсетіп, хабарлайды. */
+    fun validateThen(onValid: () -> Unit) {
+        val field = draft.validate()
+        if (field == null) {
+            onValid()
+        } else {
+            showErrors = true
+            validationMessages[field]?.let { message -> scope.launch { snackbar.showSnackbar(message) } }
+        }
+    }
 
     AgroScaffold(
         topBar = {
-            AgroAppBar(
-                title = stringResource(
-                    if (editMode) L10nR.string.edit_ad_title else L10nR.string.create_ad_title,
-                ),
-                onBack = onBack,
-                actions = {
-                    if (!editMode) {
-                        AgroIconButton(
-                            icon = Icons.Outlined.UploadFile,
-                            contentDescription = stringResource(L10nR.string.bulk_upload_title),
-                            onClick = onOpenBulkUpload,
-                        )
-                    }
-                },
-            )
+            if (header != null) {
+                header()
+            } else {
+                CreateHeader(
+                    title = stringResource(if (editMode) L10nR.string.edit_ad_title else L10nR.string.create_tab_ad),
+                    closeLabel = stringResource(L10nR.string.common_close),
+                    onClose = onBack,
+                )
+            }
         },
     ) { inner ->
         Box(modifier = inner.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize().imePadding()) {
                 when {
                     loading -> Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
                         contentAlignment = Alignment.Center,
                     ) {
                         LoadingWidget()
                     }
-                    showPreview -> {
-                        // ---- Алдын ала қарау (create_preview_page) ----
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .verticalScroll(rememberScrollState())
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                        ) {
-                            AdPreviewCard(draft = draft, newImages = images, video = video)
-                            AgroButton(
-                                text = stringResource(L10nR.string.ad_publish),
-                                onClick = viewModel::submit,
-                                loading = submitting,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            androidx.compose.material3.TextButton(
-                                onClick = { showPreview = false },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(stringResource(L10nR.string.ad_preview_edit))
-                            }
-                        }
+                    showPreview -> Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        AdPreviewCard(draft = draft, newImages = images, video = video)
                     }
-                    else -> {
-                        // ---- Форма ----
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .verticalScroll(rememberScrollState())
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                        ) {
-                            MediaSection(
-                                existingImages = draft.images,
-                                newImages = images,
-                                video = video,
-                                onAddImages = {
-                                    imagePicker.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                                    )
-                                },
-                                onRemoveExisting = viewModel::removeExistingImage,
-                                onRemoveNew = viewModel::removeNewImage,
-                                onAddVideo = {
-                                    videoPicker.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly),
-                                    )
-                                },
-                                onRemoveVideo = { viewModel.setVideo(null) },
-                            )
+                    else -> Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(24.dp),
+                    ) {
+                        ContactSection(
+                            phones = draft.contactNumbers,
+                            phonesError = invalidField == AdDraft.FIELD_PHONES,
+                            addressLabel = addressLabel(draft, locations),
+                            addressError = invalidField == AdDraft.FIELD_LOCATION,
+                            onEditPhones = { phones -> viewModel.updateDraft { it.copy(contactNumbers = phones) } },
+                            onPickAddress = { addressPickerVisible = true },
+                        )
 
-                            // Атау + AI көмекшісі.
-                            Row(verticalAlignment = Alignment.Bottom) {
-                                Box(modifier = Modifier.weight(1f)) {
-                                    AgroTextField(
-                                        value = draft.title,
-                                        onValueChange = { value -> viewModel.updateDraft { it.copy(title = value.take(120)) } },
-                                        label = stringResource(L10nR.string.create_field_title),
-                                        isError = invalidField == AdDraft.FIELD_TITLE,
-                                        singleLine = false,
-                                        maxLines = 2,
-                                    )
-                                }
-                                IconButton(
-                                    onClick = { viewModel.generateAiContent(AppLocale.fromTag(localeTag).tag) },
-                                    enabled = draft.title.isNotBlank() && !aiLoading,
-                                ) {
-                                    if (aiLoading) {
-                                        LoadingWidget(Modifier.size(22.dp))
-                                    } else {
-                                        Icon(
-                                            imageVector = Icons.Outlined.AutoAwesome,
-                                            contentDescription = stringResource(L10nR.string.ai_generate),
-                                            tint = MaterialTheme.colorScheme.primary,
-                                        )
+                        PhotosSection(
+                            existingImages = draft.images,
+                            newImages = images,
+                            videoLink = draft.videoLink,
+                            videoError = invalidField == AdDraft.FIELD_VIDEO,
+                            onAddImages = {
+                                imagePicker.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                                )
+                            },
+                            onRemoveExisting = viewModel::removeExistingImage,
+                            onRemoveNew = viewModel::removeNewImage,
+                            onVideoLinkChange = { link -> viewModel.updateDraft { it.copy(videoLink = link.trim()) } },
+                        )
+
+                        FormSection(title = stringResource(L10nR.string.create_section_main)) {
+                            FormTextRow(
+                                value = draft.title,
+                                onValueChange = { value -> viewModel.updateDraft { it.copy(title = value.take(120)) } },
+                                placeholder = stringResource(L10nR.string.create_title_hint),
+                                isError = invalidField == AdDraft.FIELD_TITLE,
+                                trailing = {
+                                    // AI көмекшісі — атау бойынша сипаттама мен санатты толтырады.
+                                    Box(
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(CircleShape)
+                                            .clickable(enabled = draft.title.isNotBlank() && !aiLoading) {
+                                                viewModel.generateAiContent(AppLocale.fromTag(localeTag).tag)
+                                            },
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        if (aiLoading) {
+                                            LoadingWidget(Modifier.size(20.dp))
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Outlined.AutoAwesome,
+                                                contentDescription = stringResource(L10nR.string.ai_generate),
+                                                tint = MaterialTheme.colorScheme.primary.copy(
+                                                    alpha = if (draft.title.isNotBlank()) 1f else 0.4f,
+                                                ),
+                                                modifier = Modifier.size(22.dp),
+                                            )
+                                        }
                                     }
-                                }
-                            }
+                                },
+                            )
+                            FormDivider()
+                            FormSelectRow(
+                                label = stringResource(L10nR.string.create_category),
+                                value = categoryValue(grouped, subcategories, draft, localeTag)
+                                    ?: stringResource(L10nR.string.create_choose_category),
+                                valueIsPlaceholder = draft.categoryId == null,
+                                isError = invalidField == AdDraft.FIELD_CATEGORY ||
+                                    invalidField == AdDraft.FIELD_SUBCATEGORY,
+                                onClick = { categoryPickerVisible = true },
+                            )
+                        }
 
-                            AgroTextField(
+                        FormSection(
+                            title = stringResource(L10nR.string.create_section_description),
+                            trailing = "${draft.description.length}/${formatThousands(MaxDescription)}",
+                        ) {
+                            FormTextRow(
                                 value = draft.description,
                                 onValueChange = { value ->
-                                    viewModel.updateDraft { it.copy(description = value.take(4000)) }
+                                    viewModel.updateDraft { it.copy(description = value.take(MaxDescription)) }
                                 },
-                                label = stringResource(L10nR.string.create_field_description),
-                                isError = invalidField == AdDraft.FIELD_DESCRIPTION,
+                                placeholder = stringResource(L10nR.string.create_description_hint),
                                 singleLine = false,
-                                maxLines = 6,
+                                minHeight = 130.dp,
+                                isError = invalidField == AdDraft.FIELD_DESCRIPTION,
                             )
+                        }
 
-                            // Категория / сабкатегория.
-                            SelectRow(
-                                icon = Icons.Outlined.Category,
-                                label = categoryName(grouped, draft.categoryId, localeTag)
-                                    ?: stringResource(L10nR.string.create_pick_category),
-                                isError = invalidField == AdDraft.FIELD_CATEGORY,
-                                onClick = { categoryPickerVisible = true },
+                        FormSection(title = stringResource(L10nR.string.create_section_tags)) {
+                            TagsRow(
+                                keywords = draft.keywords,
+                                onChange = { keywords -> viewModel.updateDraft { it.copy(keywords = keywords) } },
                             )
-                            SelectRow(
-                                icon = Icons.Outlined.Category,
-                                label = subcategories.firstOrNull { it.id == draft.subcategoryId }
-                                    ?.localizedName(localeTag)
-                                    ?: stringResource(L10nR.string.create_pick_subcategory),
-                                isError = invalidField == AdDraft.FIELD_SUBCATEGORY,
-                                onClick = { categoryPickerVisible = true },
-                            )
+                        }
 
-                            // Баға + валюта + келісу.
-                            AgroTextField(
+                        FormSection(title = stringResource(L10nR.string.create_section_price)) {
+                            FormSegmented(
+                                options = listOf(
+                                    stringResource(L10nR.string.create_price_fixed),
+                                    stringResource(L10nR.string.create_price_negotiable),
+                                ),
+                                selectedIndex = if (draft.negotiable) 1 else 0,
+                                onSelect = { index -> viewModel.updateDraft { it.copy(negotiable = index == 1) } },
+                                modifier = Modifier.padding(12.dp),
+                            )
+                            FormDivider()
+                            FormTextRow(
                                 value = draft.price,
                                 onValueChange = { value ->
                                     viewModel.updateDraft { it.copy(price = value.filter(Char::isDigit).take(12)) }
                                 },
-                                label = stringResource(L10nR.string.create_field_price),
-                                isError = invalidField == AdDraft.FIELD_PRICE,
+                                placeholder = stringResource(L10nR.string.create_price_hint),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                isError = invalidField == AdDraft.FIELD_PRICE,
+                                trailing = {
+                                    CurrencyMenu(
+                                        selected = draft.currency,
+                                        onSelect = { currency -> viewModel.updateDraft { it.copy(currency = currency) } },
+                                    )
+                                },
                             )
-                            CurrencyChips(
-                                selected = draft.currency,
-                                onSelect = { currency -> viewModel.updateDraft { it.copy(currency = currency) } },
-                            )
-                            ToggleRow(
-                                title = stringResource(L10nR.string.mp_negotiable_short),
-                                checked = draft.negotiable,
-                                onToggle = { checked -> viewModel.updateDraft { it.copy(negotiable = checked) } },
-                            )
+                        }
 
-                            // Өлшем бірлігі.
-                            SelectRow(
-                                icon = Icons.Outlined.Straighten,
-                                label = draft.measurementUnit?.let { unitLabel(it) }
-                                    ?: stringResource(L10nR.string.create_pick_unit),
+                        FormCard {
+                            FormSelectRow(
+                                label = stringResource(L10nR.string.create_unit),
+                                value = draft.measurementUnit?.let { unitLabel(it) }
+                                    ?: stringResource(L10nR.string.create_choose),
+                                valueIsPlaceholder = true,
+                                updown = true,
                                 onClick = { unitPickerVisible = true },
                             )
-
-                            // Мекенжай (user_location_id).
-                            SelectRow(
-                                icon = Icons.Outlined.LocationOn,
-                                label = locations.firstOrNull { it.id == draft.userLocationId }?.fullAddress
-                                    ?: stringResource(L10nR.string.create_pick_location),
-                                isError = invalidField == AdDraft.FIELD_LOCATION,
-                                onClick = { locationPickerVisible = true },
-                            )
-                            // Карта/каталог арқылы — сақталған мекенжай болмағанда
-                            // country/region/district каталог ID-лері жіберіледі (Фаза 7).
-                            if (draft.userLocationId == null) {
-                                val pickedLabel = draft.location?.displayLabel()
-                                if (!pickedLabel.isNullOrBlank()) {
-                                    SelectRow(
-                                        icon = Icons.Outlined.Map,
-                                        label = pickedLabel,
-                                        onClick = { onOpenMapPicker(draft.location) },
-                                    )
-                                } else {
-                                    SelectRow(
-                                        icon = Icons.Outlined.Map,
-                                        label = stringResource(L10nR.string.create_pick_location_map),
-                                        onClick = { onOpenMapPicker(draft.location) },
-                                    )
-                                }
-                            }
-
-                            // Байланыс нөмірлері.
-                            PhonesSection(
-                                phones = draft.contactNumbers,
-                                isError = invalidField == AdDraft.FIELD_PHONES,
-                                onEdit = { phones -> viewModel.updateDraft { it.copy(contactNumbers = phones) } },
-                            )
-
-                            // Кілт сөздер.
-                            KeywordsSection(
-                                keywords = draft.keywords,
-                                onEdit = { keywords -> viewModel.updateDraft { it.copy(keywords = keywords) } },
-                            )
-
-                            // Жеткізу / алып кету.
-                            ToggleRow(
-                                title = stringResource(L10nR.string.detail_delivery),
-                                checked = draft.deliveryAvailable,
-                                onToggle = { checked -> viewModel.updateDraft { it.copy(deliveryAvailable = checked) } },
-                            )
-                            if (isBusiness && draft.deliveryAvailable && zones.isNotEmpty()) {
-                                DeliveryZonesSection(
-                                    zones = zones,
-                                    selectedIds = draft.deliveryZoneIds,
-                                    onChange = viewModel::setDeliveryZones,
-                                )
-                            }
-                            ToggleRow(
-                                title = stringResource(L10nR.string.detail_pickup),
-                                checked = draft.pickupAvailable,
-                                onToggle = { checked -> viewModel.updateDraft { it.copy(pickupAvailable = checked) } },
-                            )
-                            if (draft.pickupAvailable) {
-                                AgroTextField(
-                                    value = draft.pickupAddress,
-                                    onValueChange = { value -> viewModel.updateDraft { it.copy(pickupAddress = value) } },
-                                    label = stringResource(L10nR.string.create_field_pickup_address),
-                                    isError = invalidField == AdDraft.FIELD_PICKUP_ADDRESS,
-                                    singleLine = false,
-                                    maxLines = 2,
-                                )
-                            }
-
-                            // Бизнес өрістері: SKU, қойма, себет, маркетплейс.
-                            if (isBusiness) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    Box(modifier = Modifier.weight(1f)) {
-                                        AgroTextField(
-                                            value = draft.sku,
-                                            onValueChange = { value -> viewModel.updateDraft { it.copy(sku = value.take(64)) } },
-                                            label = stringResource(L10nR.string.create_field_sku),
-                                        )
-                                    }
-                                    Box(modifier = Modifier.weight(1f)) {
-                                        AgroTextField(
-                                            value = draft.stockQuantity,
-                                            onValueChange = { value ->
-                                                viewModel.updateDraft {
-                                                    it.copy(stockQuantity = value.filter(Char::isDigit).take(9))
-                                                }
-                                            },
-                                            label = stringResource(L10nR.string.create_field_stock),
-                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                        )
-                                    }
-                                }
-                                ToggleRow(
-                                    title = stringResource(L10nR.string.create_field_allow_cart),
-                                    checked = draft.allowCart,
-                                    onToggle = { checked -> viewModel.updateDraft { it.copy(allowCart = checked) } },
-                                )
-                                ToggleRow(
-                                    title = stringResource(L10nR.string.create_field_marketplace),
-                                    checked = draft.isMarketplace,
-                                    onToggle = { checked -> viewModel.updateDraft { it.copy(isMarketplace = checked) } },
-                                )
-                            }
                         }
+
+                        if (isBusiness) {
+                            SalesSection(
+                                draft = draft,
+                                zones = zones,
+                                pickupError = invalidField == AdDraft.FIELD_PICKUP_ADDRESS,
+                                onUpdate = viewModel::updateDraft,
+                                onZonesChange = viewModel::setDeliveryZones,
+                            )
                         }
                     }
+                }
 
-                // Жіберу түймесі — әрқашан көрінеді (форма скролл болғандықтан үстінен жабылады).
-                androidx.compose.material3.Surface(
-                    color = extendedColors().card,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    AgroButton(
-                        text = stringResource(L10nR.string.ad_preview),
-                        onClick = {
-                            val field = draft.validate()
-                            if (field == null) {
-                                showPreview = true
-                            } else {
-                                validationMessages[field]?.let { message ->
-                                    scope.launch { snackbar.showSnackbar(message) }
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
-                            .navigationBarsPadding(),
-                    )
+                if (!loading) {
+                    CreateBottomBar {
+                        if (showPreview) {
+                            CreateBarButton(
+                                text = stringResource(L10nR.string.ad_preview_edit),
+                                icon = Icons.Outlined.Edit,
+                                primary = false,
+                                onClick = { showPreview = false },
+                                modifier = Modifier.weight(1f),
+                            )
+                        } else {
+                            CreateBarButton(
+                                text = stringResource(L10nR.string.ad_preview),
+                                icon = Icons.Outlined.Visibility,
+                                primary = false,
+                                onClick = { validateThen { showPreview = true } },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        CreateBarButton(
+                            text = stringResource(L10nR.string.create_publish),
+                            icon = Icons.AutoMirrored.Outlined.Send,
+                            loading = submitting,
+                            onClick = { validateThen(viewModel::submit) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
             }
             SnackbarHost(
                 hostState = snackbar,
-                modifier = Modifier.align(Alignment.BottomCenter),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 80.dp),
             )
         }
     }
@@ -508,408 +448,431 @@ fun CreateAdPage(
         )
     }
 
-    if (locationPickerVisible) {
-        ListPickerDialog(
-            title = stringResource(L10nR.string.create_pick_location),
-            items = locations,
-            label = { it.fullAddress },
-            selected = locations.firstOrNull { it.id == draft.userLocationId },
-            onSelect = { location ->
+    if (addressPickerVisible) {
+        AddressPickerSheet(
+            locations = locations,
+            selectedId = draft.userLocationId,
+            onPickSaved = { location ->
                 viewModel.updateDraft { it.copy(userLocationId = location.id, location = null) }
-                locationPickerVisible = false
+                addressPickerVisible = false
             },
-            onDismiss = { locationPickerVisible = false },
+            onPickMap = {
+                addressPickerVisible = false
+                onOpenMapPicker(draft.location)
+            },
+            onDismiss = { addressPickerVisible = false },
         )
     }
 }
 
-private fun categoryName(
+/** Таңдалған мекенжайдың мәтіні: сақталған мекенжай → карта/каталог → null. */
+private fun addressLabel(
+    draft: AdDraft,
+    locations: List<com.agroland.feature.profile.data.UserLocation>,
+): String? {
+    locations.firstOrNull { it.id == draft.userLocationId }?.fullAddress?.takeIf { it.isNotBlank() }?.let { return it }
+    if (draft.userLocationId == null) {
+        draft.location?.displayLabel()?.takeIf { it.isNotBlank() }?.let { return it }
+    }
+    return null
+}
+
+/** «Санат» мәні: «Категория · Сабкатегория» немесе тек категория. */
+private fun categoryValue(
+    grouped: Map<String, List<Category>>,
+    subcategories: List<Category>,
+    draft: AdDraft,
+    localeTag: String?,
+): String? {
+    val category = categoryName(grouped, draft.categoryId, localeTag) ?: return null
+    val sub = subcategories.firstOrNull { it.id == draft.subcategoryId }?.localizedName(localeTag)
+    return if (sub != null) "$category · $sub" else category
+}
+
+internal fun categoryName(
     grouped: Map<String, List<Category>>,
     categoryId: Int?,
     localeTag: String?,
 ): String? {
     if (categoryId == null) return null
-    grouped.values.flatten().firstOrNull { it.id == categoryId }?.let { return it.localizedName(localeTag) }
-    return null
+    return grouped.values.flatten().firstOrNull { it.id == categoryId }?.localizedName(localeTag)
 }
 
-/** Медиа бөлімі — қолданылған + жаңа суреттер, бейне, «+» таңдау плиткасы. */
+/** 1000 → «1 000» (iOS санауышы). */
+internal fun formatThousands(value: Int): String =
+    value.toString().reversed().chunked(3).joinToString(" ").reversed()
+
+/** Байланыс ақпараты: телефон нөмірлері + «Тағы қосу» + мекенжай. */
 @Composable
-private fun MediaSection(
+private fun ContactSection(
+    phones: List<String>,
+    phonesError: Boolean,
+    addressLabel: String?,
+    addressError: Boolean,
+    onEditPhones: (List<String>) -> Unit,
+    onPickAddress: () -> Unit,
+) {
+    FormSection(title = stringResource(L10nR.string.create_section_contact)) {
+        phones.forEachIndexed { index, phone ->
+            FormTextRow(
+                value = phone,
+                onValueChange = { value ->
+                    onEditPhones(phones.toMutableList().also { if (index < it.size) it[index] = value.take(20) })
+                },
+                placeholder = stringResource(L10nR.string.create_phone_hint),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                isError = phonesError && phone.isBlank(),
+                trailing = {
+                    Icon(
+                        imageVector = Icons.Outlined.RemoveCircleOutline,
+                        contentDescription = stringResource(L10nR.string.common_delete),
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .clickable { onEditPhones(phones.filterIndexed { i, _ -> i != index }) },
+                    )
+                },
+            )
+            FormDivider()
+        }
+        FormActionRow(
+            icon = Icons.Outlined.AddCircleOutline,
+            text = stringResource(L10nR.string.create_add_more),
+            onClick = { onEditPhones(phones + "") },
+        )
+        FormDivider(start = 54.dp)
+        FormSelectRow(
+            label = null,
+            value = addressLabel ?: stringResource(L10nR.string.create_specify_address),
+            valueIsPlaceholder = addressLabel == null,
+            leadingIcon = Icons.Outlined.PinDrop,
+            isError = addressError,
+            onClick = onPickAddress,
+        )
+        if (phonesError && phones.none { it.isNotBlank() }) {
+            Text(
+                text = stringResource(L10nR.string.validation_phones),
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+            )
+        }
+    }
+}
+
+/** Жарнама фотосы: «Қосу» плиткасы + суреттер (n/10) + YouTube сілтемесі. */
+@Composable
+private fun PhotosSection(
     existingImages: List<String>,
     newImages: List<android.net.Uri>,
-    video: android.net.Uri?,
+    videoLink: String,
+    videoError: Boolean,
     onAddImages: () -> Unit,
     onRemoveExisting: (String) -> Unit,
     onRemoveNew: (android.net.Uri) -> Unit,
-    onAddVideo: () -> Unit,
-    onRemoveVideo: () -> Unit,
+    onVideoLinkChange: (String) -> Unit,
 ) {
-    val ext = extendedColors()
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = stringResource(L10nR.string.create_section_media),
-            style = MaterialTheme.typography.bodySmall,
-            color = ext.primaryText,
-        )
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(existingImages) { url ->
-                MediaTile(onRemove = { onRemoveExisting(url) }) {
-                    CachedImage(
-                        url = url,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                    )
+    val count = existingImages.size + newImages.size
+    FormSection(
+        title = stringResource(L10nR.string.create_section_photos),
+        trailing = "$count/$MaxPhotos",
+        footer = stringResource(L10nR.string.create_first_photo_hint),
+    ) {
+        LazyRow(
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            if (count < MaxPhotos) {
+                item(key = "add") { AddPhotoTile(onClick = onAddImages) }
+            }
+            items(existingImages, key = { it }) { url ->
+                PhotoTile(onRemove = { onRemoveExisting(url) }) {
+                    CachedImage(url = url, contentDescription = null, modifier = Modifier.fillMaxSize())
                 }
             }
-            items(newImages) { uri ->
-                MediaTile(onRemove = { onRemoveNew(uri) }) {
+            items(newImages, key = { it.toString() }) { uri ->
+                PhotoTile(onRemove = { onRemoveNew(uri) }) {
                     AsyncImage(
                         model = uri,
                         contentDescription = null,
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                     )
                 }
             }
-            if (video != null) {
-                item {
-                    MediaTile(onRemove = onRemoveVideo) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(ext.grey),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Videocam,
-                                    contentDescription = null,
-                                    tint = ext.primaryText,
-                                )
-                                Text(
-                                    text = stringResource(L10nR.string.create_video_added),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = ext.primaryText,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            item {
-                Column {
-                    Box(
-                        modifier = Modifier
-                            .size(92.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(ext.grey)
-                            .clickable(onClick = onAddImages),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Add,
-                            contentDescription = stringResource(L10nR.string.create_add_images),
-                            tint = ext.secondaryText,
-                        )
-                    }
-                    androidx.compose.material3.TextButton(onClick = onAddVideo) {
-                        Icon(
-                            imageVector = Icons.Outlined.Videocam,
-                            contentDescription = null,
-                            tint = ext.secondaryText,
-                            modifier = Modifier.size(16.dp),
-                        )
-                        Text(
-                            text = stringResource(L10nR.string.create_add_video),
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
-                }
-            }
         }
+        FormDivider()
+        FormTextRow(
+            value = videoLink,
+            onValueChange = onVideoLinkChange,
+            placeholder = stringResource(L10nR.string.create_youtube_hint),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            isError = videoError,
+        )
+    }
+}
+
+/** Пунктирлі жасыл «Қосу» плиткасы. */
+@Composable
+private fun AddPhotoTile(onClick: () -> Unit) {
+    val primary = MaterialTheme.colorScheme.primary
+    Column(
+        modifier = Modifier
+            .size(96.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(primary.copy(alpha = 0.08f))
+            .drawBehind {
+                drawRoundRect(
+                    color = primary.copy(alpha = 0.55f),
+                    cornerRadius = CornerRadius(16.dp.toPx()),
+                    style = Stroke(
+                        width = 1.5.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f)),
+                    ),
+                )
+            }
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null, tint = primary, modifier = Modifier.size(30.dp))
+        Spacer(Modifier.height(6.dp))
+        Text(text = stringResource(L10nR.string.create_add_short), fontSize = 13.sp, color = primary)
     }
 }
 
 @Composable
-private fun MediaTile(onRemove: () -> Unit, content: @Composable () -> Unit) {
-    val ext = extendedColors()
+private fun PhotoTile(onRemove: () -> Unit, content: @Composable () -> Unit) {
     Box(
         modifier = Modifier
-            .size(92.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(ext.grey),
+            .size(96.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(extendedColors().grey),
     ) {
-        Box(modifier = Modifier.fillMaxSize()) { content() }
-        Icon(
-            imageVector = Icons.Outlined.Close,
-            contentDescription = stringResource(L10nR.string.common_delete),
-            tint = ext.primaryText,
+        content()
+        Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(4.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(ext.card)
-                .clickable(onClick = onRemove)
-                .padding(2.dp)
-                .size(14.dp),
-        )
-    }
-}
-
-/** Валюта таңдауы — chips. */
-@Composable
-private fun CurrencyChips(selected: String, onSelect: (String) -> Unit) {
-    val currencies = listOf("₸", "$", "€", "₽")
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        currencies.forEach { currency ->
-            com.agroland.core.ui.components.AgroChip(
-                text = currency,
-                selected = selected == currency,
-                onClick = { onSelect(currency) },
-            )
-        }
-    }
-}
-
-/** Бір сөйлем + switch — келісу/жеткізу/ҚҚС қатарлары. */
-@Composable
-private fun ToggleRow(
-    title: String,
-    checked: Boolean,
-    onToggle: (Boolean) -> Unit,
-) {
-    val ext = extendedColors()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(ext.card)
-            .clickable { onToggle(!checked) }
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodySmall,
-            color = ext.primaryText,
-            modifier = Modifier.weight(1f),
-        )
-        com.agroland.core.ui.components.AgroSwitch(
-            checked = checked,
-            onCheckedChange = onToggle,
-        )
-    }
-}
-
-/** Таңдау жолы — иконка + мән + қате күйі. */
-@Composable
-private fun SelectRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
-    isError: Boolean = false,
-    onClick: () -> Unit,
-) {
-    val ext = extendedColors()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(if (isError) ext.grey else ext.card)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = if (isError) MaterialTheme.colorScheme.error else ext.secondaryText,
-            modifier = Modifier.size(20.dp),
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = if (isError) MaterialTheme.colorScheme.error else ext.primaryText,
-            modifier = Modifier.weight(1f),
-        )
-        Icon(
-            imageVector = Icons.Outlined.KeyboardArrowDown,
-            contentDescription = null,
-            tint = ext.secondaryText,
-            modifier = Modifier.size(20.dp),
-        )
-    }
-}
-
-/** Телефондар — қатар + өңдеу/жою + жаңа қосу. */
-@Composable
-private fun PhonesSection(
-    phones: List<String>,
-    isError: Boolean,
-    onEdit: (List<String>) -> Unit,
-) {
-    val ext = extendedColors()
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = stringResource(L10nR.string.create_field_phones),
-            style = MaterialTheme.typography.bodySmall,
-            color = if (isError) MaterialTheme.colorScheme.error else ext.primaryText,
-        )
-        phones.forEachIndexed { index, phone ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.weight(1f)) {
-                    AgroTextField(
-                        value = phone,
-                        onValueChange = { value ->
-                            val updated = phones.toMutableList().also {
-                                if (index < it.size) it[index] = value.take(20)
-                            }
-                            onEdit(updated)
-                        },
-                        label = stringResource(L10nR.string.create_field_phone),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    )
-                }
-                IconButton(
-                    onClick = { onEdit(phones.filterIndexed { i, _ -> i != index }) },
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Delete,
-                        contentDescription = stringResource(L10nR.string.common_delete),
-                        tint = ext.secondaryText,
-                    )
-                }
-            }
-        }
-        androidx.compose.material3.TextButton(onClick = { onEdit(phones + "") }) {
+                .padding(5.dp)
+                .size(22.dp)
+                .clip(CircleShape)
+                .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f))
+                .clickable(onClick = onRemove),
+            contentAlignment = Alignment.Center,
+        ) {
             Icon(
-                imageVector = Icons.Outlined.Add,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(16.dp),
+                imageVector = Icons.Outlined.Close,
+                contentDescription = stringResource(L10nR.string.common_delete),
+                tint = androidx.compose.ui.graphics.Color.White,
+                modifier = Modifier.size(14.dp),
             )
-            Text(stringResource(L10nR.string.create_add_phone))
         }
     }
 }
 
-/** Кілт сөздер — chips + қосу жолы. */
+/**
+ * Тегтер — үтір арқылы бір жолда. Мәтін жергілікті сақталады (соңғы «, » жоғалмас
+ * үшін), ал draft.keywords-ке таза тізім жазылады; өңдеу режимінде сырттан
+ * келген тізім мәтінге синхрондалады.
+ */
 @Composable
-private fun KeywordsSection(
-    keywords: List<String>,
-    onEdit: (List<String>) -> Unit,
-) {
-    val ext = extendedColors()
-    var input by remember { mutableStateOf("") }
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun TagsRow(keywords: List<String>, onChange: (List<String>) -> Unit) {
+    var text by remember { mutableStateOf(keywords.joinToString(", ")) }
+    fun parse(value: String) = value.split(',').map { it.trim() }.filter { it.isNotEmpty() }.distinct()
+    LaunchedEffect(keywords) {
+        if (parse(text) != keywords) text = keywords.joinToString(", ")
+    }
+    FormTextRow(
+        value = text,
+        onValueChange = { value ->
+            text = value.take(300)
+            onChange(parse(text))
+        },
+        placeholder = stringResource(L10nR.string.create_tags_hint),
+    )
+}
+
+/** Валюта белгісі (₸) — басқанда мәзірден өзгертіледі. */
+@Composable
+private fun CurrencyMenu(selected: String, onSelect: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
         Text(
-            text = stringResource(L10nR.string.create_field_keywords),
-            style = MaterialTheme.typography.bodySmall,
-            color = ext.primaryText,
+            text = selected,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Medium,
+            color = extendedColors().secondaryText,
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { expanded = true }
+                .padding(horizontal = 6.dp, vertical = 2.dp),
         )
-        if (keywords.isNotEmpty()) {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(keywords) { keyword ->
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(18.dp))
-                            .background(ext.grey)
-                            .padding(start = 12.dp, top = 6.dp, bottom = 6.dp, end = 4.dp),
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = keyword,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = ext.primaryText,
-                            )
-                            Icon(
-                                imageVector = Icons.Outlined.Close,
-                                contentDescription = stringResource(L10nR.string.common_delete),
-                                tint = ext.secondaryText,
-                                modifier = Modifier
-                                    .padding(start = 4.dp)
-                                    .size(14.dp)
-                                    .clickable { onEdit(keywords - keyword) },
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.weight(1f)) {
-                AgroTextField(
-                    value = input,
-                    onValueChange = { input = it.take(30) },
-                    label = stringResource(L10nR.string.create_field_keyword),
-                )
-            }
-            IconButton(
-                onClick = {
-                    val keyword = input.trim()
-                    if (keyword.isNotBlank() && keyword !in keywords) {
-                        onEdit(keywords + keyword)
-                    }
-                    input = ""
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = stringResource(L10nR.string.create_add_keyword),
-                    tint = MaterialTheme.colorScheme.primary,
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            listOf("₸", "$", "€", "₽").forEach { currency ->
+                DropdownMenuItem(
+                    text = { Text(currency) },
+                    onClick = {
+                        onSelect(currency)
+                        expanded = false
+                    },
                 )
             }
         }
     }
 }
 
-/** Жеткізу аймақтары — бизнес үшін көп таңдау. */
+/** Бизнес өрістері: жеткізу (+аймақтар), өзі алу (+мекенжай), SKU, қойма, себет, Agro Market. */
 @Composable
-private fun DeliveryZonesSection(
+private fun SalesSection(
+    draft: AdDraft,
     zones: List<com.agroland.feature.marketplace.data.DeliveryZone>,
-    selectedIds: List<Long>,
-    onChange: (List<Long>) -> Unit,
+    pickupError: Boolean,
+    onUpdate: ((AdDraft) -> AdDraft) -> Unit,
+    onZonesChange: (List<Long>) -> Unit,
 ) {
     val ext = extendedColors()
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = stringResource(L10nR.string.create_field_delivery_zones),
-            style = MaterialTheme.typography.bodySmall,
-            color = ext.primaryText,
+    FormSection(title = stringResource(L10nR.string.create_section_sales)) {
+        FormToggleRow(
+            title = stringResource(L10nR.string.detail_delivery),
+            checked = draft.deliveryAvailable,
+            onToggle = { checked -> onUpdate { it.copy(deliveryAvailable = checked) } },
         )
-        zones.forEach { zone ->
-            val checked = zone.id in selectedIds
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(ext.card)
-                    .clickable {
-                        onChange(if (checked) selectedIds - zone.id else selectedIds + zone.id)
-                    }
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
+        if (draft.deliveryAvailable && zones.isNotEmpty()) {
+            zones.forEach { zone ->
+                val checked = zone.id in draft.deliveryZoneIds
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onZonesChange(if (checked) draft.deliveryZoneIds - zone.id else draft.deliveryZoneIds + zone.id)
+                        }
+                        .padding(start = 32.dp, end = 12.dp, top = 2.dp, bottom = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         text = zone.name ?: zone.regionName ?: "#${zone.id}",
-                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 15.sp,
                         color = ext.primaryText,
+                        modifier = Modifier.weight(1f),
                     )
-                    if (zone.regionName != null && zone.name != null) {
+                    AgroCheckbox(
+                        checked = checked,
+                        onCheckedChange = { now ->
+                            onZonesChange(if (now) draft.deliveryZoneIds + zone.id else draft.deliveryZoneIds - zone.id)
+                        },
+                    )
+                }
+            }
+        }
+        FormDivider()
+        FormToggleRow(
+            title = stringResource(L10nR.string.detail_pickup),
+            checked = draft.pickupAvailable,
+            onToggle = { checked -> onUpdate { it.copy(pickupAvailable = checked) } },
+        )
+        if (draft.pickupAvailable) {
+            FormDivider()
+            FormTextRow(
+                value = draft.pickupAddress,
+                onValueChange = { value -> onUpdate { it.copy(pickupAddress = value) } },
+                placeholder = stringResource(L10nR.string.create_field_pickup_address),
+                isError = pickupError,
+            )
+        }
+        FormDivider()
+        FormTextRow(
+            value = draft.sku,
+            onValueChange = { value -> onUpdate { it.copy(sku = value.take(64)) } },
+            placeholder = stringResource(L10nR.string.create_field_sku),
+        )
+        FormDivider()
+        FormTextRow(
+            value = draft.stockQuantity,
+            onValueChange = { value -> onUpdate { it.copy(stockQuantity = value.filter(Char::isDigit).take(9)) } },
+            placeholder = stringResource(L10nR.string.create_field_stock),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        )
+        FormDivider()
+        FormToggleRow(
+            title = stringResource(L10nR.string.create_field_allow_cart),
+            checked = draft.allowCart,
+            onToggle = { checked -> onUpdate { it.copy(allowCart = checked) } },
+        )
+        FormDivider()
+        FormToggleRow(
+            title = stringResource(L10nR.string.create_field_marketplace),
+            checked = draft.isMarketplace,
+            onToggle = { checked -> onUpdate { it.copy(isMarketplace = checked) } },
+        )
+    }
+}
+
+/** Мекенжай таңдау парағы: сақталған мекенжайлар + «Карта арқылы таңдау». */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun AddressPickerSheet(
+    locations: List<com.agroland.feature.profile.data.UserLocation>,
+    selectedId: Long?,
+    onPickSaved: (com.agroland.feature.profile.data.UserLocation) -> Unit,
+    onPickMap: (() -> Unit)?,
+    onDismiss: () -> Unit,
+) {
+    val ext = extendedColors()
+    val primary = MaterialTheme.colorScheme.primary
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.background) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = stringResource(L10nR.string.create_address),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = ext.primaryText,
+                modifier = Modifier.padding(start = 4.dp),
+            )
+            FormCard {
+                if (locations.isEmpty()) {
+                    Text(
+                        text = stringResource(L10nR.string.create_no_locations),
+                        fontSize = 15.sp,
+                        color = ext.secondaryText,
+                        modifier = Modifier.padding(16.dp),
+                    )
+                }
+                locations.forEachIndexed { index, location ->
+                    if (index > 0) FormDivider(start = 54.dp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onPickSaved(location) }
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Outlined.PinDrop, contentDescription = null, tint = primary, modifier = Modifier.size(22.dp))
+                        Spacer(Modifier.width(16.dp))
                         Text(
-                            text = zone.regionName,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = ext.secondaryText,
+                            text = location.fullAddress,
+                            fontSize = 15.sp,
+                            color = if (location.id == selectedId) primary else ext.primaryText,
+                            fontWeight = if (location.id == selectedId) FontWeight.SemiBold else FontWeight.Normal,
+                            modifier = Modifier.weight(1f),
                         )
                     }
                 }
-                AgroCheckbox(
-                    checked = checked,
-                    onCheckedChange = { checkedNow ->
-                        onChange(if (checkedNow) selectedIds + zone.id else selectedIds - zone.id)
-                    },
-                )
+            }
+            if (onPickMap != null) {
+                FormCard {
+                    FormActionRow(
+                        icon = Icons.Outlined.Map,
+                        text = stringResource(L10nR.string.create_pick_location_map),
+                        onClick = onPickMap,
+                    )
+                }
             }
         }
     }
@@ -957,7 +920,7 @@ private fun AdPreviewCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(extendedColors().card)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),

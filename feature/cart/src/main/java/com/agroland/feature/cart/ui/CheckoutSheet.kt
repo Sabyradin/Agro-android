@@ -112,6 +112,15 @@ fun CheckoutSheet(
             // ── Smart Calculator: preview үлесі ──
             PreviewBreakdown(state = state)
 
+            state.error?.let { error ->
+                Text(
+                    text = error.displayText(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
             AgroButton(
                 text = stringResource(L10nR.string.cart_proceed_to_payment),
                 onClick = onSubmit,

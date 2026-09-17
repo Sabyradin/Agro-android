@@ -147,8 +147,8 @@ fun ChatListPage(
             onOpenSearch = { viewModel.onSearchChange("") },
         )
 
-        // «Менің пікірлерім» мен «Мұрағат» — бірінің астында бірі, бірдей құрылымда:
-        // иконкалар мен мәтіндер бір сызықта (іздеу кезінде жасырылады).
+        // «Менің пікірлерім» — тізім үстінде (іздеу кезінде жасырылады). «Мұрағат»
+        // Telegram-дағыдай тізімнің бірінші чаты ретінде, тек бос болмаса көрінеді.
         if (searchInput.isEmpty()) {
             if (onOpenMyReviews != null) {
                 ShortcutRow(
@@ -157,20 +157,8 @@ fun ChatListPage(
                     badge = myReviewsBadge,
                     onClick = onOpenMyReviews,
                 )
-                HorizontalDivider(
-                    color = extendedColors().divider,
-                    thickness = 0.5.dp,
-                    modifier = Modifier.padding(start = ShortcutTextStart, end = 16.dp),
-                )
+                HorizontalDivider(color = extendedColors().divider, thickness = 0.5.dp)
             }
-            ShortcutRow(
-                icon = Icons.Outlined.Archive,
-                text = stringResource(L10nR.string.archived_chats),
-                badge = state.archivedCount,
-                badgeMuted = true,
-                onClick = { onOpenArchived(state.archivedCount) },
-            )
-            HorizontalDivider(color = extendedColors().divider, thickness = 0.5.dp)
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -179,7 +167,7 @@ fun ChatListPage(
                 state.loadFailed -> Box(Modifier.align(Alignment.Center).padding(horizontal = 32.dp)) {
                     ErrorWithRetry(onRetry = viewModel::retry)
                 }
-                state.rows.isEmpty() -> Box(Modifier.align(Alignment.Center)) {
+                state.rows.isEmpty() && (state.archivedCount == 0 || searchInput.isNotEmpty()) -> Box(Modifier.align(Alignment.Center)) {
                     EmptyView(
                         icon = Icons.Outlined.ChatBubble,
                         title = stringResource(L10nR.string.nothing_found),
@@ -189,6 +177,18 @@ fun ChatListPage(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp),
                 ) {
+                    // Мұрағат — Telegram стилі: бірінші жол, бос болса/іздеуде жоқ.
+                    if (state.archivedCount > 0 && searchInput.isEmpty()) {
+                        item(key = "archived") {
+                            ArchivedChatsTile(
+                                count = state.archivedCount,
+                                preview = state.archivedPreview,
+                                unread = state.archivedRows.sumOf { it.room.unreadCount },
+                                showDivider = state.rows.isNotEmpty(),
+                                onClick = { onOpenArchived(state.archivedCount) },
+                            )
+                        }
+                    }
                     itemsIndexed(state.rows, key = { _, row -> row.room.roomId }) { index, row ->
                         val isLast = index == state.rows.lastIndex
                         SwipeActionRow(
@@ -397,9 +397,6 @@ private fun ChatSearchAppBar(
     androidx.activity.compose.BackHandler(enabled = searchOpen) { close() }
 }
 
-/** Иконка шеңберінің сол шеті (16) + шеңбер (40) + аралық (12) — мәтін басталатын сызық. */
-private val ShortcutTextStart = 68.dp
-
 /** Чат тізімінің үстіндегі жол: дөңгелек иконка + атау + санауыш + шеврон. */
 @Composable
 private fun ShortcutRow(
@@ -407,7 +404,6 @@ private fun ShortcutRow(
     text: String,
     badge: Int,
     onClick: () -> Unit,
-    badgeMuted: Boolean = false,
 ) {
     val ext = extendedColors()
     Row(
@@ -445,14 +441,14 @@ private fun ShortcutRow(
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(if (badgeMuted) ext.secondaryText.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primary)
+                    .background(MaterialTheme.colorScheme.primary)
                     .padding(horizontal = 8.dp, vertical = 2.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = badge.toString(),
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (badgeMuted) ext.primaryText else ext.white,
+                    color = ext.white,
                 )
             }
             Spacer(Modifier.width(6.dp))
@@ -463,6 +459,93 @@ private fun ShortcutRow(
             tint = ext.secondaryText,
             modifier = Modifier.size(20.dp),
         )
+    }
+}
+
+/**
+ * «Мұрағат» жолы (Telegram стилі): чат жолымен бірдей өлшемдер — сұр дөңгелектегі
+ * мұрағат иконкасы, атауы + саны, астында мұрағаттағы чаттардың аттары, оқылмаған
+ * хабарламалар сұр бейджбен.
+ */
+@Composable
+private fun ArchivedChatsTile(
+    count: Int,
+    preview: String,
+    unread: Int,
+    showDivider: Boolean,
+    onClick: () -> Unit,
+) {
+    val ext = extendedColors()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(ext.secondaryText.copy(alpha = 0.55f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Archive,
+                    contentDescription = null,
+                    tint = ext.white,
+                    modifier = Modifier.size(26.dp),
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "${stringResource(L10nR.string.archived_chats)} ($count)",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = ext.primaryText,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (preview.isNotBlank()) {
+                    Text(
+                        text = preview,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ext.secondaryText,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            if (unread > 0) {
+                Spacer(Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(ext.secondaryText.copy(alpha = 0.55f))
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = if (unread > 99) "99+" else unread.toString(),
+                        color = ext.white,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+        }
+        if (showDivider) {
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = ext.divider,
+                modifier = Modifier.padding(start = 80.dp, end = 16.dp),
+            )
+        }
     }
 }
 

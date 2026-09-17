@@ -49,6 +49,8 @@ data class CheckoutUiState(
     val preview: CartPreview? = null,
     val previewLoading: Boolean = false,
     val submitting: Boolean = false,
+    /** Соңғы «Төлемге өту» қатесі — парақтың ішінде көрсетіледі (snackbar парақтың астында қалатын). */
+    val error: CartError? = null,
 ) {
     /** Ешбір тауар жеткізілмейтін болса — тек өзі алу режимі. */
     val pickupOnly: Boolean get() = items.isNotEmpty() && items.none { it.isDelivery }
@@ -56,9 +58,15 @@ data class CheckoutUiState(
     /** Жеткізу режимі бар ма (кем дегенде бір тауар жеткізіледі)? */
     val anyDelivery: Boolean get() = items.any { it.isDelivery }
 
-    /** Өзі алатын тауарлардың сатушы мекенжайы (чекаут pickup_address). */
+    /**
+     * Өзі алатын тауарлардың сатушы мекенжайы (чекаут pickup_address). Сатушы
+     * мекенжайды толтырмаса — жарнаманың орны (аудан, қала): backend pickup=true
+     * кезінде бос мекенжайға 400 PICKUP_ADDRESS_REQUIRED қайтарады.
+     */
     val pickupAddress: String?
-        get() = items.firstOrNull { !it.isDelivery }?.item?.announcement?.base?.pickupAddress
+        get() = items.firstOrNull { !it.isDelivery }?.item?.announcement?.base?.let { base ->
+            base.pickupAddress?.takeIf { it.isNotBlank() } ?: base.placeLabel.takeIf { it.isNotBlank() }
+        }
 
     /** Таңдалған мекенжай. */
     val selectedAddress: UserLocation?
@@ -127,13 +135,25 @@ class CartViewModel @Inject constructor(
 
     private var busy = mutableSetOf<Long>()
 
+    /** Себет бір рет толық жүктелген бе — кейінгі жаңартулар шиммерсіз (үнсіз) жүреді. */
+    private var loadedOnce = false
+
     init {
         refresh()
     }
 
-    fun refresh() {
+    /**
+     * Себет қойындысы көрінген сайын шақырылады. Тауар басқа беттен (жарнама,
+     * лента) қосылса, қойындының ViewModel-і ескі күйде қалатын — енді серверден
+     * үнсіз қайта оқылады. Алғашқы көрсетуде init жүктеуі жеткілікті.
+     */
+    fun onShown() {
+        if (loadedOnce) refresh(silent = true)
+    }
+
+    fun refresh(silent: Boolean = false) {
         viewModelScope.launch {
-            _loading.value = true
+            if (!silent) _loading.value = true
             _error.value = null
             when (val result = repository.getCart()) {
                 is ApiResult.Success -> {
@@ -141,9 +161,10 @@ class CartViewModel @Inject constructor(
                     // Flutter: себет жаңартылғанда барлығы таңдалып тұрады.
                     _selectedIds.value = result.value.map { it.id }.toSet()
                 }
-                is ApiResult.Error -> _error.value = result.failure.toCartError()
+                is ApiResult.Error -> if (!silent) _error.value = result.failure.toCartError()
             }
             _loading.value = false
+            loadedOnce = true
             loadOrderSections()
         }
     }
@@ -365,7 +386,7 @@ class CartViewModel @Inject constructor(
     fun submitCheckout() {
         val state = _checkout.value
         if (!state.canSubmit) return
-        _checkout.update { it.copy(submitting = true) }
+        _checkout.update { it.copy(submitting = true, error = null) }
         viewModelScope.launch {
             val address = state.selectedAddress
             val result = repository.checkout(
@@ -396,7 +417,7 @@ class CartViewModel @Inject constructor(
                         _checkout.update { CheckoutUiState() }
                         startCheckout()
                     } else {
-                        _events.emit(CartEvent.ShowError(cartError))
+                        _checkout.update { it.copy(error = cartError) }
                     }
                 }
             }

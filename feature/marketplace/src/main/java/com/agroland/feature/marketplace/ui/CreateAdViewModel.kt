@@ -134,6 +134,7 @@ class CreateAdViewModel @Inject constructor(
                     allowCart = detail.base.allowCart,
                     isMarketplace = detail.base.isMarketplace,
                     images = detail.base.imageUrls,
+                    videoLink = detail.videoUrl?.takeIf { AdDraft.isYouTubeLink(it) } ?: "",
                 )
             }
             is ApiResult.Error -> _events.emit(Event.ShowError(result.failure.toMarketplaceError()))

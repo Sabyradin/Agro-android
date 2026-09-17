@@ -156,7 +156,14 @@ fun VoiceCallScreen(
                 // Вибрация қолжетімсіз.
             }
         }
-        onDispose { vibrator?.cancel() }
+        onDispose {
+            // Рұқсат/сервис қолжетімсіз болса да қоңырау экраны құламауы керек.
+            try {
+                vibrator?.cancel()
+            } catch (_: Throwable) {
+                // ok
+            }
+        }
     }
 
     // Terminal себебі 2200мс көрсетіліп тазартылады (Flutter паритеті).
